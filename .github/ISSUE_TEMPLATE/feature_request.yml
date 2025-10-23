@@ -1,0 +1,33 @@
+name: "✨ Feature request"
+description: "Suggest an idea for this project"
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve Umami Connect!
+  - type: input
+    id: feature-summary
+    attributes:
+      label: "Feature summary"
+      description: "Briefly describe the feature you would like to see."
+      placeholder: "A short summary of the feature."
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: "Motivation and context"
+      description: "Why is this feature important? What problem does it solve?"
+      placeholder: "Explain the use case or motivation."
+    validations:
+      required: false
+  - type: textarea
+    id: solution
+    attributes:
+      label: "Proposed solution"
+      description: "Describe your proposed solution or ideas."
+      placeholder: "How could this feature be implemented?"
+    validations:
+      required: false
