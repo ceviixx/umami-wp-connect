@@ -172,40 +172,69 @@ $args = [
     'timeout' => 8
 ];
 $releases = [];
-$latest_version = '–';
+
+$latest_version = '';
 $latest_body = '';
+
 
 $response = wp_remote_get($github_api_url, $args);
 if (!is_wp_error($response) && isset($response['response']['code']) && $response['response']['code'] === 200) {
     $releases = json_decode(wp_remote_retrieve_body($response), true);
     if (!empty($releases) && is_array($releases)) {
-        $latest_version = $releases[0]['tag_name'] ?? '–';
+        $latest_version = $releases[0]['tag_name'] ?? '';
         $latest_body = $releases[0]['body'] ?? '';
     }
 }
 
-echo '<div class="wrap"><h3>Support</h3>';
+echo '<div class="wrap"><h3>Update</h3>';
 echo '<p><b>Current Version:</b> ' . esc_html($current_version) . '</p>';
-echo '<p><b>Latest release on GitHub:</b> ' . esc_html($latest_version) . ' ';
-echo '<a href="' . esc_url($github_url) . '" target="_blank">(Releases on GitHub)</a></p>';
+if ($latest_version) {
+    echo '<p><b>Latest Release:</b> ' . esc_html($latest_version) . ' ';
+    echo '<a href="' . esc_url($github_url) . '" target="_blank">(Releases on GitHub)</a></p>';
+} else {
+    $error_code = '';
+    if (is_wp_error($response)) {
+        $error_code = $response->get_error_code();
+    } elseif (isset($response['response']['code'])) {
+        $error_code = $response['response']['code'];
+    }
+    echo '<div style="background:#fff;border:1px solid #e3e3e3;border-radius:8px;padding:16px 32px;margin-bottom:24px;max-width:600px;color:#b00;font-weight:500;">Could not fetch the latest version information from GitHub.<br>Please try again later.';
+    if ($error_code) {
+        echo '<br><span style="color:#333;font-size:13px;">Error code: ' . esc_html($error_code) . '</span>';
+    }
+    echo '</div>';
+}
 if ($latest_body) {
-    echo '<div style="background:#f8f8f8;border:1px solid #ddd;padding:10px;margin-bottom:15px;"><b>Changelog:</b><br>';
-    echo nl2br(esc_html($latest_body));
+    function umami_simple_markdown($text) {
+        $text = str_replace(['<', '>'], ['&lt;', '&gt;'], $text);
+        $text = preg_replace('/^## (.*)$/m', '<h3>$1</h3>', $text);
+        $text = preg_replace('/^# (.*)$/m', '<h2>$1</h2>', $text);
+        $text = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $text);
+        $text = preg_replace('/\[(.*?)\]\(([^\s\)]+)\)/', '<a href="$2" target="_blank">$1</a>', $text);
+        $text = preg_replace('/^\- (.*)$/m', '<li>$1</li>', $text);
+        $text = preg_replace_callback('/(<li>.*?<\/li>\n?)+/s', function($matches) {
+            return '<ul>' . str_replace("\n", '', $matches[0]) . '</ul>';
+        }, $text);
+        # $text = nl2br($text);
+        return $text;
+    }
+    echo '<div style="background:#fff;border:1px solid #e3e3e3;border-radius:8px;padding:0;margin-bottom:24px;max-width:700px;">';
+    echo '<div style="background:#f8f8f8;border-bottom:1px solid #e3e3e3;padding:12px 32px 10px 32px;border-radius:8px 8px 0 0;font-weight:600;font-size:16px;display:flex;align-items:center;gap:12px;">Changelog <span style="display:inline-block;background:#007cba;color:#fff;border-radius:12px;padding:2px 12px;font-size:13px;font-weight:500;margin-left:6px;">' . esc_html($latest_version) . '</span></div>';
+    echo '<style>.umami-changelog ul { list-style: disc inside; margin-left: 1em; } .umami-changelog li { margin-bottom: 2px; }</style>';
+    echo '<div class="umami-changelog" style="padding:18px 32px 18px 32px;">' . umami_simple_markdown($latest_body) . '</div>';
     echo '</div>';
 }
 
-if (!empty($releases) && is_array($releases)) {
-    echo '<form method="post">';
+if (!empty($releases) && is_array($releases) && current_user_can('activate_plugins')) {
+    $is_newer = ($latest_version !== $current_version);
+    $btn_text = $is_newer
+        ? 'Update to version ' . esc_html($latest_version)
+        : 'Re-Install version ' . esc_html($latest_version);
+    echo '<form method="post" style="margin-top:24px;">';
     echo '<input type="hidden" name="umami_connect_self_update" value="1">';
+    echo '<input type="hidden" name="umami_update_version" value="' . esc_attr($latest_version) . '">';
     wp_nonce_field('umami_connect_self_update', 'umami_connect_self_update_nonce');
-    echo '<label for="umami_update_version"><b>Select version to install:</b></label> ';
-    echo '<select name="umami_update_version" id="umami_update_version">';
-    foreach ($releases as $rel) {
-        $tag = $rel['tag_name'] ?? '';
-        echo '<option value="' . esc_attr($tag) . '"' . ($tag === $latest_version ? ' selected' : '') . '>' . esc_html($tag) . '</option>';
-    }
-    echo '</select> ';
-    echo '<button type="submit" class="button button-primary">Perform update</button>';
+    echo '<button type="submit" class="button button-primary">' . $btn_text . '</button>';
     echo '</form>';
 }
 echo '</div>';
