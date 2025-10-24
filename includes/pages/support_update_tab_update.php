@@ -46,7 +46,12 @@ if (isset($_POST['umami_connect_self_update']) && check_admin_referer('umami_con
         }
         $tmp = download_url($zip_url, 60);
         $plugin_dir = dirname(__DIR__, 2);
-        $backup_zip = $plugin_dir . '-backup-' . date('Ymd-His') . '.zip';
+        $backup_zip = $plugin_dir . '-backup.zip';
+        foreach (glob($plugin_dir . '-backup*.zip') as $old_backup) {
+            if (file_exists($old_backup)) {
+                @unlink($old_backup);
+            }
+        }
         $unzip_dir = $plugin_dir . '-update';
         $rollback_error = false;
         if (!is_wp_error($tmp)) {
@@ -226,15 +231,26 @@ if ($latest_body) {
 }
 
 if (!empty($releases) && is_array($releases) && current_user_can('activate_plugins')) {
-    $is_newer = ($latest_version !== $current_version);
-    $btn_text = $is_newer
-        ? 'Update to version ' . esc_html($latest_version)
-        : 'Re-Install version ' . esc_html($latest_version);
-    echo '<form method="post" style="margin-top:24px;">';
-    echo '<input type="hidden" name="umami_connect_self_update" value="1">';
-    echo '<input type="hidden" name="umami_update_version" value="' . esc_attr($latest_version) . '">';
-    wp_nonce_field('umami_connect_self_update', 'umami_connect_self_update_nonce');
-    echo '<button type="submit" class="button button-primary">' . $btn_text . '</button>';
-    echo '</form>';
+    $is_localhost = (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'localhost:8080') !== false);
+    if ($is_localhost) {
+        echo '<div style="background:#fff3cd;border:1px solid #ffeeba;border-radius:8px;padding:14px 32px;margin-bottom:24px;max-width:600px;color:#856404;font-weight:500;">Update is disabled during development (localhost:8080).</div>';
+    } else {
+        function umami_version_compare($v1, $v2) {
+            return version_compare(preg_replace('/[^0-9.]/', '', $v1), preg_replace('/[^0-9.]/', '', $v2));
+        }
+        $cmp = umami_version_compare($current_version, $latest_version);
+        if ($cmp < 0 || $cmp === 0) {
+            $is_newer = ($cmp < 0);
+            $btn_text = $is_newer
+                ? 'Update to version ' . esc_html($latest_version)
+                : 'Re-Install version ' . esc_html($latest_version);
+            echo '<form method="post" style="margin-top:24px;">';
+            echo '<input type="hidden" name="umami_connect_self_update" value="1">';
+            echo '<input type="hidden" name="umami_update_version" value="' . esc_attr($latest_version) . '">';
+            wp_nonce_field('umami_connect_self_update', 'umami_connect_self_update_nonce');
+            echo '<button type="submit" class="button button-primary">' . $btn_text . '</button>';
+            echo '</form>';
+        }
+    }
 }
 echo '</div>';

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: umami Connect
  * Description: Simple integration of Umami Analytics in WordPress for  Cloud and Self-hosted.
- * Version: v0.1.1
+ * Version: v1.0.1
  * Author: ceviixx
  * Author URI: https://ceviixx.github.io/
  * Plugin URI: https://github.com/ceviixx/umami-wp-connect
