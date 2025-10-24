@@ -72,7 +72,7 @@ add_action('wp_dashboard_setup', function() {
     if ($update) {
         echo '<div style="margin-bottom:1px;"><b>Update available</b></div>';
         if (current_user_can('update_plugins')) {
-            echo '<a href="' . esc_url(admin_url('admin.php?page=umami_connect_support')) . '" style="text-decoration: none; font-size: 10px">Update now</a>';
+            echo '<a href="' . esc_url(admin_url('admin.php?page=umami_connect_support&tab=update')) . '" style="text-decoration: none; font-size: 10px">Update now</a>';
         }
     } else {
         echo '<div style="margin-bottom:8px;"><b>You\'re up to date</b></div>';
