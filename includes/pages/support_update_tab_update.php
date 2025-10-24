@@ -27,7 +27,12 @@ if (isset($_POST['umami_connect_self_update']) && check_admin_referer('umami_con
             $zip_url = $body['zipball_url'];
         }
     }
-    if ($zip_url) {
+    if (
+        $_SERVER['REQUEST_METHOD'] === 'POST'
+        && isset($_POST['umami_connect_self_update'])
+        && check_admin_referer('umami_connect_self_update', 'umami_connect_self_update_nonce')
+    ) {
+        if ($zip_url) {
         require_once ABSPATH . 'wp-admin/includes/file.php';
         require_once ABSPATH . 'wp-admin/includes/misc.php';
         require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
@@ -41,7 +46,12 @@ if (isset($_POST['umami_connect_self_update']) && check_admin_referer('umami_con
         }
         $tmp = download_url($zip_url, 60);
         $plugin_dir = dirname(__DIR__, 2);
-        $backup_zip = $plugin_dir . '-backup-' . date('Ymd-His') . '.zip';
+        $backup_zip = $plugin_dir . '-backup.zip';
+        foreach (glob($plugin_dir . '-backup*.zip') as $old_backup) {
+            if (file_exists($old_backup)) {
+                @unlink($old_backup);
+            }
+        }
         $unzip_dir = $plugin_dir . '-update';
         $rollback_error = false;
         if (!is_wp_error($tmp)) {
@@ -82,38 +92,37 @@ if (isset($_POST['umami_connect_self_update']) && check_admin_referer('umami_con
             if (!is_wp_error($result)) {
                 $entries = glob($unzip_dir . '/*', GLOB_ONLYDIR);
                 if ($entries && is_dir($entries[0])) {
-                    $it = new RecursiveDirectoryIterator($plugin_dir, RecursiveDirectoryIterator::SKIP_DOTS);
-                    $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
-                    foreach($files as $file) {
-                        if ($file->isDir()) {
-                            @rmdir($file->getRealPath());
-                        } else {
-                            @unlink($file->getRealPath());
-                        }
-                    }
-                    @rmdir($plugin_dir);
-                    if (@rename($entries[0], $plugin_dir)) {
-                        @rmdir($unzip_dir);
-                        $main_plugin_file_rel = basename(dirname($plugin_dir)) . '/' . basename($plugin_dir) . '/umami-connect.php';
-                        if (!is_plugin_active($main_plugin_file_rel)) {
-                            activate_plugin($main_plugin_file_rel);
-                        }
-                        echo '<div class="notice notice-success"><b>Update successful!</b> The plugin was updated and reactivated. The page will reload...</div>';
-                        echo '<script>setTimeout(function(){ location.reload(); }, 1800);</script>';
-                    } else {
-                        $rollback_error = false;
-                        if (class_exists('ZipArchive') && file_exists($backup_zip)) {
-                            $zip = new ZipArchive();
-                            if ($zip->open($backup_zip) === TRUE) {
-                                $zip->extractTo(dirname($plugin_dir));
-                                $zip->close();
-                            } else {
-                                $rollback_error = true;
+                    $new_dir = $entries[0];
+                    $plugin_dir_parent = dirname($plugin_dir);
+                    $plugin_dir_name = basename($plugin_dir);
+                    $archive_dir = $plugin_dir . '-archived-' . date('Ymd-His');
+
+                    if (@rename($plugin_dir, $archive_dir)) {
+                        if (@rename($new_dir, $plugin_dir)) {
+                            @rmdir($unzip_dir);
+                            $main_plugin_file_rel = basename(dirname($plugin_dir)) . '/' . basename($plugin_dir) . '/umami-connect.php';
+                            if (!is_plugin_active($main_plugin_file_rel)) {
+                                activate_plugin($main_plugin_file_rel);
                             }
+                            $it = new RecursiveDirectoryIterator($archive_dir, RecursiveDirectoryIterator::SKIP_DOTS);
+                            $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
+                            foreach($files as $file) {
+                                if ($file->isDir()) {
+                                    @rmdir($file->getRealPath());
+                                } else {
+                                    @unlink($file->getRealPath());
+                                }
+                            }
+                            @rmdir($archive_dir);
+
+                            echo '<div class="notice notice-success"><b>Update successful!</b> The plugin was updated and reactivated.</div>';
+                            echo '<script>setTimeout(function(){window.location.reload();}, 100);</script>';
                         } else {
-                            $rollback_error = true;
+                            @rename($archive_dir, $plugin_dir);
+                            echo '<div class="notice notice-error"><b>Error:</b> Could not rename new plugin folder. Rollback performed.</div>';
                         }
-                        echo '<div class="notice notice-error"><b>Error:</b> Plugin could not be replaced.' . ($rollback_error ? ' Rollback failed!' : ' Backup was restored.') . '</div>';
+                    } else {
+                        echo '<div class="notice notice-error"><b>Error:</b> Could not archive old plugin folder.</div>';
                     }
                 } else {
                     echo '<div class="notice notice-error"><b>Error:</b> Unpacked directory not found.</div>';
@@ -140,10 +149,12 @@ if (isset($_POST['umami_connect_self_update']) && check_admin_referer('umami_con
         } else {
             echo '<div class="notice notice-error"><b>Error during download:</b> ' . esc_html($tmp->get_error_message()) . '</div>';
         }
-    } else {
-        echo '<div class="notice notice-error"><b>Error:</b> ZIP-URL could not be determined.</div>';
+        } else {
+            echo '<div class="notice notice-error"><b>Error:</b> ZIP-URL could not be determined.</div>';
+        }
     }
 }
+
 
 
 
@@ -154,125 +165,136 @@ if (isset($_POST['umami_connect_self_update']) && check_admin_referer('umami_con
 
 $main_plugin_file = dirname(__DIR__, 2) . '/umami-connect.php';
 $plugin_data = get_file_data($main_plugin_file, ['Version' => 'Version']);
-$current_version = isset($plugin_data['Version']) ? $plugin_data['Version'] : 'unknown';
+$current_version = isset($plugin_data['Version']) ? $plugin_data['Version'] : 'unbekannt';
 $github_url = 'https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '/releases/latest';
 
-$latest_release = '–';
-$github_api_url = 'https://api.github.com/repos/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '/releases/latest';
+
+$github_api_url = 'https://api.github.com/repos/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '/releases';
 $args = [
     'headers' => [
         'Accept' => 'application/vnd.github.v3+json',
         'User-Agent' => 'umami-wp-connect-plugin'
     ],
-    'timeout' => 5
+    'timeout' => 8
 ];
+$releases = [];
+
+$latest_version = '';
+$latest_body = '';
+
+
 $response = wp_remote_get($github_api_url, $args);
-$latest_release_description = '';
 if (!is_wp_error($response) && isset($response['response']['code']) && $response['response']['code'] === 200) {
-    $body = json_decode(wp_remote_retrieve_body($response), true);
-    if (!empty($body['tag_name'])) {
-        $latest_release = esc_html($body['tag_name']);
-        if (!empty($body['body'])) {
-            $latest_release_description = wp_kses_post(nl2br($body['body']));
-        }
-    } else {
-        $latest_release = '<span style="color:red">Error: tag_name missing in API response</span>';
+    $releases = json_decode(wp_remote_retrieve_body($response), true);
+    if (!empty($releases) && is_array($releases)) {
+        $latest_version = $releases[0]['tag_name'] ?? '';
+        $latest_body = $releases[0]['body'] ?? '';
     }
-} else if (!is_wp_error($response) && isset($response['response']['code']) && $response['response']['code'] === 404) {
-    $releases_url = 'https://api.github.com/repos/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '/releases';
-    $response2 = wp_remote_get($releases_url, $args);
-    if (!is_wp_error($response2) && isset($response2['response']['code']) && $response2['response']['code'] === 200) {
-        $body2 = json_decode(wp_remote_retrieve_body($response2), true);
-        if (is_array($body2) && !empty($body2[0]['tag_name'])) {
-            $latest_release = esc_html($body2[0]['tag_name']);
-            if (!empty($body2[0]['body'])) {
-                $latest_release_description = wp_kses_post(nl2br($body2[0]['body']));
-            }
-        } else {
-            $latest_release = '<span style="color:red">Error: No release found</span>';
-        }
-    } else {
-        $error_msg = 'Unknown error';
-        if (is_wp_error($response2)) {
-            $error_msg = $response2->get_error_message();
-        } elseif (isset($response2['response']['code'])) {
-            $error_msg = 'HTTP-Code: ' . $response2['response']['code'];
-        }
-        $latest_release = '<span style="color:red">Error during fallback: ' . esc_html($error_msg) . '</span>';
-    }
+}
+
+echo '<div class="wrap"><h3>Update</h3>';
+echo '<p><b>Current Version:</b> ' . esc_html($current_version) . '</p>';
+if ($latest_version) {
+    echo '<p><b>Latest Release:</b> ' . esc_html($latest_version) . ' ';
+    echo '<a href="' . esc_url($github_url) . '" target="_blank">(Releases on GitHub)</a></p>';
 } else {
-    $error_msg = 'Unknown error';
+    $error_code = '';
     if (is_wp_error($response)) {
-        $error_msg = $response->get_error_message();
+        $error_code = $response->get_error_code();
     } elseif (isset($response['response']['code'])) {
-        $error_msg = 'HTTP-Code: ' . $response['response']['code'];
+        $error_code = $response['response']['code'];
     }
-    $latest_release = '<span style="color:red">Error while loading: ' . esc_html($error_msg) . '</span>';
+    echo '<div style="background:#fff;border:1px solid #e3e3e3;border-radius:8px;padding:16px 32px;margin-bottom:24px;max-width:600px;color:#b00;font-weight:500;">Could not fetch the latest version information from GitHub.<br>Please try again later.';
+    if ($error_code) {
+        echo '<br><span style="color:#333;font-size:13px;">Error code: ' . esc_html($error_code) . '</span>';
+    }
+    echo '</div>';
+}
+if ($latest_body) {
+    function umami_simple_markdown($text) {
+        $text = preg_replace_callback('/`([^`]+)`/', function($m) {
+            return '`' . str_replace(['<', '>'], ['&lt;', '&gt;'], $m[1]) . '`';
+        }, $text);
+        $text = preg_replace_callback('/```([\s\S]*?)```/', function($m) {
+            return '```' . str_replace(['<', '>'], ['&lt;', '&gt;'], $m[1]) . '```';
+        }, $text);
+        $blockquote_types = [
+            'NOTE' => [
+                'color' => '#eaf5ff',
+                'border' => '#007cba',
+                'svg' => '<svg class="octicon octicon-info mr-2" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>'
+            ],
+            'TIP' => [
+                'color' => '#eaffea',
+                'border' => '#28a745',
+                'svg' => '<svg class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>'
+            ],
+            'IMPORTANT' => [
+                'color' => '#fff4e5',
+                'border' => '#ff9800',
+                'svg' => '<svg class="octicon octicon-report mr-2" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>'
+            ],
+            'WARNING' => [
+                'color' => '#fff3cd',
+                'border' => '#ffc107',
+                'svg' => '<svg class="octicon octicon-alert mr-2" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>'
+            ],
+            'CAUTION' => [
+                'color' => '#fdecea',
+                'border' => '#d32f2f',
+                'svg' => '<svg class="octicon octicon-stop mr-2" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4.47.22A.749.749 0 0 1 5 0h6c.199 0 .389.079.53.22l4.25 4.25c.141.14.22.331.22.53v6a.749.749 0 0 1-.22.53l-4.25 4.25A.749.749 0 0 1 11 16H5a.749.749 0 0 1-.53-.22L.22 11.53A.749.749 0 0 1 0 11V5c0-.199.079-.389.22-.53Zm.84 1.28L1.5 5.31v5.38l3.81 3.81h5.38l3.81-3.81V5.31L10.69 1.5ZM8 4a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>'
+            ],
+        ];
+        foreach ($blockquote_types as $type => $style) {
+            $pattern = '/^>\s*\[!' . $type . '\]\s*\n?((?:>.*\n?)*)/mi';
+            $text = preg_replace_callback($pattern, function($matches) use ($type, $style) {
+                $content = preg_replace('/^> ?/m', '', $matches[1]);
+                $content = nl2br(trim($content));
+                $svg = preg_replace('/(<svg[^>]*)(>)/', '$1 style="fill:' . $style['border'] . ';color:' . $style['border'] . '"$2', $style['svg']);
+                $title = '<span style="font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:9px;color:' . $style['border'] . ';">' . $svg . '<span>' . ucfirst(strtolower($type)) . '</span></span>';
+                return '<div style="background:#fff;border-left:4px solid ' . $style['border'] . ';padding:12px 18px 12px 18px;margin:12px 0 16px 0;border-radius:6px;box-shadow:0 1px 2px #eee;font-size:15px;">' . $title . '<div style="margin-top:2px">' . $content . '</div></div>';
+            }, $text);
+        }
+        $text = preg_replace('/^## (.*)$/m', '<h3>$1</h3>', $text);
+        $text = preg_replace('/^# (.*)$/m', '<h2>$1</h2>', $text);
+        $text = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $text);
+        $text = preg_replace('/^---$/m', '<hr>', $text);
+        $text = preg_replace('/\[(.*?)\]\(([^\s\)]+)\)/', '<a href="$2" target="_blank">$1</a>', $text);
+        $text = preg_replace('/^\- (.*)$/m', '<li>$1</li>', $text);
+        $text = preg_replace_callback('/(<li>.*?<\/li>\n?)+/s', function($matches) {
+        return '<ul>' . str_replace("\n", '', $matches[0]) . '</ul>';
+        }, $text);
+        # $text = nl2br($text);
+        return $text;
+    }
+    echo '<div style="background:#fff;border:1px solid #e3e3e3;border-radius:8px;padding:0;margin-bottom:24px;max-width:700px;">';
+    echo '<div style="background:#f8f8f8;border-bottom:1px solid #e3e3e3;padding:12px 32px 10px 32px;border-radius:8px 8px 0 0;font-weight:600;font-size:16px;display:flex;align-items:center;gap:12px;">Changelog <span style="display:inline-block;background:#007cba;color:#fff;border-radius:12px;padding:2px 12px;font-size:13px;font-weight:500;margin-left:6px;">' . esc_html($latest_version) . '</span></div>';
+    echo '<style>.umami-changelog ul { list-style: disc inside; margin-left: 1em; } .umami-changelog li { margin-bottom: 2px; }</style>';
+    echo '<div class="umami-changelog" style="padding:18px 32px 18px 32px;">' . umami_simple_markdown($latest_body) . '</div>';
+    echo '</div>';
 }
 
-function umami_version_compare($v1, $v2) {
-    $v1 = ltrim($v1, 'vV');
-    $v2 = ltrim($v2, 'vV');
-    return version_compare($v1, $v2);
+if (!empty($releases) && is_array($releases) && current_user_can('activate_plugins')) {
+    $is_localhost = (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'localhost:8080') !== false);
+    if ($is_localhost) {
+        echo '<div style="background:#fff3cd;border:1px solid #ffeeba;border-radius:8px;padding:14px 32px;margin-bottom:24px;max-width:600px;color:#856404;font-weight:500;">Update is disabled during development (localhost:8080).</div>';
+    } else {
+        function umami_version_compare($v1, $v2) {
+            return version_compare(preg_replace('/[^0-9.]/', '', $v1), preg_replace('/[^0-9.]/', '', $v2));
+        }
+        $cmp = umami_version_compare($current_version, $latest_version);
+        if ($cmp < 0 || $cmp === 0) {
+            $is_newer = ($cmp < 0);
+            $btn_text = $is_newer
+                ? 'Update to version ' . esc_html($latest_version)
+                : 'Re-Install version ' . esc_html($latest_version);
+            echo '<form method="post" style="margin-top:24px;">';
+            echo '<input type="hidden" name="umami_connect_self_update" value="1">';
+            echo '<input type="hidden" name="umami_update_version" value="' . esc_attr($latest_version) . '">';
+            wp_nonce_field('umami_connect_self_update', 'umami_connect_self_update_nonce');
+            echo '<button type="submit" class="button button-primary">' . $btn_text . '</button>';
+            echo '</form>';
+        }
+    }
 }
-$is_update_available = (
-    $current_version !== 'unknown'
-    && $latest_release
-    && strpos($latest_release, 'Fehler') === false
-    && $latest_release !== '–'
-    && umami_version_compare($current_version, $latest_release) === -1
-);
-$is_reinstall_available = (
-    $current_version !== 'unknown'
-    && $latest_release
-    && strpos($latest_release, 'Fehler') === false
-    && $latest_release !== '–'
-    && umami_version_compare($current_version, $latest_release) === 0
-);
-$is_admin = current_user_can('update_plugins');
-?>
-
-
-<h3>Update & Reinstall</h3>
-
-<?php if ($is_update_available && $is_admin): ?>
-    <div style="background:#fff3cd; border:1px solid #ffeeba; color:#856404; border-radius:5px; padding:14px 18px; margin-bottom:18px; font-size:15px;">
-        <b>Warning:</b> Updating the plugin may result in data loss or unexpected behavior. Please make sure to backup your data and settings before proceeding. If you have custom modifications, they may be overwritten. Proceed with caution!
-    </div>
-<?php elseif ($is_reinstall_available && $is_admin): ?>
-    <div style="background:#fff3cd; border:1px solid #ffeeba; color:#856404; border-radius:5px; padding:14px 18px; margin-bottom:18px; font-size:15px;">
-        <b>Warning:</b> Reinstalling the plugin will overwrite all plugin files and may result in data loss or unexpected behavior. Please backup your data and settings before proceeding. Custom modifications will be lost. Proceed with caution!
-    </div>
-<?php endif; ?>
-
-<ul style="margin-bottom:18px; font-size:15px;">
-    <li>Current version: <b><?php echo esc_html($current_version); ?></b></li>
-    <li>Latest release: <?php if ($latest_release !== '–') { ?><a href="<?php echo esc_url($github_url); ?>" target="_blank"><b><?php echo $latest_release; ?></b></a><?php } else { echo '–'; } ?></li>
-</ul>
-<?php if (!empty($latest_release_description)): ?>
-    <div style="background:#f8f8ff; border:1.5px solid #b3c6e0; border-radius:7px; padding:18px 22px; margin-bottom:20px; max-width:720px;">
-        <div style="font-weight:bold; margin-bottom:4px; color:#1a237e; font-size:16px; letter-spacing:0.5px;">
-            Release Notes for <span style="color:#1565c0;">Latest Release</span> <span style="background:#e3f2fd; color:#1976d2; border-radius:4px; padding:2px 8px; font-size:13px; margin-left:6px; vertical-align:middle;"><b><?php echo esc_html($latest_release); ?></b></span>
-        </div>
-        <div style="font-size:15px; color:#222; line-height:1.6; margin-top:8px;">
-            <?php echo $latest_release_description; ?>
-        </div>
-    </div>
-<?php endif; ?>
-<?php if ($is_update_available && $is_admin): ?>
-    <form method="post" style="margin-bottom:24px;">
-        <?php wp_nonce_field('umami_connect_self_update', 'umami_connect_self_update_nonce'); ?>
-        <input type="hidden" name="umami_update_version" value="<?php echo esc_attr($latest_release); ?>">
-        <button type="submit" name="umami_connect_self_update" class="button button-primary">
-            Update to latest version
-        </button>
-    </form>
-<?php elseif ($is_reinstall_available && $is_admin): ?>
-    <form method="post" style="margin-bottom:24px;">
-        <?php wp_nonce_field('umami_connect_self_update', 'umami_connect_self_update_nonce'); ?>
-        <input type="hidden" name="umami_update_version" value="<?php echo esc_attr($latest_release); ?>">
-        <button type="submit" name="umami_connect_self_update" class="button">
-            Reinstall current version
-        </button>
-    </form>
-<?php endif; ?>
+echo '</div>';
