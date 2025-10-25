@@ -46,11 +46,14 @@ jobs:
           echo "Preview of updated file:"
           head -n 10 "$FILE"
 
-      - name: Create plugin ZIP
+      - name: Create plugin ZIP (with plugin folder)
         run: |
-          mkdir -p output
-          zip -r "output/umami-wp-connect-${{ github.event.release.tag_name }}.zip" \
-            assets includes "${{ env.MAIN_PLUGIN_FILE }}"
+          mkdir -p output/umami-wp-connect
+          cp -r assets output/umami-wp-connect/
+          cp -r includes output/umami-wp-connect/
+          cp "${{ env.MAIN_PLUGIN_FILE }}" output/umami-wp-connect/
+          cd output
+          zip -r "umami-wp-connect-${{ github.event.release.tag_name }}.zip" umami-wp-connect
 
       - name: Upload ZIP to release
         uses: softprops/action-gh-release@v2
