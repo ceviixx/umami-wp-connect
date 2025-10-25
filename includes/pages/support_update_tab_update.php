@@ -32,19 +32,46 @@ if (isset($_POST['umami_connect_self_update']) && check_admin_referer('umami_con
         && check_admin_referer('umami_connect_self_update', 'umami_connect_self_update_nonce')
     ) {
         if ($zip_url) {
-        require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-        $upgrader = new Plugin_Upgrader();
-        $result = $upgrader->install($zip_url);
-        if (!is_wp_error($result)) {
-            $main_plugin_file_rel = basename(dirname($plugin_dir)) . '/' . basename($plugin_dir) . '/umami-connect.php';
+            if (!function_exists('WP_Filesystem')) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+            }
+            WP_Filesystem();
+            global $wp_filesystem;
+            $tmp_zip = wp_tempnam($zip_url);
+            $zip_data = wp_remote_get($zip_url, ['timeout' => 30]);
+            if (is_wp_error($zip_data) || empty($zip_data['body'])) {
+                echo '<div class="notice notice-error"><b>Error downloading ZIP:</b> ' . esc_html($zip_data->get_error_message()) . '</div>';
+                return;
+            }
+            file_put_contents($tmp_zip, $zip_data['body']);
+            $tmp_dir = WP_CONTENT_DIR . '/upgrade/umami-wp-connect-update';
+            if (is_dir($tmp_dir)) {
+                $wp_filesystem->rmdir($tmp_dir, true);
+            }
+            $wp_filesystem->mkdir($tmp_dir);
+            $unzip = unzip_file($tmp_zip, $tmp_dir);
+            if (is_wp_error($unzip)) {
+                echo '<div class="notice notice-error"><b>Error extracting ZIP:</b> ' . esc_html($unzip->get_error_message()) . '</div>';
+                return;
+            }
+            $plugin_dir = WP_PLUGIN_DIR . '/umami-wp-connect';
+            $src_dir = $tmp_dir . '/umami-wp-connect';
+            if (!is_dir($src_dir)) {
+                $dirs = glob($tmp_dir . '/*', GLOB_ONLYDIR);
+                if (!empty($dirs)) {
+                    $src_dir = $dirs[0];
+                }
+            }
+            $result = copy_dir($src_dir, $plugin_dir);
+            if (is_wp_error($result)) {
+                echo '<div class="notice notice-error"><b>Error copying files:</b> ' . esc_html($result->get_error_message()) . '</div>';
+                return;
+            }
+            $main_plugin_file_rel = 'umami-wp-connect/umami-connect.php';
             if (!is_plugin_active($main_plugin_file_rel)) {
                 activate_plugin($main_plugin_file_rel);
             }
-            echo '<div class="notice notice-success"><b>Update erfolgreich!</b> Das Plugin wurde aktualisiert und reaktiviert.</div>';
-            echo '<script>setTimeout(function(){window.location.reload();}, 100);</script>';
-        } else {
-            echo '<div class="notice notice-error"><b>Error during update:</b> ' . esc_html($result->get_error_message()) . '</div>';
-        }
+            echo '<div class="notice notice-success"><b>Update successful!</b> The plugin was updated via WP_Filesystem and reactivated.</div>';
         } else {
             echo '<div class="notice notice-error"><b>Error:</b> ZIP-URL could not be determined.</div>';
         }
@@ -106,7 +133,7 @@ if ($latest_version) {
     }
     echo '</div>';
 }
-if ($latest_body) {
+if ($latest_body && version_compare(preg_replace('/[^0-9.]/', '', $current_version), preg_replace('/[^0-9.]/', '', $latest_version)) < 0) {
     function umami_simple_markdown($text) {
         $text = preg_replace_callback('/`([^`]+)`/', function($m) {
             return '`' . str_replace(['<', '>'], ['&lt;', '&gt;'], $m[1]) . '`';
