@@ -26,6 +26,7 @@ include_once plugin_dir_path(__FILE__) . 'includes/pages/events_overview.php';
 // Filters
 include_once plugin_dir_path(__FILE__) . 'includes/add_filter/plugin_action_links.php';
 include_once plugin_dir_path(__FILE__) . 'includes/add_filter/render_block.php';
+include_once plugin_dir_path(__FILE__) . 'includes/add_filter/autotrack.php';
 
 // Dashboard 
 include_once plugin_dir_path(__FILE__) . 'includes/dashboard/widget.php';
@@ -354,8 +355,8 @@ add_action('enqueue_block_editor_assets', function () {
     wp_enqueue_script(
         'umami-extend-core-button',
         plugins_url('assets/editor/umami-extend.js', __FILE__),
-        [ 'wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor', 'wp-compose', 'wp-hooks' ],
-        '1.0.0',
+        [ 'wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor', 'wp-compose', 'wp-hooks', 'wp-rich-text' ],
+        '1.0.8',
         true
     );
 
