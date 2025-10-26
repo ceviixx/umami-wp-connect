@@ -32,7 +32,6 @@
            localStorage.getItem('umami.disabled') !== 'true';
   }
 
-  // Wait for Umami to be ready
   var readyCheckCount = 0;
   var readyIv = setInterval(function(){
     readyCheckCount++;
@@ -43,7 +42,6 @@
     if (readyCheckCount > 60) clearInterval(readyIv);
   }, 500);
 
-  // Expose helper for manual tracking
   window.umamiConnect = {
     track: function(eventName, data) {
       if (!canTrack()) { 

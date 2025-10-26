@@ -210,7 +210,7 @@ add_action('admin_init', function () {
         'umami_connect_automation',
         '',
         function () {
-            echo '<p>Automatic client-side tracking for links, buttons and forms. You can override on elements using <code>data-umami-event</code> and <code>data-umami-data</code>.</p>';
+            echo '<p>Automatic tracking for links, Gutenberg buttons and forms. Attributes are injected server-side; you can override on elements using <code>data-umami-event</code> and <code>data-umami-event-*</code>. Manually configured links in the editor are respected (via <code>rel="umami:&lt;id&gt;"</code>) and you can opt-out per element with <code>data-umami-skip</code>.</p>';
         },
         'umami_connect_automation'
     );
@@ -222,7 +222,7 @@ add_action('admin_init', function () {
 
     add_settings_field('umami_autotrack_buttons', 'Auto-track buttons', function () {
         $v = get_option('umami_autotrack_buttons', '1');
-        echo '<label><input type="checkbox" name="umami_autotrack_buttons" value="1" '.checked($v,'1',false).'> Add default click events to <code>&lt;button&gt;</code> elements</label>';
+        echo '<label><input type="checkbox" name="umami_autotrack_buttons" value="1" '.checked($v,'1',false).'> Add default click events to Gutenberg Button blocks (<code>&lt;a.wp-block-button__link&gt;</code>) and native <code>&lt;button&gt;</code> elements</label>';
     }, 'umami_connect_automation', 'umami_connect_automation');
 
     add_settings_field('umami_autotrack_forms', 'Auto-track forms', function () {
@@ -252,7 +252,7 @@ add_action('admin_init', function () {
         'sanitize_callback' => function ($value) {
             return $value ? '1' : '0';
         },
-        'default' => '1', // enabled by default
+        'default' => '1',
     ]);
 
     add_settings_field(
@@ -278,7 +278,7 @@ add_action('admin_init', function () {
 
 register_activation_hook(__FILE__, function () {
     if (get_option('umami_mode', '') === '') {
-        add_option('umami_mode', 'cloud'); // allowed: 'cloud' | 'self'
+        add_option('umami_mode', 'cloud');
     }
     if (get_option('umami_host', '') === '') {
         add_option('umami_host', UMAMI_CONNECT_DEFAULT_HOST);
@@ -296,7 +296,7 @@ register_activation_hook(__FILE__, function () {
 
 
 add_action('wp_head', function () {
-    if (is_admin()) return; // never load in WP admin
+    if (is_admin()) return;
     $mode       = get_option('umami_mode', 'cloud');
     $hostInput  = get_option('umami_host', UMAMI_CONNECT_DEFAULT_HOST);
     $website_id = get_option('umami_website_id', '');
@@ -355,9 +355,16 @@ add_action('enqueue_block_editor_assets', function () {
     wp_enqueue_script(
         'umami-extend-core-button',
         plugins_url('assets/editor/umami-extend.js', __FILE__),
-        [ 'wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor', 'wp-compose', 'wp-hooks', 'wp-rich-text' ],
-        '1.0.8',
+        [ 'wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor', 'wp-compose', 'wp-hooks', 'wp-rich-text', 'wp-data' ],
+        '1.1.1',
         true
+    );
+
+    wp_enqueue_style(
+        'umami-extend-editor-style',
+        plugins_url('assets/editor/umami-extend.css', __FILE__),
+        [ 'wp-components' ],
+        '1.0.0'
     );
 
 });

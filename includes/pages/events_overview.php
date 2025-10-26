@@ -34,6 +34,13 @@ function umami_connect_render_events_overview_page() {
                         'core/paragraph' => 'Paragraph',
                         'core/post-excerpt' => 'Excerpt',
                         'core/heading' => 'Heading',
+                        'core/quote' => 'Quote',
+                        'core/pullquote' => 'Pullquote',
+                        'core/list' => 'List',
+                        'core/list-item' => 'List Item',
+                        'core/columns' => 'Columns',
+                        'core/cover' => 'Cover',
+                        'core/group' => 'Group',
                     ];
                     $A = strtolower($block_labels[$a['block_type'] ?? ''] ?? ($a['block_type'] ?? ''));
                     $B = strtolower($block_labels[$b['block_type'] ?? ''] ?? ($b['block_type'] ?? ''));
@@ -74,6 +81,13 @@ function umami_connect_render_events_overview_page() {
             'core/paragraph' => 'Paragraph',
             'core/post-excerpt' => 'Excerpt',
             'core/heading' => 'Heading',
+            'core/quote' => 'Quote',
+            'core/pullquote' => 'Pullquote',
+            'core/list' => 'List',
+            'core/list-item' => 'List Item',
+            'core/columns' => 'Columns',
+            'core/cover' => 'Cover',
+            'core/group' => 'Group',
         ];
         foreach ($filtered as $row) {
             $block_type = $row['block_type'] ?? '';
@@ -134,6 +148,28 @@ add_filter('umami_connect_get_all_events', function($events) {
                     'label' => $label,
                     'data_pairs' => $data_pairs,
                 );
+            }
+            if (!empty($block['attrs']['umamiLinkEvents']) && is_array($block['attrs']['umamiLinkEvents'])) {
+                foreach ($block['attrs']['umamiLinkEvents'] as $ev) {
+                    $eventName = isset($ev['event']) ? trim((string)$ev['event']) : '';
+                    $pairs = array();
+                    if (!empty($ev['pairs']) && is_array($ev['pairs'])) {
+                        $pairs = $ev['pairs'];
+                    }
+                    if ($eventName !== '' || !empty($pairs)) {
+                        $linkText = isset($ev['linkText']) ? (string)$ev['linkText'] : '';
+                        $linkUrl = isset($ev['linkUrl']) ? (string)$ev['linkUrl'] : '';
+                        $label = trim($linkText) . ($linkUrl ? ' → ' . $linkUrl : '');
+                        $result[] = array(
+                            'event' => $eventName !== '' ? $eventName : 'link_click',
+                            'post_id' => $post_id,
+                            'post_title' => $post_title,
+                            'block_type' => $block['blockName'] ?? '',
+                            'label' => $label,
+                            'data_pairs' => $pairs,
+                        );
+                    }
+                }
             }
             if (!empty($block['innerBlocks'])) {
                 find_umami_events($block['innerBlocks'], $result, $post_id, $post_title);

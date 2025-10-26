@@ -187,7 +187,6 @@ if ($latest_body && version_compare(preg_replace('/[^0-9.]/', '', $current_versi
         $text = preg_replace_callback('/(<li>.*?<\/li>\n?)+/s', function($matches) {
         return '<ul>' . str_replace("\n", '', $matches[0]) . '</ul>';
         }, $text);
-        # $text = nl2br($text);
         return $text;
     }
     echo '<div style="background:#fff;border:1px solid #e3e3e3;border-radius:8px;padding:0;margin-bottom:24px;max-width:700px;">';

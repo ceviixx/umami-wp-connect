@@ -1,281 +1,344 @@
-(function () {
+ (function () {
     const { addFilter } = wp.hooks;
     const { createHigherOrderComponent } = wp.compose;
-    const { InspectorControls } = wp.blockEditor || wp.editor;
-    const { PanelBody, TextControl } = wp.components;
-    const { Fragment } = wp.element;
-
+    const { InspectorControls, RichTextToolbarButton } = wp.blockEditor || wp.editor;
+    const { PanelBody, Popover, TextControl, Button, Flex, FlexItem } = wp.components;
+    const { Fragment, useState, useEffect } = wp.element;
+    const { getActiveFormat, applyFormat, removeFormat, registerFormatType } = wp.richText;
 
     function addUmamiAttributes(settings, name) {
-        if (name === 'core/button' || name === 'core/paragraph' || name === 'core/post-excerpt' || name === 'core/heading') {
+        if (name === 'core/button') {
             settings.attributes = Object.assign({}, settings.attributes, {
                 umamiEvent: { type: 'string', default: '' },
                 umamiDataPairs: { type: 'array', default: [] },
             });
         }
+        if (name === 'core/paragraph' || name === 'core/heading' || name === 'core/post-excerpt' || name === 'core/quote' || name === 'core/pullquote' || name === 'core/list' || name === 'core/list-item' || name === 'core/columns' || name === 'core/cover' || name === 'core/group') {
+            settings.attributes = Object.assign({}, settings.attributes, {
+                umamiLinkEvents: { type: 'array', default: [] },
+            });
+        }
         return settings;
     }
-    addFilter('blocks.registerBlockType', 'umami/extend-button/attributes', addUmamiAttributes);
+    addFilter('blocks.registerBlockType', 'umami/extend/attributes', addUmamiAttributes);
 
     const withInspectorControls = createHigherOrderComponent((BlockEdit) => {
-        return (props) => {
-            if (props.name !== 'core/button' && props.name !== 'core/paragraph' && props.name !== 'core/post-excerpt' && props.name !== 'core/heading') {
-                return wp.element.createElement(BlockEdit, props);
-            }
+        return function (props) {
+            if (props.name !== 'core/button') return wp.element.createElement(BlockEdit, props);
 
-            const { attributes, setAttributes } = props;
-            const { umamiEvent, umamiDataPairs = [] } = attributes;
+            const attributes = props.attributes;
+            const setAttributes = props.setAttributes;
+            const umamiEvent = attributes.umamiEvent || '';
+            const umamiDataPairs = Array.isArray(attributes.umamiDataPairs) ? attributes.umamiDataPairs : [];
 
             function updatePair(idx, field, value) {
-                const newPairs = [...umamiDataPairs];
-                newPairs[idx] = { ...newPairs[idx], [field]: value };
-                setAttributes({ umamiDataPairs: newPairs });
+                const next = umamiDataPairs.slice();
+                next[idx] = Object.assign({}, next[idx] || {}, { [field]: value });
+                setAttributes({ umamiDataPairs: next });
             }
             function addPair() {
-                setAttributes({ umamiDataPairs: [...umamiDataPairs, { key: '', value: '' }] });
+                setAttributes({ umamiDataPairs: umamiDataPairs.concat([{ key: '', value: '' }]) });
             }
             function removePair(idx) {
-                const newPairs = [...umamiDataPairs];
-                newPairs.splice(idx, 1);
-                setAttributes({ umamiDataPairs: newPairs });
+                const next = umamiDataPairs.slice();
+                next.splice(idx, 1);
+                setAttributes({ umamiDataPairs: next });
             }
 
             return wp.element.createElement(Fragment, {},
                 wp.element.createElement(BlockEdit, props),
                 wp.element.createElement(InspectorControls, {},
                     wp.element.createElement(PanelBody, { title: 'Umami Tracking', initialOpen: false },
-                        wp.element.createElement('div', { style: { marginBottom: 2 } },
-                            wp.element.createElement('span', {
-                                style: {
-                                    display: 'block',
-                                    fontWeight: 500,
-                                    fontSize: 13,
-                                    color: '#222',
-                                    marginBottom: 2
-                                }
-                            }, 'Event name'),
-                            wp.element.createElement('div', {
-                                style: {
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    background: 'transparent',
-                                    gap: 10,
-                                    borderRadius: 8,
-                                    border: '1px solid #e0e6ef',
-                                    padding: '4px 10px 4px 10px',
-                                    boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
-                                }
-                            },
-                                wp.element.createElement('input', {
-                                    type: 'text',
-                                    value: umamiEvent,
-                                    placeholder: 'Event name',
-                                    onChange: (e) => setAttributes({ umamiEvent: e.target.value }),
-                                    style: {
-                                        width: 230,
-                                        minWidth: 80,
-                                        fontSize: 14,
-                                        height: 28,
-                                        border: 'none',
-                                        background: 'transparent',
-                                        outline: 'none',
-                                        marginRight: 0,
-                                        borderRadius: 0,
-                                    }
-                                })
-                            )
-                        ),
-                        wp.element.createElement('div', { style: { marginTop: 16, marginBottom: 8 } },
-                            wp.element.createElement('strong', { style: { display: 'block', marginBottom: 6 } }, 'Data Key-Value-Pairs'),
-                            umamiDataPairs.length === 0 && wp.element.createElement('div', { style: { color: '#888', fontSize: 13, marginBottom: 8 } }, 'No key-value pairs added yet.'),
-                            umamiDataPairs.map((pair, idx) =>
-                                wp.element.createElement('div', {
-                                    key: idx,
-                                    style: {
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        background: 'transparent',
-                                        gap: 1,
-                                        marginBottom: 7,
-                                        borderRadius: 8,
-                                        border: '1px solid #e0e6ef',
-                                        padding: '4px 10px 4px 10px',
-                                        boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
-                                    }
-                                },
-                                    wp.element.createElement('input', {
-                                        type: 'text',
-                                        value: pair.key,
-                                        placeholder: 'Key',
-                                        onChange: (e) => updatePair(idx, 'key', e.target.value.replace(/[^a-zA-Z0-9_\-]/g, '')),
-                                        style: {
-                                            width: 120,
-                                            minWidth: 60,
-                                            fontSize: 14,
-                                            height: 28,
-                                            border: 'none',
-                                            background: 'transparent',
-                                            outline: 'none',
-                                            marginRight: 0,
-                                            borderRadius: 0,
-                                        }
-                                    }),
-                                    wp.element.createElement('div', {
-                                        style: {
-                                            width: 1,
-                                            height: 22,
-                                            background: '#e0e6ef',
-                                            margin: '0 10px',
-                                            borderRadius: 1
-                                        }
-                                    }),
-                                    wp.element.createElement('input', {
-                                        type: 'text',
-                                        value: pair.value,
-                                        placeholder: 'Value',
-                                        onChange: (e) => updatePair(idx, 'value', e.target.value),
-                                        style: {
-                                            width: 120,
-                                            minWidth: 60,
-                                            fontSize: 14,
-                                            height: 28,
-                                            border: 'none',
-                                            background: 'transparent',
-                                            outline: 'none',
-                                            marginRight: 0,
-                                            borderRadius: 0,
-                                            transition: 'border-color 0.2s',
-                                        }
-                                    }),
-                                    wp.element.createElement('button', {
-                                        type: 'button',
-                                        className: 'umami-remove-btn',
-                                        onClick: () => removePair(idx),
-                                        style: {
-                                            height: 28,
-                                            width: 28,
-                                            padding: 0,
-                                            marginLeft: 6,
-                                            background: 'none',
-                                            border: 'none',
-                                            color: '#b32d2e',
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            cursor: 'pointer',
-                                            transition: 'background 0.2s',
-                                            fontSize: 18
-                                        },
-                                        title: 'Remove',
-                                        tabIndex: 0
-                                    },
-                                        wp.element.createElement('span', {
-                                            style: { display: 'block', width: 15, height: 15 }
-                                        },
-                                            wp.element.createElement('svg', {
-                                                xmlns: 'http://www.w3.org/2000/svg',
-                                                viewBox: '0 0 199.219 199.316',
-                                                width: 15,
-                                                height: 15,
-                                                style: { display: 'block' }
-                                            },
-                                                wp.element.createElement('g', {},
-                                                    wp.element.createElement('rect', {
-                                                        height: '199.316',
-                                                        opacity: '0',
-                                                        width: '199.219',
-                                                        x: '0',
-                                                        y: '0'
-                                                    }),
-                                                    wp.element.createElement('path', {
-                                                        d: 'M99.6094 199.219C154.59 199.219 199.219 154.59 199.219 99.6094C199.219 44.6289 154.59 0 99.6094 0C44.6289 0 0 44.6289 0 99.6094C0 154.59 44.6289 199.219 99.6094 199.219ZM99.6094 182.617C53.7109 182.617 16.6016 145.508 16.6016 99.6094C16.6016 53.7109 53.7109 16.6016 99.6094 16.6016C145.508 16.6016 182.617 53.7109 182.617 99.6094C182.617 145.508 145.508 182.617 99.6094 182.617Z',
-                                                        fill: '#b32d2e',
-                                                        fillOpacity: '0.95'
-                                                    }),
-                                                    wp.element.createElement('path', {
-                                                        d: 'M71.875 138.477L138.379 71.875C139.941 70.4102 140.723 68.5547 140.723 66.4062C140.723 62.1094 137.207 58.6914 132.91 58.6914C130.762 58.6914 129.004 59.4727 127.539 61.0352L60.7422 127.441C59.2773 129.004 58.3984 130.762 58.3984 133.008C58.3984 137.402 61.9141 140.918 66.2109 140.918C68.5547 140.918 70.4102 139.941 71.875 138.477ZM127.344 138.477C128.809 139.941 130.664 140.918 132.91 140.918C137.207 140.918 140.723 137.402 140.723 133.008C140.723 130.762 139.941 129.004 138.379 127.441L71.6797 61.0352C70.2148 59.4727 68.3594 58.6914 66.2109 58.6914C61.9141 58.6914 58.3984 62.1094 58.3984 66.4062C58.3984 68.5547 59.2773 70.4102 60.7422 71.875Z',
-                                                        fill: '#b32d2e',
-                                                        fillOpacity: '0.95'
-                                                    })
-                                                )
-                                            )
-                                        )
+                        wp.element.createElement(TextControl, {
+                            label: 'Event Name',
+                            value: umamiEvent,
+                            onChange: function (val) { setAttributes({ umamiEvent: val }); },
+                            placeholder: 'e.g. button_click'
+                        }),
+                        wp.element.createElement('div', { style: { marginTop: 12 } },
+                            wp.element.createElement('label', { style: { display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 6 } }, 'Event Data (Key/Value)'),
+                            umamiDataPairs.map(function (pair, idx) {
+                                return wp.element.createElement(Flex, { key: idx, align: 'center', style: { gap: 8, marginBottom: 8 } },
+                                    wp.element.createElement(FlexItem, { isBlock: true, style: { flex: 1 } },
+                                        wp.element.createElement(TextControl, {
+                                            value: pair.key || '',
+                                            placeholder: 'Key',
+                                            onChange: function (val) { updatePair(idx, 'key', val.replace(/[^a-zA-Z0-9_\\-]/g, '')); }
+                                        })
+                                    ),
+                                    wp.element.createElement(FlexItem, { isBlock: true, style: { flex: 1 } },
+                                        wp.element.createElement(TextControl, {
+                                            value: pair.value || '',
+                                            placeholder: 'Value',
+                                            onChange: function (val) { updatePair(idx, 'value', val); }
+                                        })
+                                    ),
+                                    wp.element.createElement(FlexItem, null,
+                                        wp.element.createElement(Button, { isDestructive: true, isSmall: true, onClick: function () { removePair(idx); }, 'aria-label': 'Remove row' }, '×')
                                     )
-                                )
-                            ),
-                            wp.element.createElement('button', {
-                                type: 'button',
-                                className: 'button',
-                                onClick: addPair,
-                                style: {
-                                    marginTop: 8,
-                                    width: '100%',
-                                    background: '#e7f3ff',
-                                    border: '1px solid #b6d4fe',
-                                    color: '#0969da',
-                                    fontWeight: 500,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: 8,
-                                    fontSize: 15
-                                },
-                                title: 'Key-Value'
-                            },
-                                wp.element.createElement('span', { style: { display: 'flex', alignItems: 'center', height: 18 } },
-                                    wp.element.createElement('svg', {
-                                        xmlns: 'http://www.w3.org/2000/svg',
-                                        viewBox: '0 0 199.219 199.316',
-                                        width: 16,
-                                        height: 16,
-                                        style: { display: 'block' }
-                                    },
-                                        wp.element.createElement('g', {},
-                                            wp.element.createElement('rect', {
-                                                height: '199.316',
-                                                opacity: '0',
-                                                width: '199.219',
-                                                x: '0',
-                                                y: '0'
-                                            }),
-                                            wp.element.createElement('path', {
-                                                d: 'M99.6094 199.219C154.59 199.219 199.219 154.59 199.219 99.6094C199.219 44.6289 154.59 0 99.6094 0C44.6289 0 0 44.6289 0 99.6094C0 154.59 44.6289 199.219 99.6094 199.219ZM99.6094 182.617C53.7109 182.617 16.6016 145.508 16.6016 99.6094C16.6016 53.7109 53.7109 16.6016 99.6094 16.6016C145.508 16.6016 182.617 53.7109 182.617 99.6094C182.617 145.508 145.508 182.617 99.6094 182.617Z',
-                                                fill: 'blue',
-                                                fillOpacity: '0.85'
-                                            }),
-                                            wp.element.createElement('path', {
-                                                d: 'M107.715 136.426L107.715 62.5977C107.715 57.6172 104.297 54.1992 99.4141 54.1992C94.6289 54.1992 91.3086 57.6172 91.3086 62.5977L91.3086 136.426C91.3086 141.309 94.6289 144.727 99.4141 144.727C104.297 144.727 107.715 141.406 107.715 136.426ZM62.5977 107.617L136.523 107.617C141.406 107.617 144.824 104.395 144.824 99.6094C144.824 94.7266 141.406 91.3086 136.523 91.3086L62.5977 91.3086C57.6172 91.3086 54.2969 94.7266 54.2969 99.6094C54.2969 104.395 57.6172 107.617 62.5977 107.617Z',
-                                                fill: 'blue',
-                                                fillOpacity: '0.85'
-                                            })
-                                        )
-                                    )
-                                ),
-                                'Key-Value'
-                            )
+                                );
+                            }),
+                            wp.element.createElement(Button, { variant: 'secondary', isSmall: true, onClick: addPair }, '+ Add field')
                         )
                     )
                 )
             );
         };
     }, 'withInspectorControls');
-    addFilter('editor.BlockEdit', 'umami/extend-button/inspector', withInspectorControls);
+    addFilter('editor.BlockEdit', 'umami/extend/inspector', withInspectorControls);
+
+    registerFormatType('umami/link-event', {
+        title: 'Umami Event',
+        tagName: 'span',
+        className: 'umami-link-event',
+        edit: function (props) {
+            var isOpenState = wp.element.useState(false);
+            var isOpen = isOpenState[0];
+            var setOpen = isOpenState[1];
+            var eventNameState = wp.element.useState('');
+            var eventName = eventNameState[0];
+            var setEventName = eventNameState[1];
+            var pairsState = wp.element.useState([{ key: '', value: '' }]);
+            var pairs = pairsState[0];
+            var setPairs = pairsState[1];
+
+            var value = props.value;
+            var onChange = props.onChange;
+            var activeLink = getActiveFormat(value, 'core/link');
+            var activeUmami = getActiveFormat(value, 'umami/link-event');
+
+            function getLinkRange(val) {
+                var start = (typeof val.start === 'number') ? val.start : 0;
+                var end = (typeof val.end === 'number') ? val.end : start;
+                var formats = Array.isArray(val.formats) ? val.formats : [];
+                if (start === end && formats.length) {
+                    var left = start;
+                    var right = end;
+                    while (left > 0) {
+                        var f = formats[left - 1];
+                        var hasLink = Array.isArray(f) && f.some(function (ff) { return ff && ff.type === 'core/link'; });
+                        if (!hasLink) break;
+                        left--;
+                    }
+                    while (right < formats.length) {
+                        var f2 = formats[right];
+                        var hasLink2 = Array.isArray(f2) && f2.some(function (ff) { return ff && ff.type === 'core/link'; });
+                        if (!hasLink2) break;
+                        right++;
+                    }
+                    start = left;
+                    end = right;
+                }
+                return { start: start, end: end };
+            }
+
+            function normalizeText(str) {
+                if (!str) return '';
+                return String(str).replace(/\s+/g, ' ').trim();
+            }
+
+            useEffect(function () {
+                if (!isOpen) return;
+                try {
+                    var select = wp.data.select('core/block-editor');
+                    var clientId = select.getSelectedBlockClientId();
+                    var block = clientId ? select.getBlock(clientId) : null;
+                    if (!block) return;
+                    var attrs = block.attributes || {};
+                    var list = Array.isArray(attrs.umamiLinkEvents) ? attrs.umamiLinkEvents : [];
+                    var range = getLinkRange(value);
+                    var start = range.start, end = range.end;
+                    var linkText = normalizeText((value.text || '').slice(start, end) || '');
+                    var linkAttrsObj = (activeLink && activeLink.attributes) ? activeLink.attributes : {};
+                    var linkUrl = linkAttrsObj.url || linkAttrsObj.href || '';
+                    
+                    var relStr = linkAttrsObj.rel || '';
+                    var relMatch = relStr && relStr.match(/(^|\s)umami:([a-z0-9\-]+)/i);
+                    var relId = relMatch ? relMatch[2] : '';
+                    
+                    var found = null;
+                    if (relId) {
+                        found = list.find(function (e) { return e && e.id === relId; }) || null;
+                    }
+                    if (!found) {
+                        found = list.find(function (e) { return normalizeText(e.linkText) === linkText && e.linkUrl === linkUrl; }) || null;
+                    }
+                    if (found) {
+                        setEventName(found.event || '');
+                        setPairs(Array.isArray(found.pairs) && found.pairs.length ? found.pairs : [{ key: '', value: '' }]);
+                    } else {
+                        setEventName('');
+                        setPairs([{ key: '', value: '' }]);
+                    }
+                } catch (e) {}
+            }, [isOpen]);
+
+            useEffect(function () {
+                if (!activeLink && isOpen) {
+                    setOpen(false);
+                }
+            }, [isOpen, !!activeLink]);
+
+            function addPair() { setPairs(pairs.concat([{ key: '', value: '' }])); }
+            function updatePair(idx, field, val) {
+                var next = pairs.slice();
+                next[idx] = Object.assign({}, next[idx] || {}, { [field]: field === 'key' ? val.replace(/[^a-zA-Z0-9_\\-]/g, '') : val });
+                setPairs(next);
+            }
+            function removePair(idx) { var next = pairs.slice(); next.splice(idx, 1); setPairs(next); }
+
+            function onSave() {
+                try {
+                    var select = wp.data.select('core/block-editor');
+                    var dispatch = wp.data.dispatch('core/block-editor');
+                    var clientId = select.getSelectedBlockClientId();
+                    var block = clientId ? select.getBlock(clientId) : null;
+                    if (block) {
+                        var current = Array.isArray(block.attributes.umamiLinkEvents) ? block.attributes.umamiLinkEvents : [];
+                        var range = getLinkRange(value);
+                        var start = range.start, end = range.end;
+                        var linkText = normalizeText((value.text || '').slice(start, end) || '');
+                        var linkAttrsObj = (activeLink && activeLink.attributes) ? activeLink.attributes : {};
+                        var linkUrl = linkAttrsObj.url || linkAttrsObj.href || '';
+                        
+                        if (!linkText && value.text) {
+                            var formats = value.formats || [];
+                            for (var i = start; i < end && i < formats.length; i++) {
+                                if (formats[i]) {
+                                    for (var j = 0; j < formats[i].length; j++) {
+                                        if (formats[i][j] && formats[i][j].type === 'core/link') {
+                                            linkText = normalizeText(value.text.slice(start, end) || value.text);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        var activeRel = linkAttrsObj.rel || '';
+                        var relMatch = activeRel && activeRel.match(/(^|\s)umami:([a-z0-9\-]+)/i);
+                        var relId = relMatch ? relMatch[2] : '';
+
+                        var existingIndex = -1;
+                        if (relId) {
+                            existingIndex = current.findIndex(function (e) { return e && e.id === relId; });
+                        }
+                        if (existingIndex < 0) {
+                            existingIndex = current.findIndex(function (e) { return normalizeText(e.linkText) === linkText && e.linkUrl === linkUrl; });
+                        }
+                        var existing = existingIndex >= 0 ? current[existingIndex] : null;
+                        var id = relId || (existing && existing.id) || ('u' + Math.random().toString(36).slice(2, 10));
+                        var cleanPairs = currentPairsClean(pairs);
+                        var entry = { id: id, linkText: linkText, linkUrl: linkUrl, event: eventName || '', pairs: cleanPairs };
+                        var hasData = !!entry.event || entry.pairs.length > 0;
+                        var next = current.slice();
+                        if (existingIndex >= 0) { if (hasData) next[existingIndex] = entry; else next.splice(existingIndex, 1); } else if (hasData) { next.push(entry); }
+                        dispatch.updateBlockAttributes(clientId, { umamiLinkEvents: next });
+
+                        if (hasData) {
+                            var relTokens = activeRel.split(/\s+/).filter(Boolean).filter(function (t) { return !/^umami:/.test(t); });
+                            relTokens.push('umami:' + id);
+                            var relJoined = Array.from(new Set(relTokens)).join(' ');
+                            
+                            var updatedLinkAttrs = Object.assign({}, linkAttrsObj, { rel: relJoined });
+                            
+                            var newValueLink = applyFormat(value, { 
+                                type: 'core/link', 
+                                attributes: updatedLinkAttrs,
+                                unregisteredAttributes: {}
+                            }, start, end);
+                            
+                            newValueLink = removeFormat(newValueLink, 'umami/link-event', start, end);
+                            newValueLink = applyFormat(newValueLink, { 
+                                type: 'umami/link-event', 
+                                attributes: {} 
+                            }, start, end);
+                            
+                            onChange(newValueLink);
+                        } else {
+                            var v = removeFormat(value, 'umami/link-event', start, end);
+                            onChange(v);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Umami link tracking save error:', e);
+                }
+                setOpen(false);
+            }
+
+            function currentPairsClean(arr) {
+                var out = [];
+                for (var i = 0; i < arr.length; i++) {
+                    var p = arr[i] || {};
+                    if (p.key && p.value !== undefined && p.value !== '') out.push({ key: p.key, value: p.value });
+                }
+                return out;
+            }
+
+            if (!activeLink) return null;
+
+            return wp.element.createElement(Fragment, {},
+                wp.element.createElement(RichTextToolbarButton, {
+                    icon: 'chart-area',
+                    title: 'Umami Tracking',
+                    onClick: function () { setOpen(!isOpen); },
+                    isActive: !!activeUmami,
+                    className: 'umami-tracking-button'
+                }),
+                (isOpen) && wp.element.createElement(Popover, { position: 'bottom center', onClose: function () { setOpen(false); }, className: 'umami-tracking-popover components-card' },
+                    wp.element.createElement('div', { className: 'umami-popover-inner' },
+                        wp.element.createElement('div', { className: 'umami-popover-header' },
+                            wp.element.createElement('span', { className: 'umami-popover-title' }, 'Umami Link Tracking')
+                        ),
+                        wp.element.createElement('div', { className: 'umami-popover-section' },
+                            wp.element.createElement(TextControl, { label: 'Event Name', value: eventName, onChange: setEventName, placeholder: 'e.g. link_click' })
+                        ),
+                        wp.element.createElement('div', { className: 'umami-popover-section' },
+                            wp.element.createElement('div', { className: 'components-base-control__label' }, 'Event Data (Key/Value)'),
+                            pairs.map(function (pair, idx) {
+                                return wp.element.createElement(Flex, { key: idx, className: 'umami-pair-row', align: 'center' },
+                                    wp.element.createElement(FlexItem, { isBlock: true, style: { flex: 1 } },
+                                        wp.element.createElement(TextControl, {
+                                            value: pair.key || '',
+                                            placeholder: 'Key',
+                                            onChange: function (val) { updatePair(idx, 'key', val); }
+                                        })
+                                    ),
+                                    wp.element.createElement(FlexItem, { isBlock: true, style: { flex: 1 } },
+                                        wp.element.createElement(TextControl, {
+                                            value: pair.value || '',
+                                            placeholder: 'Value',
+                                            onChange: function (val) { updatePair(idx, 'value', val); }
+                                        })
+                                    ),
+                                    wp.element.createElement(FlexItem, null,
+                                        wp.element.createElement(Button, { isSmall: true, isDestructive: true, onClick: function () { removePair(idx); }, 'aria-label': 'Remove row' }, '×')
+                                    )
+                                );
+                            }),
+                            wp.element.createElement(Button, { variant: 'secondary', onClick: addPair, isSmall: true }, '+ Add field')
+                        ),
+                        wp.element.createElement('div', { className: 'umami-popover-footer' },
+                            wp.element.createElement(Button, { variant: 'tertiary', onClick: function () { setOpen(false); } }, 'Cancel'),
+                            wp.element.createElement(Button, { variant: 'primary', onClick: onSave }, 'Save')
+                        )
+                    )
+                )
+            );
+        }
+    });
 
     function addExtraProps(saveProps, blockType, attributes) {
-    if (blockType.name === 'core/button' || blockType.name === 'core/paragraph' || blockType.name === 'core/post-excerpt' || blockType.name === 'core/heading') {
-            if (attributes.umamiEvent) {
-                saveProps['data-umami-event'] = attributes.umamiEvent;
-            }
+        if (blockType.name === 'core/button') {
+            if (attributes.umamiEvent) saveProps['data-umami-event'] = attributes.umamiEvent;
             if (Array.isArray(attributes.umamiDataPairs)) {
-                attributes.umamiDataPairs.forEach(pair => {
-                    if (pair.key && pair.value) {
-                        saveProps['data-umami-data-' + pair.key] = pair.value;
-                    }
-                });
+                for (var i = 0; i < attributes.umamiDataPairs.length; i++) {
+                    var p = attributes.umamiDataPairs[i];
+                    if (p && p.key && p.value) saveProps['data-umami-event-' + p.key] = p.value;
+                }
             }
         }
         return saveProps;
     }
-    wp.hooks.addFilter('blocks.getSaveContent.extraProps', 'umami/extend-button/save-props', addExtraProps);
+    addFilter('blocks.getSaveContent.extraProps', 'umami/extend/save-props', addExtraProps);
 })();
