@@ -118,7 +118,7 @@ add_action('admin_init', function () {
                 echo '<span class="dashicons dashicons-warning" style="font-size:22px; color:#d48806;"></span>';
                 echo '<div>';
                 echo '<strong style="color:#d48806; font-size:15px;">Permalinks are not enabled</strong>';
-                echo '<div style="color:#b32d2e; font-size:12px; margin-top:2px;">Page views cannot be tracked correctly. <a href="options-permalink.php" style="color:#d48806; text-decoration:underline;">Enable permalinks</a> for optimal tracking.</div>';
+                echo '<div style="font-size:12px; margin-top:2px;">Page views cannot be tracked correctly. <a href="options-permalink.php" style="text-decoration:underline;">Enable permalinks</a> for optimal tracking.</div>';
                 echo '</div>';
                 echo '</div>';
             } else {
@@ -210,7 +210,7 @@ add_action('admin_init', function () {
         'umami_connect_automation',
         '',
         function () {
-            echo '<p>Automatic tracking for links, Gutenberg buttons and forms. Attributes are injected server-side; you can override on elements using <code>data-umami-event</code> and <code>data-umami-event-*</code>. Manually configured links in the editor are respected (via <code>rel="umami:&lt;id&gt;"</code>) and you can opt-out per element with <code>data-umami-skip</code>.</p>';
+            echo '<p>Automatic tracking for links, Gutenberg buttons and forms. Attributes are injected server-side; you can override on elements using <code>data-umami-event</code> and <code>data-umami-event-*</code>. Manually configured links in the editor are respected.</p>';
         },
         'umami_connect_automation'
     );
@@ -222,7 +222,7 @@ add_action('admin_init', function () {
 
     add_settings_field('umami_autotrack_buttons', 'Auto-track buttons', function () {
         $v = get_option('umami_autotrack_buttons', '1');
-        echo '<label><input type="checkbox" name="umami_autotrack_buttons" value="1" '.checked($v,'1',false).'> Add default click events to Gutenberg Button blocks (<code>&lt;a.wp-block-button__link&gt;</code>) and native <code>&lt;button&gt;</code> elements</label>';
+        echo '<label><input type="checkbox" name="umami_autotrack_buttons" value="1" '.checked($v,'1',false).'> Add default click events to Gutenberg Button blocks and native <code>&lt;button&gt;</code> elements</label>';
     }, 'umami_connect_automation', 'umami_connect_automation');
 
     add_settings_field('umami_autotrack_forms', 'Auto-track forms', function () {
