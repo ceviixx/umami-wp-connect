@@ -86,10 +86,9 @@ if (isset($_POST['umami_connect_self_update']) && check_admin_referer('umami_con
 
 
 
-$main_plugin_file = dirname(__DIR__, 2) . '/umami-connect.php';
-$plugin_data = get_file_data($main_plugin_file, ['Version' => 'Version']);
-$current_version = isset($plugin_data['Version']) ? $plugin_data['Version'] : 'unbekannt';
-$github_url = 'https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '/releases/latest';
+$version_info = umami_connect_get_version_info();
+$current_version = $version_info['current'];
+$github_url = $version_info['github_url'];
 
 
 $github_api_url = 'https://api.github.com/repos/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '/releases';
@@ -102,7 +101,7 @@ $args = [
 ];
 $releases = [];
 
-$latest_version = '';
+$latest_version = $version_info['latest'];
 $latest_body = '';
 
 
@@ -110,14 +109,13 @@ $response = wp_remote_get($github_api_url, $args);
 if (!is_wp_error($response) && isset($response['response']['code']) && $response['response']['code'] === 200) {
     $releases = json_decode(wp_remote_retrieve_body($response), true);
     if (!empty($releases) && is_array($releases)) {
-        $latest_version = $releases[0]['tag_name'] ?? '';
         $latest_body = $releases[0]['body'] ?? '';
     }
 }
 
 echo '<div class="wrap"><h3>Update</h3>';
 echo '<p><b>Current Version:</b> ' . esc_html($current_version) . '</p>';
-if ($latest_version) {
+if ($latest_version && $latest_version !== '–') {
     echo '<p><b>Latest Release:</b> ' . esc_html($latest_version) . ' ';
     echo '<a href="' . esc_url($github_url) . '" target="_blank">(Releases on GitHub)</a></p>';
 } else {
@@ -133,7 +131,7 @@ if ($latest_version) {
     }
     echo '</div>';
 }
-if ($latest_body && version_compare(preg_replace('/[^0-9.]/', '', $current_version), preg_replace('/[^0-9.]/', '', $latest_version)) < 0) {
+if ($latest_body) {
     function umami_simple_markdown($text) {
         $text = preg_replace_callback('/`([^`]+)`/', function($m) {
             return '`' . str_replace(['<', '>'], ['&lt;', '&gt;'], $m[1]) . '`';
@@ -178,10 +176,11 @@ if ($latest_body && version_compare(preg_replace('/[^0-9.]/', '', $current_versi
                 return '<div style="background:#fff;border-left:4px solid ' . $style['border'] . ';padding:12px 18px 12px 18px;margin:12px 0 16px 0;border-radius:6px;box-shadow:0 1px 2px #eee;font-size:15px;">' . $title . '<div style="margin-top:2px">' . $content . '</div></div>';
             }, $text);
         }
+        $text = preg_replace('/^---+\s*$/m', '<hr style="border:none;border-top:1px solid #e3e3e3;margin:16px 0;">', $text);
+        $text = preg_replace('/^### (.*)$/m', '<h4>$1</h4>', $text);
         $text = preg_replace('/^## (.*)$/m', '<h3>$1</h3>', $text);
         $text = preg_replace('/^# (.*)$/m', '<h2>$1</h2>', $text);
         $text = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $text);
-        $text = preg_replace('/^---$/m', '<hr>', $text);
         $text = preg_replace('/\[(.*?)\]\(([^\s\)]+)\)/', '<a href="$2" target="_blank">$1</a>', $text);
         $text = preg_replace('/^\- (.*)$/m', '<li>$1</li>', $text);
         $text = preg_replace_callback('/(<li>.*?<\/li>\n?)+/s', function($matches) {
@@ -189,8 +188,12 @@ if ($latest_body && version_compare(preg_replace('/[^0-9.]/', '', $current_versi
         }, $text);
         return $text;
     }
+    $has_update = umami_connect_has_update();
+    $version_label = $has_update 
+        ? '<span style="display:inline-block;background:#f0f0f0;color:#666;border-radius:12px;padding:2px 12px;font-size:13px;font-weight:500;">' . esc_html($current_version) . '</span> <span style="color:#999;font-size:14px;margin:0 6px;">→</span> <span style="display:inline-block;background:#007cba;color:#fff;border-radius:12px;padding:2px 12px;font-size:13px;font-weight:500;">' . esc_html($latest_version) . '</span>'
+        : '<span style="display:inline-block;background:#28a745;color:#fff;border-radius:12px;padding:2px 12px;font-size:13px;font-weight:500;">' . esc_html($current_version) . '</span> <span style="color:#999;font-size:13px;margin-left:8px;">Current Version</span>';
     echo '<div style="background:#fff;border:1px solid #e3e3e3;border-radius:8px;padding:0;margin-bottom:24px;max-width:700px;">';
-    echo '<div style="background:#f8f8f8;border-bottom:1px solid #e3e3e3;padding:12px 32px 10px 32px;border-radius:8px 8px 0 0;font-weight:600;font-size:16px;display:flex;align-items:center;gap:12px;">Changelog <span style="display:inline-block;background:#007cba;color:#fff;border-radius:12px;padding:2px 12px;font-size:13px;font-weight:500;margin-left:6px;">' . esc_html($latest_version) . '</span></div>';
+    echo '<div style="background:#f8f8f8;border-bottom:1px solid #e3e3e3;padding:12px 32px 10px 32px;border-radius:8px 8px 0 0;font-weight:600;font-size:16px;display:flex;align-items:center;gap:12px;">Release Notes ' . $version_label . '</div>';
     echo '<style>.umami-changelog ul { list-style: disc inside; margin-left: 1em; } .umami-changelog li { margin-bottom: 2px; }</style>';
     echo '<div class="umami-changelog" style="padding:18px 32px 18px 32px;">' . umami_simple_markdown($latest_body) . '</div>';
     echo '</div>';

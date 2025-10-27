@@ -10,10 +10,9 @@
 
 if (!defined('ABSPATH')) exit;
 
-# Constants
 require_once plugin_dir_path(__FILE__) . 'includes/constants.php';
+require_once plugin_dir_path(__FILE__) . 'includes/version_check.php';
 
-// Sidebar navigation
 include_once plugin_dir_path(__FILE__) . 'includes/menu.php';
 
 // Pages
@@ -29,7 +28,7 @@ include_once plugin_dir_path(__FILE__) . 'includes/add_filter/render_block.php';
 include_once plugin_dir_path(__FILE__) . 'includes/add_filter/autotrack.php';
 
 // Dashboard 
-include_once plugin_dir_path(__FILE__) . 'includes/dashboard/widget.php';
+include_once plugin_dir_path(__FILE__) . 'includes/dashboard/status_widget.php';
 
 // Non excluded functions...
 
