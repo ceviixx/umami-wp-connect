@@ -89,5 +89,5 @@ jobs:
       - name: Run PHP_CodeSniffer
         run: |
           echo "🔍 Running PHP_CodeSniffer..."
-          # Fail on PHPCS errors, ignore warnings
-          /root/.composer/vendor/bin/phpcs --standard=phpcs.xml --warning-severity=0 .
+          # Use composer global exec to find phpcs regardless of home path
+          composer global exec phpcs -- --standard=phpcs.xml --warning-severity=0 .

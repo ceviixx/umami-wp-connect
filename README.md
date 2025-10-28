@@ -37,8 +37,6 @@
   - Host URL (for self-hosted)
   - Website ID (required)
   - Script loading: async or defer
-  - Exclude logged‑in users from tracking (recommended)
-  - Optional consent gate (wait until a global flag is set)
 - Auto‑tracking out of the box:
   - Links: adds `data-umami-event` to inline links
   - Buttons: adds `data-umami-event` to Gutenberg buttons and native buttons
