@@ -1,0 +1,93 @@
+name: Lint Tests
+
+on: [push, pull_request]
+
+jobs:
+  js-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install ESLint
+        run: |
+          npm init -y
+          npm install eslint@8
+      - name: Create ESLint config
+        run: |
+          cat > .eslintrc.js << 'EOF'
+          module.exports = {
+            env: {
+              browser: true,
+              es2021: true
+            },
+            globals: {
+              wp: "readonly"
+            },
+            extends: ["eslint:recommended"],
+            parserOptions: {
+              ecmaVersion: 12,
+              sourceType: "module"
+            },
+            rules: {
+              indent: ["error", 2],
+              quotes: ["error", "single"],
+              semi: ["error", "always"],
+              "no-unused-vars": "warn",
+              "no-console": "off"
+            }
+          };
+          EOF
+      - name: Run ESLint
+        run: |
+          echo "🔍 Running ESLint..."
+          npx eslint assets/ --max-warnings 0
+
+  php-lint:
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.1-cli
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          apt-get update && apt-get install -y git unzip wget
+          wget https://getcomposer.org/installer -O composer-setup.php
+          php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+          rm composer-setup.php
+      - name: Install PHP_CodeSniffer and WordPress Coding Standards
+        run: |
+          composer global config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+          composer global require "squizlabs/php_codesniffer=3.*"
+          composer global require "wp-coding-standards/wpcs"
+      - name: Create PHPCS config
+        run: |
+          cat > phpcs.xml << 'EOF'
+          <?xml version="1.0"?>
+          <ruleset name="Umami WP Connect">
+            <description>WordPress Coding Standards für PHP</description>
+            <rule ref="WordPress">
+              <exclude name="WordPress.Files.FileName"/>
+              <exclude name="WordPress.PHP.YodaConditions"/>
+              <exclude name="Squiz.Commenting.FileComment"/>
+              <exclude name="Squiz.Commenting.FunctionComment"/>
+              <exclude name="Generic.Commenting.DocComment"/>
+              <exclude name="WordPress.Security.EscapeOutput"/>
+              <!-- Allow native DOM object members like $nodeValue, $textContent -->
+              <exclude name="WordPress.NamingConventions.ValidVariableName"/>
+            </rule>
+            <exclude-pattern>vendor/*</exclude-pattern>
+            <exclude-pattern>node_modules/*</exclude-pattern>
+            <exclude-pattern>*.js</exclude-pattern>
+            <exclude-pattern>assets/*</exclude-pattern>
+          </ruleset>
+          EOF
+      - name: Run PHP lint
+        run: find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
+      - name: Run PHP_CodeSniffer
+        run: |
+          echo "🔍 Running PHP_CodeSniffer..."
+          # Fail on PHPCS errors, ignore warnings
+          /root/.composer/vendor/bin/phpcs --standard=phpcs.xml --warning-severity=0 .

@@ -1,0 +1,175 @@
+name: Structure Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  structure-check:
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.1-cli
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check required WordPress plugin files
+        run: |
+          echo "🔍 Checking for required WordPress plugin files..."
+          
+          # Main plugin file
+          if [ ! -f "umami-connect.php" ]; then
+            echo "❌ Main plugin file 'umami-connect.php' not found"
+            exit 1
+          fi
+          echo "✓ Main plugin file exists"
+          
+          # README
+          if [ ! -f "README.md" ]; then
+            echo "❌ README.md not found"
+            exit 1
+          fi
+          echo "✓ README.md exists"
+          
+          # Check for plugin header in main file
+          if ! grep -q "Plugin Name:" umami-connect.php; then
+            echo "❌ Plugin Name header missing in main file"
+            exit 1
+          fi
+          if ! grep -q "Version:" umami-connect.php; then
+            echo "❌ Version header missing in main file"
+            exit 1
+          fi
+          echo "✓ Required plugin headers present"
+
+      - name: Validate directory structure
+        run: |
+          echo "🔍 Validating directory structure..."
+          
+          # Check for standard WordPress plugin directories
+          for dir in includes assets; do
+            if [ ! -d "$dir" ]; then
+              echo "❌ Required directory '$dir' not found"
+              exit 1
+            fi
+            echo "✓ Directory '$dir' exists"
+          done
+          
+          # Check that PHP files are in proper locations
+          if find . -maxdepth 1 -name "*.php" -not -name "umami-connect.php" | grep -q .; then
+            echo "⚠️  Warning: Additional PHP files found in root directory"
+          fi
+
+      - name: PHP whitespace/indentation check (WordPress-guided)
+        run: |
+          echo "🔍 Checking PHP whitespace & indentation per WordPress standards..."
+          apt-get update && apt-get install -y git unzip wget >/dev/null
+          wget https://getcomposer.org/installer -O composer-setup.php
+          php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+          rm composer-setup.php
+          composer global config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+          composer global require "squizlabs/php_codesniffer=3.*" "wp-coding-standards/wpcs"
+
+          cat > phpcs-structure.xml << 'EOF'
+          <?xml version="1.0"?>
+          <ruleset name="Umami WP Connect (Structure)">
+            <description>Whitespace/Indentation checks per WordPress standards (tabs for indentation, spaces for alignment).</description>
+
+            <!-- Configure tab width like WPCS -->
+            <config name="tab_width" value="4"/>
+
+            <!-- Use only the WordPress WhiteSpace sniffs and trailing whitespace check -->
+            <rule ref="WordPress.WhiteSpace"/>
+            <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace"/>
+
+            <!-- Project excludes (we only check PHP here) -->
+            <exclude-pattern>vendor/*</exclude-pattern>
+            <exclude-pattern>node_modules/*</exclude-pattern>
+            <exclude-pattern>assets/*</exclude-pattern>
+          </ruleset>
+          EOF
+
+          /root/.composer/vendor/bin/phpcs \
+            --standard=phpcs-structure.xml \
+            --warning-severity=0 \
+            --extensions=php \
+            .
+
+      - name: Check file naming conventions
+        run: |
+          echo "🔍 Checking file naming conventions..."
+          
+          # Check for spaces in filenames (WordPress best practice: use hyphens or underscores)
+          if find . -type f -name "* *" | grep -v node_modules | grep -v vendor | grep -q .; then
+            echo "❌ Files with spaces in names found:"
+            find . -type f -name "* *" | grep -v node_modules | grep -v vendor
+            exit 1
+          fi
+          echo "✓ No spaces in filenames"
+          
+          # Check PHP file extensions
+          if find . -type f \( -name "*.php[0-9]" -o -name "*.php~" -o -name "*.php.bak" \) | grep -q .; then
+            echo "❌ Invalid PHP file extensions found:"
+            find . -type f \( -name "*.php[0-9]" -o -name "*.php~" -o -name "*.php.bak" \)
+            exit 1
+          fi
+          echo "✓ PHP file extensions valid"
+
+      - name: Check for WordPress security best practices
+        run: |
+          echo "🔍 Checking WordPress security patterns..."
+          
+          # Check that PHP files have ABSPATH check (sample main files)
+          for file in umami-connect.php includes/constants.php includes/menu.php; do
+            if [ -f "$file" ]; then
+              if ! grep -q "ABSPATH\|WP_PLUGIN_DIR" "$file" | head -20; then
+                echo "⚠️  Warning: '$file' might be missing ABSPATH security check"
+              fi
+            fi
+          done
+          echo "✓ Security pattern check complete"
+
+      - name: Validate plugin header consistency
+        run: |
+          echo "🔍 Checking plugin header consistency..."
+          
+          # Extract version from main plugin file
+          PLUGIN_VERSION=$(grep -E "^ \* Version:" umami-connect.php | sed 's/.*Version: *//' | tr -d ' ')
+          
+          if [ -z "$PLUGIN_VERSION" ]; then
+            echo "❌ Could not extract version from plugin header"
+            exit 1
+          fi
+          
+          echo "✓ Plugin version: $PLUGIN_VERSION"
+          
+          # Check for common header fields
+          for field in "Plugin Name" "Description" "Author" "Plugin URI"; do
+            if ! grep -q "$field:" umami-connect.php; then
+              echo "⚠️  Warning: '$field' header not found"
+            fi
+          done
+
+      - name: Check for development artifacts
+        run: |
+          echo "🔍 Checking for development artifacts..."
+          
+          # Check for common debug/dev patterns in PHP files
+          if find . -name "*.php" -type f -exec grep -l "var_dump\|print_r.*exit\|die.*debug\|console\.log" {} \; | grep -q .; then
+            echo "⚠️  Warning: Potential debug code found:"
+            find . -name "*.php" -type f -exec grep -Hn "var_dump\|print_r.*exit\|die.*debug" {} \;
+          fi
+          
+          # Check for TODO/FIXME comments (informational)
+          TODO_COUNT=$(find . -name "*.php" -o -name "*.js" | xargs grep -i "TODO\|FIXME" 2>/dev/null | wc -l || echo 0)
+          if [ "$TODO_COUNT" -gt 0 ]; then
+            echo "ℹ️  Info: $TODO_COUNT TODO/FIXME comments found (review recommended)"
+          fi
+          
+          echo "✓ Development artifacts check complete"
+
+      - name: Structure check summary
+        run: |
+          echo ""
+          echo "✅ Structure check passed!"
+          echo "📦 Plugin structure follows WordPress standards"

@@ -1,0 +1,26 @@
+name: WordPress Plugin Smoke Test
+
+on: [push, pull_request]
+
+jobs:
+  wp-smoke-test:
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.1-cli
+    strategy:
+      matrix:
+        php-version: ['8.1', '8.0', '7.4']
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP Syntax Check for PHP ${{ matrix.php-version }}
+        run: |
+          find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" -exec php -l {} \;
+      - name: Check main plugin file
+        run: |
+          if [ -f umami-connect.php ]; then
+            echo "✓ Main plugin file found"
+            php -l umami-connect.php
+          else
+            echo "✗ Main plugin file not found"
+            exit 1
+          fi

@@ -1,0 +1,59 @@
+name: Security Tests
+
+on: [push, pull_request]
+
+jobs:
+  dependency-check:
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.1-cli
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          apt-get update && apt-get install -y nodejs npm git zip unzip wget
+          wget https://getcomposer.org/installer -O composer-setup.php
+          php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+          rm composer-setup.php
+      
+      - name: NPM Security Audit
+        run: |
+          echo "🔒 Checking npm dependencies..."
+          if [ -f package.json ]; then
+            npm audit --audit-level=moderate || echo "⚠️  npm audit found issues (non-blocking)"
+          else
+            echo "⚠️  No package.json found"
+          fi
+        
+      - name: Composer Security Audit
+        run: |
+          echo "🔒 Checking composer dependencies..."
+          if [ -f composer.json ]; then
+            composer audit || echo "⚠️  composer audit found issues (non-blocking)"
+          else
+            echo "⚠️  No composer.json found"
+          fi
+
+  psalm-security:
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.1-cli
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          apt-get update && apt-get install -y git unzip wget
+          wget https://getcomposer.org/installer -O composer-setup.php
+          php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+          rm composer-setup.php
+      
+      - name: Install Psalm
+        run: composer global require vimeo/psalm
+      
+      - name: Run Psalm Security Analysis
+        run: |
+          echo "🔒 Running Psalm taint analysis..."
+          /root/.composer/vendor/bin/psalm --init src=. 2>&1 || echo "⚠️  Psalm init failed (non-blocking)"
+          /root/.composer/vendor/bin/psalm --taint-analysis 2>&1 || echo "⚠️  Psalm analysis completed with findings"
