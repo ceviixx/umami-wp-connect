@@ -89,7 +89,7 @@ jobs:
           </ruleset>
           EOF
 
-          composer global exec phpcs \
+          /root/.composer/vendor/bin/phpcs \
             --standard=phpcs-structure.xml \
             --warning-severity=0 \
             --extensions=php \
