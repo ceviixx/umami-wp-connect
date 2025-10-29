@@ -1,31 +1,38 @@
 (function () {
   var CFG = (window.__UMAMI_CONNECT__) || {};
 
-  function log() {
+  function log()
+  {
     if (CFG.debug && typeof console !== 'undefined') {
       console.log.apply(console, ['[UmamiConnect]'].concat([].slice.call(arguments)));
     }
   }
 
-  function getByPath(root, path) {
+  function getByPath(root, path)
+  {
     try {
-      if (!path) return undefined;
+      if (!path) { return undefined;
+      }
       var parts = String(path).split('.');
       var cur = root;
       for (var i=0;i<parts.length;i++){
-        if (cur == null) return undefined;
+        if (cur == null) { return undefined;
+        }
         cur = cur[parts[i]];
       }
       return cur;
     } catch(e){ return undefined; }
   }
 
-  function consentGranted() {
-    if (!CFG.consentRequired) return true;
+  function consentGranted()
+  {
+    if (!CFG.consentRequired) { return true;
+    }
     return !!getByPath(window, CFG.consentFlag || 'umamiConsentGranted');
   }
 
-  function canTrack() {
+  function canTrack()
+  {
     return typeof window.umami === 'object' &&
            typeof window.umami.track === 'function' &&
            consentGranted() &&
@@ -33,17 +40,20 @@
   }
 
   var readyCheckCount = 0;
-  var readyIv = setInterval(function(){
-    readyCheckCount++;
-    if (canTrack()) {
-      clearInterval(readyIv);
-      log('umami ready');
-    }
-    if (readyCheckCount > 60) clearInterval(readyIv);
-  }, 500);
+  var readyIv = setInterval(
+    function () {
+      readyCheckCount++;
+      if (canTrack()) {
+        clearInterval(readyIv);
+        log('umami ready');
+      }
+      if (readyCheckCount > 60) { clearInterval(readyIv);
+      }
+    }, 500
+  );
 
   window.umamiConnect = {
-    track: function(eventName, data) {
+    track: function (eventName, data) {
       if (!canTrack()) { 
         log('skip track (not ready or no consent)', eventName, data); 
         return; 
