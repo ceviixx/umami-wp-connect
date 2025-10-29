@@ -36,20 +36,19 @@ function umami_connect_update_page() {
 				if ( ! function_exists( 'WP_Filesystem' ) ) {
 					include_once ABSPATH . 'wp-admin/includes/file.php';
 				}
-			WP_Filesystem();
-			global $wp_filesystem;
-			$tmp_zip  = wp_tempnam( $zip_url );
-			$zip_data = wp_remote_get( $zip_url, array( 'timeout' => 30 ) );
-			if ( is_wp_error( $zip_data ) || empty( $zip_data['body'] ) ) {
-				echo '<div class="notice notice-error"><b>Error downloading ZIP:</b> ' . esc_html( $zip_data->get_error_message() ) . '</div>';
-				return;
-			}
-			// Use WP_Filesystem instead of file_put_contents for security
-			if ( ! $wp_filesystem->put_contents( $tmp_zip, $zip_data['body'], FS_CHMOD_FILE ) ) {
-				echo '<div class="notice notice-error"><b>Error:</b> Could not write temporary file.</div>';
-				return;
-			}
-			$tmp_dir = WP_CONTENT_DIR . '/upgrade/umami-wp-connect-update';
+				WP_Filesystem();
+				global $wp_filesystem;
+				$tmp_zip  = wp_tempnam( $zip_url );
+				$zip_data = wp_remote_get( $zip_url, array( 'timeout' => 30 ) );
+				if ( is_wp_error( $zip_data ) || empty( $zip_data['body'] ) ) {
+					echo '<div class="notice notice-error"><b>Error downloading ZIP:</b> ' . esc_html( $zip_data->get_error_message() ) . '</div>';
+					return;
+				}
+				if ( ! $wp_filesystem->put_contents( $tmp_zip, $zip_data['body'], FS_CHMOD_FILE ) ) {
+					echo '<div class="notice notice-error"><b>Error:</b> Could not write temporary file.</div>';
+					return;
+				}
+				$tmp_dir = WP_CONTENT_DIR . '/upgrade/umami-wp-connect-update';
 				if ( is_dir( $tmp_dir ) ) {
 					$wp_filesystem->rmdir( $tmp_dir, true );
 				}
