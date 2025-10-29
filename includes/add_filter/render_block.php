@@ -29,7 +29,7 @@ add_filter(
 					$attr     = '';
 					$href_val = null;
 					if ( preg_match( '/href\s*=\s*([\"\"])\s*(.*?)\s*\1/i', $m[2], $hm ) ) {
-						$href_val = trim( $hm[2] );
+							$href_val = trim( $hm[2] );
 					} elseif ( preg_match( '/href\s*=\s*([^\s>]+)/i', $m[2], $hm2 ) ) {
 						$href_val = trim( $hm2[1] );
 					}
@@ -84,13 +84,13 @@ add_filter(
 			$anchor_nodes = $xpath->query( '//a' );
 			if ( $anchor_nodes && $anchor_nodes->length ) {
 				foreach ( $anchor_nodes as $a ) {
-					$matched = null;
+						$matched = null;
 
-					$rel = $a->hasAttribute( 'rel' ) ? $a->getAttribute( 'rel' ) : '';
+						$rel = $a->hasAttribute( 'rel' ) ? $a->getAttribute( 'rel' ) : '';
 					if ( $rel && preg_match( '/(^|\s)umami:([a-z0-9\-]+)/i', $rel, $mm ) ) {
 						$rid = $mm[2];
 						if ( isset( $by_id[ $rid ] ) ) {
-							$matched = $by_id[ $rid ];
+										$matched = $by_id[ $rid ];
 						}
 					}
 
@@ -110,14 +110,14 @@ add_filter(
 					if ( ! $matched && ! empty( $link_events ) ) {
 						$href = $a->hasAttribute( 'href' ) ? $a->getAttribute( 'href' ) : '';
 						if ( $href !== '' ) {
-							$candidates = array_values(
-								array_filter(
-									$link_events,
-									function ( $ev ) use ( $href ) {
-										return isset( $ev['linkUrl'] ) && (string) $ev['linkUrl'] === $href;
-									}
-								)
-							);
+								$candidates = array_values(
+									array_filter(
+										$link_events,
+										function ( $ev ) use ( $href ) {
+											return isset( $ev['linkUrl'] ) && (string) $ev['linkUrl'] === $href;
+										}
+									)
+								);
 							if ( count( $candidates ) === 1 ) {
 								$matched = $candidates[0];
 							}
@@ -146,7 +146,7 @@ add_filter(
 						foreach ( $data_keys as $k => $v ) {
 							$attr_name = 'data-umami-event-' . $k;
 							if ( ! $a->hasAttribute( $attr_name ) ) {
-								$a->setAttribute( $attr_name, esc_attr( $v ) );
+										$a->setAttribute( $attr_name, esc_attr( $v ) );
 							}
 						}
 					}

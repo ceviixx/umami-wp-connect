@@ -1,4 +1,4 @@
-name: CodeQL
+name: Security Analysis
 
 on:
   push:
@@ -14,28 +14,28 @@ permissions:
   actions: read
 
 jobs:
-  analyze:
-    name: Analyze
+  semgrep:
+    name: Semgrep Security Scan
     runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
-      actions: read
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ 'javascript', 'php' ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+      - name: Run Semgrep
+        uses: semgrep/semgrep-action@v1
         with:
-          languages: ${{ matrix.language }}
+          config: >-
+            p/security-audit
+            p/php
+            p/javascript
+            p/owasp-top-ten
+          generateSarif: true
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+        if: always()

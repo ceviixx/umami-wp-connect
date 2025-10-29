@@ -36,7 +36,8 @@ add_filter(
 						foreach ( $child->attributes as $attr ) {
 							if ( strpos( $attr->name, 'data-umami-event-' ) === 0 ) {
 								$has_any_umami_attr = true;
-								break; }
+								break;
+							}
 						}
 					}
 					if ( $is_umami_span || $has_any_umami_attr ) {
@@ -83,12 +84,12 @@ add_filter(
 			}
 		}
 
-		// phpcs:disable WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+     // phpcs:disable WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 		$get_own_text = function ( \DOMNode $node ) {
 			$txt = '';
 			foreach ( $node->childNodes as $child ) {
 				if ( $child->nodeType === XML_TEXT_NODE ) {
-					$txt .= $child->nodeValue;
+						$txt .= $child->nodeValue;
 				} elseif ( $child->nodeType === XML_CDATA_SECTION_NODE ) {
 					$txt .= $child->data;
 				}
@@ -96,7 +97,7 @@ add_filter(
 			$txt = preg_replace( '/\s+/u', ' ', $txt );
 			return trim( $txt );
 		};
-		// phpcs:enable WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+     // phpcs:enable WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 
 		if ( $autotrack_links ) {
 			$links = $xpath->query( '//a[not(contains(@class, "wp-block-button__link")) and not(contains(@class, "wp-element-button"))]' );
@@ -115,7 +116,8 @@ add_filter(
 				foreach ( $link->attributes as $attr ) {
 					if ( strpos( $attr->name, 'data-umami-event-' ) === 0 ) {
 						$has_any_pair = true;
-						break; }
+						break;
+					}
 				}
 				if ( $has_any_pair ) {
 					continue;
@@ -123,7 +125,7 @@ add_filter(
 
 				$text = $get_own_text( $link );
 				if ( $text === '' ) {
-					// phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+                 // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 					$text = trim( preg_replace( '/\s+/u', ' ', $link->textContent ) );
 				}
 				$href = $link->hasAttribute( 'href' ) ? $link->getAttribute( 'href' ) : '';

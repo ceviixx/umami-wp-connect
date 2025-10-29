@@ -47,8 +47,8 @@ add_action(
 
 				echo '<div style="flex:1.3; min-width:180px; max-width:320px; display:flex; flex-direction:column; justify-content:center;">';
 				echo '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
-					echo '<tr><td style="padding:6px 10px 6px 0; color:#666;">Event names</td><td style="padding:6px 0; font-weight:bold; text-align:right;">' . intval( $event_names_count ) . '</td></tr>';
-					echo '<tr><td style="padding:6px 10px 6px 0; color:#666;">Event key-value pairs</td><td style="padding:6px 0; font-weight:bold; text-align:right;">' . intval( $event_key_value_count ) . '</td></tr>';
+				echo '<tr><td style="padding:6px 10px 6px 0; color:#666;">Event names</td><td style="padding:6px 0; font-weight:bold; text-align:right;">' . intval( $event_names_count ) . '</td></tr>';
+				echo '<tr><td style="padding:6px 10px 6px 0; color:#666;">Event key-value pairs</td><td style="padding:6px 0; font-weight:bold; text-align:right;">' . intval( $event_key_value_count ) . '</td></tr>';
 				echo '</table>';
 				echo '</div>';
 				echo '</div>';

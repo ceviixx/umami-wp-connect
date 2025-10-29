@@ -5,11 +5,11 @@ function umami_connect_settings_page() {
 		<h1><b>umami Connect</b></h1>
 		<h3>General</h3>
 		<form action="options.php" method="post" id="umami-connect-form">
-			<?php
-			settings_fields( 'umami_connect_general' );
-			do_settings_sections( 'umami_connect' );
-			submit_button();
-			?>
+	<?php
+	settings_fields( 'umami_connect_general' );
+	do_settings_sections( 'umami_connect' );
+	submit_button();
+	?>
 		</form>
 		<script>
 		(function(){

@@ -21,7 +21,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/menu.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/pages/general.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/pages/self_protection.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/pages/automation.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/pages/support_update.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/pages/update.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/pages/events_overview.php';
 
 // Filters.
@@ -88,7 +88,7 @@ add_action(
 						}
 						$value = esc_url_raw( rtrim( $value, '/' ) );
 					}
-					return $value;
+						return $value;
 				},
 				'default'           => UMAMI_CONNECT_DEFAULT_HOST,
 			)
@@ -107,7 +107,7 @@ add_action(
 					if ( preg_match( '/^[a-f0-9-]{10,}$/i', $value ) ) {
 						return $value;
 					}
-					return preg_replace( '/[^a-zA-Z0-9\-_]/', '', $value );
+						return preg_replace( '/[^a-zA-Z0-9\-_]/', '', $value );
 				},
 				'default'           => '',
 			)
@@ -147,7 +147,7 @@ add_action(
 			'umami_connect_main',
 			'',
 			function () {
-				echo '<p>Select Cloud or Self-hosted. In Cloud mode the base host <code>' . esc_html( UMAMI_CONNECT_DEFAULT_HOST ) . '</code> is used automatically.</p>';
+				echo '<p>Configure your Umami Analytics tracking settings. See Help (top right) for detailed information.</p>';
 				if ( empty( get_option( 'permalink_structure' ) ) ) {
 					echo '<div class="notice notice-warning" style="margin:16px 0 20px 0; padding:12px 16px 12px 12px; display:flex; align-items:center; gap:12px;">';
 					echo '<span class="dashicons dashicons-warning" style="font-size:22px; color:#d48806;"></span>';
@@ -177,10 +177,9 @@ add_action(
 				$mode = esc_attr( get_option( 'umami_mode', 'cloud' ) );
 				?>
 			<select name="umami_mode" id="umami_mode">
-					<option value="cloud" <?php selected( $mode, 'cloud' ); ?>>Cloud</option>
-					<option value="self"  <?php selected( $mode, 'self' ); ?>>Self-hosted</option>
+						<option value="cloud" <?php selected( $mode, 'cloud' ); ?>>Cloud</option>
+						<option value="self"  <?php selected( $mode, 'self' ); ?>>Self-hosted</option>
 			</select>
-				<p class="description">Cloud uses <?php echo esc_html( UMAMI_CONNECT_DEFAULT_HOST ); ?>. Self-hosted allows a custom host.</p>
 				<?php
 			},
 			'umami_connect',
@@ -193,7 +192,6 @@ add_action(
 			function () {
 				$value = esc_attr( get_option( 'umami_host', UMAMI_CONNECT_DEFAULT_HOST ) );
 				echo '<input required type="url" name="umami_host" id="umami_host" value="' . $value . '" class="regular-text" placeholder="https://umami.example.com">';
-				echo '<p class="description">Base URL of your Umami server (without <code>/script.js</code>). We append the script filename if it is missing.</p>';
 			},
 			'umami_connect',
 			'umami_connect_main'
@@ -206,7 +204,6 @@ add_action(
 				$value = esc_attr( get_option( 'umami_website_id', '' ) );
 				echo '<input required type="text" name="umami_website_id" id="umami_website_id" value="' . $value . '" class="regular-text" placeholder="Website UUID">';
 				echo '<div id="umami-website-id-error" style="color:#b32d2e; margin-top:8px; display:none;"></div>';
-				echo '<p class="description">Your Umami Website ID.</p>';
 			},
 			'umami_connect',
 			'umami_connect_main'
@@ -219,13 +216,9 @@ add_action(
 				$mode = esc_attr( get_option( 'umami_script_loading', 'defer' ) );
 				?>
 			<select name="umami_script_loading" id="umami_script_loading">
-					<option value="defer" <?php selected( $mode, 'defer' ); ?>>defer</option>
-					<option value="async" <?php selected( $mode, 'async' ); ?>>async</option>
+						<option value="defer" <?php selected( $mode, 'defer' ); ?>>defer</option>
+						<option value="async" <?php selected( $mode, 'async' ); ?>>async</option>
 			</select>
-			<ul class="description">
-				<li><b>defer</b> to execute after the HTML is parsed (recommended for most cases).</li>
-				<li><b>async</b> to load the script as soon as possible (may execute before DOM is ready).</li>
-			</ul>
 				<?php
 			},
 			'umami_connect',
@@ -236,7 +229,7 @@ add_action(
 			'umami_connect_self_protection',
 			'',
 			function () {
-				echo '<p>Controls whether logged-in users (e.g., admins, editors) are <em>not</em> tracked by default.</p>';
+				echo '<p>Exclude your own visits from analytics. See Help (top right) for details.</p>';
 			},
 			'umami_connect_self_protection'
 		);
@@ -245,7 +238,7 @@ add_action(
 			'umami_connect_automation',
 			'',
 			function () {
-				echo '<p>Automatic tracking for links, Gutenberg buttons and forms. Attributes are injected server-side; you can override on elements using <code>data-umami-event</code> and <code>data-umami-event-*</code>. Manually configured links in the editor are respected.</p>';
+				echo '<p>Enable automatic event tracking for user interactions. See Help (top right) for details.</p>';
 			},
 			'umami_connect_automation'
 		);
@@ -337,10 +330,9 @@ add_action(
 				$value = get_option( 'umami_exclude_logged_in', '1' );
 				?>
 			<label>
-					<input type="checkbox" name="umami_exclude_logged_in" id="umami_exclude_logged_in" value="1" <?php checked( $value, '1' ); ?>>
+						<input type="checkbox" name="umami_exclude_logged_in" id="umami_exclude_logged_in" value="1" <?php checked( $value, '1' ); ?>>
 				Automatically exclude logged-in users from Umami
 			</label>
-			<p class="description">Sets <code>localStorage.umami.disabled = "true"</code> for logged-in users. Disable if you want to measure admin visits as well.</p>
 				<?php
 			},
 			'umami_connect_self_protection',
