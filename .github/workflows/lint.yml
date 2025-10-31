@@ -1,14 +1,19 @@
 name: Lint Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   js-lint:
+    name: JS Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
       - name: Install ESLint
@@ -46,11 +51,12 @@ jobs:
           npx eslint assets/ --max-warnings 0
 
   php-lint:
+    name: PHP Lint
     runs-on: ubuntu-latest
     container:
       image: php:8.1-cli
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install dependencies
         run: |
           apt-get update && apt-get install -y git unzip wget

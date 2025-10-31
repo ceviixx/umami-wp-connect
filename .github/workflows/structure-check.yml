@@ -2,16 +2,19 @@ name: Structure Check
 
 on:
   push:
+    branches-ignore: [ main ]
   pull_request:
+    branches: [ main ]
 
 jobs:
   structure-check:
+    name: Structure check
     runs-on: ubuntu-latest
     container:
       image: php:8.1-cli
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Check required WordPress plugin files
         run: |

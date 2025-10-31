@@ -6,6 +6,7 @@ on:
 
 jobs:
   build-zip:
+    name: Build ZIP
     runs-on: ubuntu-latest
 
     env:
@@ -13,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Update plugin version
         run: |
@@ -63,6 +64,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   notify-discord:
+    name: Discord notification
     runs-on: ubuntu-latest
     needs: build-zip
     steps:

@@ -1,14 +1,19 @@
 name: Security Tests
 
-on: [push, pull_request]
+on:
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly security scan on Mondays at 2 AM
 
 jobs:
   dependency-check:
+    name: Dependency Check
     runs-on: ubuntu-latest
     container:
       image: php:8.1-cli
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Install dependencies
         run: |
@@ -36,11 +41,12 @@ jobs:
           fi
 
   psalm-security:
+    name: Psalm Security
     runs-on: ubuntu-latest
     container:
       image: php:8.1-cli
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Install dependencies
         run: |
