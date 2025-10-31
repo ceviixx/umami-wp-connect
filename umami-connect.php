@@ -23,6 +23,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/pages/self_protection.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/pages/automation.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/pages/update.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/pages/events_overview.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/pages/advanced.php';
 
 // Filters.
 require_once plugin_dir_path( __FILE__ ) . 'includes/add_filter/plugin_action_links.php';
@@ -37,6 +38,141 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/dashboard/status_widget.php
 add_action(
 	'admin_init',
 	function () {
+		// Advanced tracker configuration options.
+		register_setting(
+			'umami_connect_advanced',
+			'umami_tracker_host_url',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => function ( $value ) {
+					$value = trim( (string) $value );
+					if ( $value === '' ) {
+						return '';
+					}
+					if ( ! preg_match( '~^https?://~i', $value ) ) {
+						$value = 'https://' . $value;
+					}
+					return esc_url_raw( rtrim( $value, '/' ) );
+				},
+				'default'           => '',
+			)
+		);
+		register_setting(
+			'umami_connect_advanced',
+			'umami_disable_auto_track',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => fn( $v ) => $v ? '1' : '0',
+				'default'           => '0',
+			)
+		);
+		register_setting(
+			'umami_connect_advanced',
+			'umami_tracker_domains',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => function ( $value ) {
+					$value = trim( (string) $value );
+					$value = preg_replace( '/\s+/', '', $value );
+					return $value;
+				},
+				'default'           => '',
+			)
+		);
+		register_setting(
+			'umami_connect_advanced',
+			'umami_tracker_tag',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => function ( $value ) {
+					return sanitize_text_field( $value );
+				},
+				'default'           => '',
+			)
+		);
+		register_setting(
+			'umami_connect_advanced',
+			'umami_tracker_exclude_search',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => fn( $v ) => $v ? '1' : '0',
+				'default'           => '0',
+			)
+		);
+		register_setting(
+			'umami_connect_advanced',
+			'umami_tracker_exclude_hash',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => fn( $v ) => $v ? '1' : '0',
+				'default'           => '0',
+			)
+		);
+		register_setting(
+			'umami_connect_advanced',
+			'umami_tracker_do_not_track',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => fn( $v ) => $v ? '1' : '0',
+				'default'           => '0',
+			)
+		);
+		register_setting(
+			'umami_connect_advanced',
+			'umami_tracker_before_send_mode',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => function ( $value ) {
+					return in_array( $value, array( 'function_name', 'inline' ), true ) ? $value : 'function_name';
+				},
+				'default'           => 'function_name',
+			)
+		);
+		register_setting(
+			'umami_connect_advanced',
+			'umami_tracker_before_send',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => function ( $value ) {
+					$value = trim( (string) $value );
+					if ( $value === '' ) {
+						return '';
+					}
+					return preg_match( '/^[A-Za-z_$][A-Za-z0-9_$.]*$/', $value ) ? $value : '';
+				},
+				'default'           => '',
+			)
+		);
+		register_setting(
+			'umami_connect_advanced',
+			'umami_tracker_before_send_inline',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => function ( $value ) {
+					// Basic JS code sanitization: strip script tags but allow function definition.
+					$value = trim( (string) $value );
+					if ( $value === '' ) {
+						return '';
+					}
+					// Remove any <script> tags for safety.
+					$value = preg_replace( '/<\/?script[^>]*>/i', '', $value );
+
+					// Validate syntax: must start with "function".
+					if ( ! preg_match( '/^function\s*\(/', $value ) ) {
+						add_settings_error(
+							'umami_tracker_before_send_inline',
+							'invalid_function',
+							'beforeSend inline code must start with "function(".',
+							'error'
+						);
+						return get_option( 'umami_tracker_before_send_inline', '' );
+					}
+
+					return $value;
+				},
+				'default'           => '',
+			)
+		);
 		register_setting(
 			'umami_connect_general',
 			'umami_script_loading',
@@ -371,6 +507,47 @@ add_action(
 		if ( is_admin() ) {
 			return;
 		}
+		if ( empty( $_GET['umami_check_before_send'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only check
+			return;
+		}
+
+		echo "\n<script>\n";
+		echo "(function(){\n";
+		echo "try {\n";
+		echo "  var usp = new URLSearchParams(window.location.search);\n";
+		echo "  var path = usp.get('path') || '';\n";
+		echo "  var token = usp.get('token') || '';\n";
+		echo "  function resolve(p){\n";
+		echo "    if(!p){return undefined;}\n";
+		echo "    var obj = window;\n";
+		echo "    var parts = p.split('.');\n";
+		echo "    for(var i=0;i<parts.length;i++){\n";
+		echo "      var s = parts[i];\n";
+		echo "      if(!s){return undefined;}\n";
+		echo "      try { obj = obj[s]; } catch(e){ return undefined; }\n";
+		echo "      if(typeof obj === 'undefined'){ return undefined; }\n";
+		echo "    }\n";
+		echo "    return obj;\n";
+		echo "  }\n";
+		echo "  var ref = resolve(path);\n";
+		echo "  var exists = typeof ref !== 'undefined';\n";
+		echo "  var isFunction = typeof ref === 'function';\n";
+		echo "  if (window.parent) {\n";
+		echo "    window.parent.postMessage({ type:'umami-before-send-check', path: path, exists: exists, isFunction: isFunction, token: token }, window.location.origin);\n";
+		echo "  }\n";
+		echo "} catch(e){}\n";
+		echo "})();\n";
+		echo "</script>\n";
+	},
+	1
+);
+
+add_action(
+	'wp_head',
+	function () {
+		if ( is_admin() ) {
+			return;
+		}
 		$mode       = get_option( 'umami_mode', 'cloud' );
 		$host_input = get_option( 'umami_host', UMAMI_CONNECT_DEFAULT_HOST );
 		$website_id = get_option( 'umami_website_id', '' );
@@ -394,7 +571,53 @@ add_action(
 
 		$script_loading = get_option( 'umami_script_loading', 'async' );
 		$attr           = ( $script_loading === 'defer' ) ? 'defer' : 'async';
-		echo "\n" . '<script ' . $attr . ' src="' . esc_url( $script_url ) . '" data-website-id="' . esc_attr( $website_id ) . '"></script>' . "\n";
+		$attrs          = array();
+		$attrs[]        = $attr;
+		$attrs[]        = 'src="' . esc_url( $script_url ) . '"';
+		$attrs[]        = 'data-website-id="' . esc_attr( $website_id ) . '"';
+
+		$host_override = get_option( 'umami_tracker_host_url', '' );
+		if ( ! empty( $host_override ) ) {
+			$attrs[] = 'data-host-url="' . esc_url( $host_override ) . '"';
+		}
+		if ( get_option( 'umami_disable_auto_track', '0' ) === '1' ) {
+			$attrs[] = 'data-auto-track="false"';
+		}
+		$domains = get_option( 'umami_tracker_domains', '' );
+		if ( $domains !== '' ) {
+			$attrs[] = 'data-domains="' . esc_attr( $domains ) . '"';
+		}
+		$tag = get_option( 'umami_tracker_tag', '' );
+		if ( $tag !== '' ) {
+			$attrs[] = 'data-tag="' . esc_attr( $tag ) . '"';
+		}
+		if ( get_option( 'umami_tracker_exclude_search', '0' ) === '1' ) {
+			$attrs[] = 'data-exclude-search="true"';
+		}
+		if ( get_option( 'umami_tracker_exclude_hash', '0' ) === '1' ) {
+			$attrs[] = 'data-exclude-hash="true"';
+		}
+		if ( get_option( 'umami_tracker_do_not_track', '0' ) === '1' ) {
+			$attrs[] = 'data-do-not-track="true"';
+		}
+
+		$before_send_mode = get_option( 'umami_tracker_before_send_mode', 'name' );
+		if ( $before_send_mode === 'inline' ) {
+			$inline_code = get_option( 'umami_tracker_before_send_inline', '' );
+			if ( $inline_code !== '' ) {
+				echo "\n<script>\n";
+				echo 'window.__umamiBeforeSend = ' . $inline_code . ";\n";
+				echo "</script>\n";
+				$attrs[] = 'data-before-send="__umamiBeforeSend"';
+			}
+		} else {
+			$before_send = get_option( 'umami_tracker_before_send', '' );
+			if ( $before_send !== '' ) {
+				$attrs[] = 'data-before-send="' . esc_attr( $before_send ) . '"';
+			}
+		}
+
+		echo "\n" . '<script ' . implode( ' ', $attrs ) . '></script>' . "\n";
 	},
 	20
 );

@@ -75,6 +75,8 @@ function umami_connect_update_page() {
 				if ( ! is_plugin_active( $main_plugin_file_rel ) ) {
 					activate_plugin( $main_plugin_file_rel );
 				}
+				// Clear version cache after successful update.
+				delete_transient( 'umami_connect_latest_release' );
 				echo '<div class="notice notice-success"><b>Update successful!</b> The plugin was updated via WP_Filesystem and reactivated.</div>';
 			} else {
 				echo '<div class="notice notice-error"><b>Error:</b> ZIP-URL could not be determined.</div>';

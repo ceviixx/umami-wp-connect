@@ -44,15 +44,41 @@ add_action(
 		);
 		add_action( "load-{$events_overview_page}", 'umami_connect_add_help_events_overview' );
 
+		$advanced_page = add_submenu_page(
+			'umami_connect',
+			'Advanced',
+			'Advanced',
+			'manage_options',
+			'umami_connect_advanced',
+			'umami_connect_advanced_page'
+		);
+		add_action( "load-{$advanced_page}", 'umami_connect_add_help_advanced' );
+
+		$update_menu_title = 'Update';
+		if ( umami_connect_has_update() ) {
+			$update_menu_title = 'Update <span class="update-plugins count-1"><span class="update-count">1</span></span>';
+		}
+
 		$update_page = add_submenu_page(
 			'umami_connect',
 			'Update',
-			'Update',
+			$update_menu_title,
 			'manage_options',
 			'umami_connect_update',
 			'umami_connect_update_page'
 		);
 		add_action( "load-{$update_page}", 'umami_connect_add_help_update' );
+	}
+);
+
+// Backward compatibility: redirect old Update page slug to new one.
+add_action(
+	'admin_init',
+	function () {
+		if ( isset( $_GET['page'] ) && $_GET['page'] === 'umami_connect_support' ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=umami_connect_update' ), 301 );
+			exit;
+		}
 	}
 );
 
@@ -231,4 +257,128 @@ function umami_connect_add_help_update() {
 		'<p><a href="https://discord.gg/84w4CQU7Jb" target="_blank">Discord</a></p>' .
 		'<p><a href="https://umami.is/docs" target="_blank">Umami Documentation</a></p>'
 	);
+}
+
+function umami_connect_add_help_advanced() {
+	$screen = get_current_screen();
+
+	$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'host-url'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+	$screen->set_help_sidebar(
+		'<p><strong>Support & Resources</strong></p>' .
+		'<p><a href="https://github.com/ceviixx/umami-wp-connect" target="_blank">GitHub</a></p>' .
+		'<p><a href="https://discord.gg/84w4CQU7Jb" target="_blank">Discord</a></p>' .
+		'<p><a href="https://umami.is/docs/tracker-configuration" target="_blank">Tracker configuration</a></p>'
+	);
+
+	switch ( $tab ) {
+		case 'host-url':
+			$screen->add_help_tab(
+				array(
+					'id'      => 'umami_help_adv_host_overview',
+					'title'   => 'Overview',
+					'content' => '<p><strong>Host URL override</strong></p>' .
+								'<p>Overrides the endpoint the tracker uses to send analytics events. Useful when:</p>' .
+								'<ul><li>You load <code>script.js</code> from a CDN.</li><li>Your Umami collector runs on a different domain.</li></ul>' .
+								'<p>Maps to <code>data-host-url</code>.</p>',
+				)
+			);
+			$screen->add_help_tab(
+				array(
+					'id'      => 'umami_help_adv_host_usage',
+					'title'   => 'Usage',
+					'content' => '<p>Enter a full URL (e.g., <code>https://analytics.example.com</code>). Leave empty to use the script\'s own host.</p>',
+				)
+			);
+			break;
+
+		case 'auto-track':
+			$screen->add_help_tab(
+				array(
+					'id'      => 'umami_help_adv_autotrack',
+					'title'   => 'Overview',
+					'content' => '<p><strong>Disable auto tracking</strong></p>' .
+								'<p>Umami\'s tracker can automatically collect page views and clicks. Disable it if you want full manual control.</p>' .
+								'<p>Maps to <code>data-auto-track="false"</code>.</p>' .
+								'<p><em>Note:</em> The plugin\'s Automation features are separate and can still emit events.</p>',
+				)
+			);
+			break;
+
+		case 'domains':
+			$screen->add_help_tab(
+				array(
+					'id'      => 'umami_help_adv_domains',
+					'title'   => 'Overview',
+					'content' => '<p><strong>Allowed domains</strong></p>' .
+								'<p>Restrict the tracker to specific hostnames. Comma-separated list, no spaces.</p>' .
+								'<p>Example: <code>example.com,blog.example.com</code></p>' .
+								'<p>Maps to <code>data-domains</code>.</p>',
+				)
+			);
+			break;
+
+		case 'tag':
+			$screen->add_help_tab(
+				array(
+					'id'      => 'umami_help_adv_tag',
+					'title'   => 'Overview',
+					'content' => '<p><strong>Event tag</strong></p>' .
+								'<p>Add a tag to all events so you can filter them in reports. Maps to <code>data-tag</code>.</p>' .
+								'<p>Example: <code>umami-eu</code></p>',
+				)
+			);
+			break;
+
+		case 'exclude-search':
+			$screen->add_help_tab(
+				array(
+					'id'      => 'umami_help_adv_exclude_search',
+					'title'   => 'Overview',
+					'content' => '<p><strong>Exclude search</strong></p>' .
+								'<p>Ignores URL query parameters when collecting page views. Maps to <code>data-exclude-search</code>.</p>',
+				)
+			);
+			break;
+
+		case 'exclude-hash':
+			$screen->add_help_tab(
+				array(
+					'id'      => 'umami_help_adv_exclude_hash',
+					'title'   => 'Overview',
+					'content' => '<p><strong>Exclude hash</strong></p>' .
+								'<p>Ignores the URL hash (fragment) when collecting page views. Maps to <code>data-exclude-hash</code>.</p>',
+				)
+			);
+			break;
+
+		case 'dnt':
+			$screen->add_help_tab(
+				array(
+					'id'      => 'umami_help_adv_dnt',
+					'title'   => 'Overview',
+					'content' => '<p><strong>Do Not Track</strong></p>' .
+								'<p>Respects the user\'s browser DNT preference. Maps to <code>data-do-not-track</code>.</p>',
+				)
+			);
+			break;
+
+		case 'before-send':
+		default:
+			$screen->add_help_tab(
+				array(
+					'id'      => 'umami_help_adv_before_send',
+					'title'   => 'Overview',
+					'content' => '<p><strong>beforeSend</strong></p>' .
+								'<p>Let you inspect or modify the payload before it is sent. Return the payload to continue or a false-y value to cancel sending.</p>' .
+								'<p>Two modes:</p>' .
+								'<ul>' .
+								'<li><strong>Function name</strong>: Provide the global function path (e.g., <code>MyApp.handlers.beforeSend</code>). Use the “Check function” button to verify it is available on the public site.</li>' .
+								'<li><strong>Inline</strong>: Define the function body directly. Use the “Test function” button to validate before saving.</li>' .
+								'</ul>' .
+								'<p>Maps to <code>data-before-send</code>.</p>',
+				)
+			);
+			break;
+	}
 }
