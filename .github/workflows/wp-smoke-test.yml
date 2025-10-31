@@ -1,9 +1,14 @@
 name: WordPress Plugin Smoke Test
 
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   wp-smoke-test:
+    name: WP smoke test
     runs-on: ubuntu-latest
     container:
       image: php:8.1-cli
@@ -11,7 +16,7 @@ jobs:
       matrix:
         php-version: ['8.1', '8.0', '7.4']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: PHP Syntax Check for PHP ${{ matrix.php-version }}
         run: |
           find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" -exec php -l {} \;
