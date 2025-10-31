@@ -1,6 +1,12 @@
 name: Security Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly security scan on Mondays at 2 AM
 
 jobs:
   dependency-check:

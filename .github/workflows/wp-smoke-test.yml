@@ -1,6 +1,8 @@
 name: WordPress Plugin Smoke Test
 
-on: [push, pull_request]
+on: 
+  pull_request:
+    branches: [ main ]
 
 jobs:
   wp-smoke-test:
