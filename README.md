@@ -31,23 +31,41 @@
 
 ## Features
 
-- Injects the Umami tracking script into your site’s `<head>`
+### Core Tracking
+- Injects the Umami tracking script into your site's `<head>`
 - Easy setup in WordPress Admin:
   - Cloud or Self-hosted mode
   - Host URL (for self-hosted)
   - Website ID (required)
   - Script loading: async or defer
+
+### Auto-Tracking
 - Auto‑tracking out of the box:
-  - Links: adds `data-umami-event` to inline links
-  - Buttons: adds `data-umami-event` to Gutenberg buttons and native buttons
-  - Forms: adds `data-umami-event` on submit (uses `form:<id|name>` or `form_submit`)
-- Gutenberg editor integration:
-  - Button block: set custom event + key/value data in the sidebar
-  - Inline link tracking: toolbar action to set event + key/value data on selected links
-- Admin UX:
-  - Events overview page (search/sort through configured events)
-  - Dashboard widget with quick status
-  - Support & Updates page with release notes and self‑update helper
+  - **Links:** adds `data-umami-event` to inline links
+  - **Buttons:** adds `data-umami-event` to Gutenberg buttons and native buttons
+  - **Forms:** adds `data-umami-event` on submit (uses `form:<id|name>` or `form_submit`)
+
+### Gutenberg Editor Integration
+- **Button block:** set custom event + key/value data in the sidebar
+- **Inline link tracking:** toolbar action to set event + key/value data on selected links
+
+### Advanced Configuration
+- **Host URL override:** Override the endpoint for analytics events (useful for CDN or different collector domains)
+- **Auto-track disable:** Disable Umami's automatic tracking for full manual control
+- **Domain restrictions:** Limit tracking to specific hostnames (comma-separated list)
+- **Event tagging:** Add tags to all events for filtering in reports
+- **URL cleanup:** Exclude search parameters or hash fragments from page views
+- **Do Not Track:** Respect browser DNT preferences
+- **beforeSend hook:** Inspect or modify payloads before sending
+  - Function name mode: Reference a global function (with validation)
+  - Inline mode: Define custom JavaScript logic (with test button)
+
+### Admin UX
+- **Events overview page:** search/sort through configured events
+- **Dashboard widget:** quick status and update notifications
+- **Update management:** release notes and one-click self-update with version badge
+- **Self-protection:** prevent logged-in users from being tracked
+- **Context-sensitive help:** per-page help tabs with detailed documentation
 
 ### Where tracking works
 
@@ -95,14 +113,79 @@ Tip: Enable pretty permalinks in WordPress for the best page view tracking.
 
 ---
 
+## Advanced Configuration
+
+The **Advanced** page provides fine-grained control over the Umami tracker behavior via `data-*` attributes:
+
+### Host URL Override
+Override the endpoint where analytics events are sent. Useful when:
+- Loading `script.js` from a CDN
+- Your Umami collector runs on a different domain
+- Example: `https://analytics.example.com`
+
+### Auto-Track Control
+Disable Umami's built-in auto-tracking for full manual control via JavaScript API.
+
+### Domain Restrictions
+Limit tracking to specific hostnames (comma-separated, no spaces).
+- Example: `example.com,blog.example.com`
+
+### Event Tagging
+Add a tag to all events for easy filtering in reports.
+- Example: `production` or `eu-region`
+
+### URL Cleanup
+- **Exclude search:** Ignore URL query parameters in page views
+- **Exclude hash:** Ignore URL hash fragments in page views
+
+### Do Not Track
+Respect the user's browser DNT preference.
+
+### beforeSend Hook
+Inspect or modify event payloads before they're sent to Umami:
+
+**Function Name Mode:**
+- Reference a global function (e.g., `MyApp.handlers.beforeSend`)
+- Use the "Check function" button to verify it exists on the public site
+
+**Inline Mode:**
+- Define the function body directly in the admin
+- Use the "Test function" button to validate syntax before saving
+- The function receives `(url, data)` and should return the modified payload or a falsy value to cancel
+
+Example:
+```javascript
+// Only track page views, skip custom events
+if (data && data.name) {
+  return null; // cancel custom events
+}
+return { url, data }; // allow page views
+```
+
+For more details, see the [Umami Tracker Configuration](https://umami.is/docs/tracker-configuration) documentation.
+
+---
+
 ## Usage
 
-- Auto‑tracking works without extra steps if enabled in Automation:
-  - Links: automatic `data-umami-event` like `link:Text` and `data-umami-event-url` for the href
-  - Buttons: automatic `data-umami-event` like `button:Text`
-  - Forms: automatic `data-umami-event` like `form:<id|name>` on submit
-- Gutenberg Button block: select a button → sidebar “Umami Tracking” → set Event Name and optional key/value pairs
-- Inline link tracking: select linked text in supported blocks → toolbar “Umami Tracking” → set Event Name and optional key/value pairs
+### Basic Tracking
+- Auto‑tracking works without extra steps if enabled in **Automation** settings:
+  - **Links:** automatic `data-umami-event` like `link:Text` and `data-umami-event-url` for the href
+  - **Buttons:** automatic `data-umami-event` like `button:Text`
+  - **Forms:** automatic `data-umami-event` like `form:<id|name>` on submit
+
+### Custom Events in Gutenberg
+- **Button block:** select a button → sidebar "Umami Tracking" → set Event Name and optional key/value pairs
+- **Inline link tracking:** select linked text in supported blocks → toolbar "Umami Tracking" → set Event Name and optional key/value pairs
+
+### Advanced Configuration
+- Go to **Umami Connect → Advanced** to access fine-grained tracker configuration
+- Configure host URL override, domain restrictions, event tagging, URL cleanup, DNT, and beforeSend hooks
+- Use the built-in validation tools (Check function, Test function) for beforeSend configuration
+
+### Self-Protection
+- Enable "Do not track my own visits" to exclude logged-in WordPress users from analytics
+- Useful for keeping your data focused on actual visitors
 
 ---
 
