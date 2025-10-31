@@ -8,6 +8,7 @@ on:
 
 jobs:
   js-lint:
+    name: JS Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -50,6 +51,7 @@ jobs:
           npx eslint assets/ --max-warnings 0
 
   php-lint:
+    name: PHP Lint
     runs-on: ubuntu-latest
     container:
       image: php:8.1-cli

@@ -1,8 +1,6 @@
 name: Security Tests
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
   schedule:
@@ -10,6 +8,7 @@ on:
 
 jobs:
   dependency-check:
+    name: Dependency Check
     runs-on: ubuntu-latest
     container:
       image: php:8.1-cli
@@ -42,6 +41,7 @@ jobs:
           fi
 
   psalm-security:
+    name: Psalm Security
     runs-on: ubuntu-latest
     container:
       image: php:8.1-cli

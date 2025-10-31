@@ -8,6 +8,7 @@ on:
 
 jobs:
   wp-smoke-test:
+    name: WP smoke test
     runs-on: ubuntu-latest
     container:
       image: php:8.1-cli
