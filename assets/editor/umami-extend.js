@@ -257,7 +257,6 @@
                             
               onChange(newValueLink);
             } else {
-              // Remove umami: tokens from rel attribute when no data
               var cleanRelTokens = activeRel.split(/\s+/).filter(Boolean).filter(function (t) { return !/^umami:/.test(t); });
               var cleanRelJoined = cleanRelTokens.length > 0 ? cleanRelTokens.join(' ') : '';
               
@@ -295,9 +294,8 @@
 
       if (!activeLink) return null;
 
-      // Simply check if there's a umami: token in the rel attribute
       var hasUmamiData = false;
-      if (activeLink && activeLink.attributes) {
+      if (activeLink.attributes) {
         var relStr = activeLink.attributes.rel || '';
         hasUmamiData = /umami:[a-z0-9-]+/i.test(relStr);
       }

@@ -4,12 +4,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 function umami_connect_render_events_overview_page() {
-	if ( isset( $_POST['umami_delete_event'] ) && check_admin_referer( 'umami_delete_event', 'umami_delete_nonce' ) ) {
-		$post_id     = isset( $_POST['post_id'] ) ? intval( $_POST['post_id'] ) : 0;
-		$block_index = isset( $_POST['block_index'] ) ? sanitize_text_field( wp_unslash( $_POST['block_index'] ) ) : '';
-		$event_type  = isset( $_POST['event_type'] ) ? sanitize_text_field( wp_unslash( $_POST['event_type'] ) ) : 'button';
+	if ( ! current_user_can( 'edit_posts' ) ) {
+		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'umami-connect' ) );
+	}
 
-		if ( $post_id && $block_index ) {
+	if ( isset( $_POST['umami_delete_event'] ) && check_admin_referer( 'umami_delete_event', 'umami_delete_nonce' ) ) {
+		$post_id     = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+		$block_index = isset( $_POST['block_index'] ) ? sanitize_text_field( wp_unslash( $_POST['block_index'] ) ) : '';
+		$event_type  = isset( $_POST['event_type'] ) ? sanitize_key( wp_unslash( $_POST['event_type'] ) ) : 'button';
+
+		if ( ! $post_id || $post_id <= 0 ) {
+			echo '<div class="notice notice-error is-dismissible"><p><strong>Error: Invalid post ID.</strong></p></div>';
+		} elseif ( empty( $block_index ) || ! is_string( $block_index ) ) {
+			echo '<div class="notice notice-error is-dismissible"><p><strong>Error: Invalid block index.</strong></p></div>';
+		} elseif ( ! in_array( $event_type, array( 'button', 'link' ), true ) ) {
+			echo '<div class="notice notice-error is-dismissible"><p><strong>Error: Invalid event type.</strong></p></div>';
+		} else {
+
 			$result = umami_connect_delete_event_from_block( $post_id, $block_index, $event_type );
 			if ( $result ) {
 				echo '<div class="notice notice-success is-dismissible"><p><strong>Event deleted successfully.</strong></p></div>';
@@ -39,8 +50,7 @@ function umami_connect_render_events_overview_page() {
 	}
 
 	$current_filter = isset( $_GET['filter'] ) ? sanitize_key( wp_unslash( $_GET['filter'] ) ) : 'all';
-
-	$original_filter = isset( $_GET['filter'] ) ? sanitize_key( wp_unslash( $_GET['filter'] ) ) : 'all';
+	$original_filter = $current_filter;
 	$filter_switched = false;
 
 	if ( $current_filter === 'events' && $events_count === 0 ) {
@@ -286,16 +296,85 @@ function umami_connect_render_events_overview_page() {
 		echo '<input type="hidden" name="umami_delete_event" value="1">';
 		echo '</form>';
 
+		wp_enqueue_script( 'wp-a11y' );
+		wp_enqueue_style( 'wp-jquery-ui-dialog' );
+		wp_enqueue_script( 'jquery-ui-dialog' );
 		?>
+
+		<div id="umami-delete-dialog" title="<?php esc_attr_e( 'Confirm Event Deletion', 'umami-connect' ); ?>" style="display: none;">
+			<div style="padding: 8px 0;">
+				<p style="margin: 0 0 12px; font-size: 14px; line-height: 1.5;">
+					<?php esc_html_e( 'Are you sure you want to delete this event tracking configuration?', 'umami-connect' ); ?>
+				</p>
+				<p style="margin: 0; color: #d63638; font-weight: 600; font-size: 13px;">
+					<?php esc_html_e( 'This action cannot be undone.', 'umami-connect' ); ?>
+				</p>
+			</div>
+		</div>
+
 		<script type="text/javascript">
 		jQuery(document).ready(function($) {
+			var currentDeleteData = {};
+
+			$('#umami-delete-dialog').dialog({
+				autoOpen: false,
+				modal: true,
+				draggable: false,
+				resizable: false,
+				width: 450,
+				height: 'auto',
+				dialogClass: 'wp-dialog umami-delete-dialog',
+				closeOnEscape: true,
+				buttons: [
+					{
+						text: '<?php echo esc_js( __( 'Cancel', 'umami-connect' ) ); ?>',
+						class: 'button',
+						style: 'background: #f6f7f7; border-color: #50575e; color: #50575e;',
+						click: function() {
+							$(this).dialog('close');
+						}
+					},
+					{
+						text: '<?php echo esc_js( __( 'Delete Event', 'umami-connect' ) ); ?>',
+						class: 'button button-primary',
+						style: 'background: #d63638; border-color: #d63638;',
+						click: function() {
+							$('#delete-post-id').val(currentDeleteData.postId);
+							$('#delete-block-index').val(currentDeleteData.blockIndex);
+							$('#delete-event-type').val(currentDeleteData.eventType);
+
+							$(this).dialog('close');
+							$('#delete-event-form').submit();
+						}
+					}
+				],
+				open: function() {
+					$('.ui-dialog-buttonset .button:first').focus();
+
+					$('.umami-delete-dialog .ui-dialog-titlebar').css({
+						'background': '#f9f9f9',
+						'border-bottom': '1px solid #e2e4e7',
+						'padding': '12px 16px'
+					});
+
+					$('.umami-delete-dialog .ui-dialog-buttonpane').css({
+						'background': '#f9f9f9',
+						'border-top': '1px solid #e2e4e7',
+						'padding': '12px 16px'
+					});
+				}
+			});
+
 			$('.delete-event').on('click', function(e) {
 				e.preventDefault();
-				
-				$('#delete-post-id').val($(this).data('post-id'));
-				$('#delete-block-index').val($(this).data('block-index'));
-				$('#delete-event-type').val($(this).data('event-type'));
-				$('#delete-event-form').submit();
+
+				currentDeleteData = {
+					postId: $(this).data('post-id'),
+					blockIndex: $(this).data('block-index'),
+					eventType: $(this).data('event-type')
+				};
+
+				$('#umami-delete-dialog').dialog('open');
 			});
 		});
 		</script>
@@ -309,7 +388,15 @@ add_filter(
 	function ( $events ) {
 		global $wpdb;
 		$result = array();
-		$posts  = $wpdb->get_results( "SELECT ID, post_title, post_content FROM $wpdb->posts WHERE post_status = 'publish' AND (post_type = 'post' OR post_type = 'page')" );
+		$posts  = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT ID, post_title, post_content FROM {$wpdb->posts} WHERE post_status = %s AND (post_type = %s OR post_type = %s) LIMIT %d",
+				'publish',
+				'post',
+				'page',
+				1000
+			)
+		);
 
 		function find_umami_events( $blocks, &$result, $post_id, $post_title, $parent_path = '' ) {
 			foreach ( $blocks as $idx => $block ) {
@@ -325,7 +412,7 @@ add_filter(
 					if ( ! empty( $block['attrs']['text'] ) ) {
 						$label = $block['attrs']['text'];
 					} elseif ( ! empty( $block['innerHTML'] ) ) {
-						$label = strip_tags( $block['innerHTML'] );
+						$label = wp_strip_all_tags( $block['innerHTML'] );
 					}
 					$data_pairs = array();
 					if ( ! empty( $block['attrs']['umamiDataPairs'] ) && is_array( $block['attrs']['umamiDataPairs'] ) ) {
@@ -374,7 +461,7 @@ add_filter(
 					if ( ! empty( $block['attrs']['text'] ) ) {
 						$label = $block['attrs']['text'];
 					} elseif ( ! empty( $block['innerHTML'] ) ) {
-						$label = strip_tags( $block['innerHTML'] );
+						$label = wp_strip_all_tags( $block['innerHTML'] );
 					}
 
 					if ( $block_name === 'core/button' && ! empty( $label ) ) {
@@ -390,10 +477,11 @@ add_filter(
 							'is_tracked'  => false,
 						);
 					} elseif ( $block_name !== 'core/button' && ! empty( $block['innerHTML'] ) && strpos( $block['innerHTML'], '<a ' ) !== false ) {
-						if ( preg_match_all( '/<a\s+[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/i', $block['innerHTML'], $matches, PREG_SET_ORDER ) ) {
+						$clean_html = wp_kses_post( $block['innerHTML'] );
+						if ( preg_match_all( '/<a\s+[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/i', $clean_html, $matches, PREG_SET_ORDER ) ) {
 							foreach ( $matches as $match ) {
-								$link_url   = $match[1];
-								$link_text  = strip_tags( $match[2] );
+								$link_url   = esc_url_raw( $match[1] );
+								$link_text  = wp_strip_all_tags( $match[2] );
 								$link_label = trim( $link_text ) . ( $link_url ? ' → ' . $link_url : '' );
 
 								if ( ! empty( $link_text ) ) {
@@ -446,40 +534,6 @@ function umami_connect_delete_event_from_block( $post_id, $block_index, $event_t
 	if ( $changed ) {
 		$new_content = serialize_blocks( $blocks );
 
-		if ( $event_type === 'button' ) {
-			$new_content = preg_replace( '/\s+data-umami-event="[^"]*"/', '', $new_content );
-			$new_content = preg_replace( '/\s+data-umami-event-[^=]*="[^"]*"/', '', $new_content );
-		} elseif ( $event_type === 'link' ) {
-			$new_content = preg_replace( '/\s+rel="[^"]*umami:[^"]*"/', '', $new_content );
-			$new_content = preg_replace( '/\s+rel="[^"]*umami--event--[^"]*"/', '', $new_content );
-			$new_content = preg_replace( '/\s+data-umami-event="[^"]*"/', '', $new_content );
-			$new_content = preg_replace( '/\s+data-umami-event-[^=\s]*="[^"]*"/', '', $new_content );
-
-			$new_content = preg_replace_callback(
-				'/\srel="([^"]*)"/',
-				function ( $matches ) {
-					$rel_value    = $matches[1];
-					$tokens       = preg_split( '/\s+/', trim( $rel_value ) );
-					$clean_tokens = array_filter(
-						$tokens,
-						function ( $token ) {
-							return ! preg_match( '/^umami[:\-]/', $token );
-						}
-					);
-					$clean_rel    = implode( ' ', $clean_tokens );
-
-					if ( empty( trim( $clean_rel ) ) ) {
-						return '';
-					}
-					return ' rel="' . $clean_rel . '"';
-				},
-				$new_content
-			);
-
-			$new_content = preg_replace( '/\s+rel=""/', '', $new_content );
-			$new_content = preg_replace( '/\s+rel="\s*"/', '', $new_content );
-		}
-
 		$result = wp_update_post(
 			array(
 				'ID'           => $post_id,
@@ -505,6 +559,8 @@ function umami_connect_delete_event_from_block( $post_id, $block_index, $event_t
 	return false;
 }
 
+
+
 /**
  * Recursively find and remove event from block by path
  */
@@ -526,17 +582,119 @@ function remove_event_from_block_by_path( &$blocks, $target_path, $event_type, &
 
 		if ( $block_path === $target_path ) {
 			if ( $event_type === 'button' ) {
+				$attrs_changed = false;
 				if ( isset( $block['attrs']['umamiEvent'] ) ) {
 					unset( $block['attrs']['umamiEvent'] );
-					$changed = true;
+					$attrs_changed = true;
 				}
 				if ( isset( $block['attrs']['umamiDataPairs'] ) ) {
 					unset( $block['attrs']['umamiDataPairs'] );
+					$attrs_changed = true;
+				}
+
+				if ( $attrs_changed ) {
+					if ( isset( $block['innerHTML'] ) ) {
+						$clean_html = $block['innerHTML'];
+						$clean_html = preg_replace( '/\s+data-umami-event="[^"]*"/', '', $clean_html );
+						$clean_html = preg_replace( '/\s+data-umami-event-[^=\s]*="[^"]*"/', '', $clean_html );
+						$block['innerHTML'] = $clean_html;
+					}
+
+					if ( isset( $block['innerContent'] ) && is_array( $block['innerContent'] ) ) {
+						$inner_content_count = count( $block['innerContent'] );
+						for ( $i = 0; $i < $inner_content_count; $i++ ) {
+							if ( is_string( $block['innerContent'][ $i ] ) ) {
+								$clean_content = $block['innerContent'][ $i ];
+								$clean_content = preg_replace( '/\s+data-umami-event="[^"]*"/', '', $clean_content );
+								$clean_content = preg_replace( '/\s+data-umami-event-[^=\s]*="[^"]*"/', '', $clean_content );
+								$block['innerContent'][ $i ] = $clean_content;
+							}
+						}
+					}
 					$changed = true;
 				}
 			} elseif ( $event_type === 'link' ) {
+				$attrs_changed = false;
 				if ( isset( $block['attrs']['umamiLinkEvents'] ) ) {
 					unset( $block['attrs']['umamiLinkEvents'] );
+					$attrs_changed = true;
+				}
+
+				if ( $attrs_changed ) {
+					if ( isset( $block['innerHTML'] ) ) {
+						$clean_html = $block['innerHTML'];
+
+						$clean_html = preg_replace( '/\s+rel="[^"]*umami:[^"]*"/', '', $clean_html );
+						$clean_html = preg_replace( '/\s+rel="[^"]*umami--event--[^"]*"/', '', $clean_html );
+						$clean_html = preg_replace( '/\s+data-umami-event="[^"]*"/', '', $clean_html );
+						$clean_html = preg_replace( '/\s+data-umami-event-[^=\s]*="[^"]*"/', '', $clean_html );
+
+						$clean_html = preg_replace_callback(
+							'/\s+rel="([^"]*)"/',
+							function ( $matches ) {
+								$rel_value = $matches[1];
+								$tokens = preg_split( '/\s+/', trim( $rel_value ) );
+								$clean_tokens = array_filter(
+									$tokens,
+									function ( $token ) {
+										return ! preg_match( '/^umami[:\-]/', $token );
+									}
+								);
+								$clean_rel = implode( ' ', $clean_tokens );
+
+								if ( empty( trim( $clean_rel ) ) ) {
+									return '';
+								}
+								return ' rel="' . $clean_rel . '"';
+							},
+							$clean_html
+						);
+
+						$clean_html = preg_replace( '/\s+rel=""/', '', $clean_html );
+						$clean_html = preg_replace( '/\s+rel="\s*"/', '', $clean_html );
+
+						$block['innerHTML'] = $clean_html;
+					}
+
+					if ( isset( $block['innerContent'] ) && is_array( $block['innerContent'] ) ) {
+						$inner_content_count = count( $block['innerContent'] );
+						for ( $i = 0; $i < $inner_content_count; $i++ ) {
+							if ( is_string( $block['innerContent'][ $i ] ) ) {
+								$clean_content = $block['innerContent'][ $i ];
+
+								$clean_content = preg_replace( '/\s+rel="[^"]*umami:[^"]*"/', '', $clean_content );
+								$clean_content = preg_replace( '/\s+rel="[^"]*umami--event--[^"]*"/', '', $clean_content );
+								$clean_content = preg_replace( '/\s+data-umami-event="[^"]*"/', '', $clean_content );
+								$clean_content = preg_replace( '/\s+data-umami-event-[^=\s]*="[^"]*"/', '', $clean_content );
+
+								$clean_content = preg_replace_callback(
+									'/\s+rel="([^"]*)"/',
+									function ( $matches ) {
+										$rel_value = $matches[1];
+										$tokens = preg_split( '/\s+/', trim( $rel_value ) );
+										$clean_tokens = array_filter(
+											$tokens,
+											function ( $token ) {
+												return ! preg_match( '/^umami[:\-]/', $token );
+											}
+										);
+										$clean_rel = implode( ' ', $clean_tokens );
+
+										if ( empty( trim( $clean_rel ) ) ) {
+											return '';
+										}
+										return ' rel="' . $clean_rel . '"';
+									},
+									$clean_content
+								);
+
+								$clean_content = preg_replace( '/\s+rel=""/', '', $clean_content );
+								$clean_content = preg_replace( '/\s+rel="\s*"/', '', $clean_content );
+
+								$block['innerContent'][ $i ] = $clean_content;
+							}
+						}
+					}
 					$changed = true;
 				}
 			}
