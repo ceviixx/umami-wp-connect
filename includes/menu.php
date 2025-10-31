@@ -43,6 +43,7 @@ add_action(
 			'umami_connect_render_events_overview_page'
 		);
 		add_action( "load-{$events_overview_page}", 'umami_connect_add_help_events_overview' );
+		add_action( "load-{$events_overview_page}", 'umami_connect_add_screen_options_events_overview' );
 
 		$update_page = add_submenu_page(
 			'umami_connect',
@@ -181,7 +182,7 @@ function umami_connect_add_help_events_overview() {
 			'id'      => 'umami_help_events_creating',
 			'title'   => 'Creating Events',
 			'content' => '<p><strong>Supported Blocks</strong><br>' .
-						'Buttons, Paragraphs, Images, and Headings can be configured for event tracking.</p>' .
+						'Buttons, Paragraphs, Headings, Quotes, and Pull Quotes can be configured for event tracking.</p>' .
 						'<p><strong>Block Inspector</strong><br>' .
 						'Select any supported block in Gutenberg and look for the "Umami Event Tracking" panel in the block inspector.</p>' .
 						'<p><strong>Event Configuration</strong><br>' .
@@ -263,4 +264,50 @@ function umami_connect_add_help_update() {
 		'<p><a href="https://discord.gg/84w4CQU7Jb" target="_blank">Discord</a></p>' .
 		'<p><a href="https://umami.is/docs" target="_blank">Umami Documentation</a></p>'
 	);
+}
+/**
+ * Add screen options for Events Overview page
+ */
+function umami_connect_add_screen_options_events_overview() {
+	$screen = get_current_screen();
+
+	if ( ! $screen || $screen->id !== 'umami-connect_page_umami_connect_events_overview' ) {
+		return;
+	}
+
+	add_screen_option(
+		'per_page',
+		array(
+			'label'   => __( 'Events per page', 'umami-connect' ),
+			'default' => 20,
+			'option'  => 'events_per_page',
+		)
+	);
+
+	add_filter( 'manage_' . $screen->id . '_columns', 'umami_connect_events_overview_columns' );
+
+	add_filter( 'set-screen-option', 'umami_connect_set_screen_option', 10, 3 );
+}
+
+/**
+ * Define available columns for Events Overview
+ */
+function umami_connect_events_overview_columns( $columns ) {
+	return array(
+		'event'      => __( 'Event', 'umami-connect' ),
+		'post'       => __( 'Post/Page', 'umami-connect' ),
+		'block_type' => __( 'Block Type', 'umami-connect' ),
+		'label'      => __( 'Label/Text', 'umami-connect' ),
+		'data_pairs' => __( 'Data Pairs', 'umami-connect' ),
+	);
+}
+
+/**
+ * Handle screen option saving
+ */
+function umami_connect_set_screen_option( $status, $option, $value ) {
+	if ( 'events_per_page' === $option ) {
+		return $value;
+	}
+	return $status;
 }
