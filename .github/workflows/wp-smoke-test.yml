@@ -1,6 +1,8 @@
 name: WordPress Plugin Smoke Test
 
-on: 
+on:
+  push:
+    branches-ignore: [ main ]
   pull_request:
     branches: [ main ]
 
