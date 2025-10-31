@@ -123,9 +123,9 @@ add_action(
 			array(
 				'type'              => 'string',
 				'sanitize_callback' => function ( $value ) {
-					return in_array( $value, array( 'function_name', 'inline' ), true ) ? $value : 'function_name';
+					return in_array( $value, array( 'disabled', 'function_name', 'inline' ), true ) ? $value : 'disabled';
 				},
-				'default'           => 'function_name',
+				'default'           => 'disabled',
 			)
 		);
 		register_setting(
@@ -507,7 +507,7 @@ add_action(
 		if ( is_admin() ) {
 			return;
 		}
-		if ( empty( $_GET['umami_check_before_send'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only check
+		if ( ! isset( $_GET['umami_check_before_send'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only check
 			return;
 		}
 
@@ -601,22 +601,21 @@ add_action(
 			$attrs[] = 'data-do-not-track="true"';
 		}
 
-		$before_send_mode = get_option( 'umami_tracker_before_send_mode', 'name' );
+		$before_send_mode = get_option( 'umami_tracker_before_send_mode', 'disabled' );
 		if ( $before_send_mode === 'inline' ) {
 			$inline_code = get_option( 'umami_tracker_before_send_inline', '' );
 			if ( $inline_code !== '' ) {
 				echo "\n<script>\n";
-				echo 'window.__umamiBeforeSend = ' . $inline_code . ";\n";
+				echo 'window.__umamiBeforeSend = (' . $inline_code . ");\n";
 				echo "</script>\n";
 				$attrs[] = 'data-before-send="__umamiBeforeSend"';
 			}
-		} else {
+		} elseif ( $before_send_mode === 'function_name' ) {
 			$before_send = get_option( 'umami_tracker_before_send', '' );
 			if ( $before_send !== '' ) {
 				$attrs[] = 'data-before-send="' . esc_attr( $before_send ) . '"';
 			}
 		}
-
 		echo "\n" . '<script ' . implode( ' ', $attrs ) . '></script>' . "\n";
 	},
 	20

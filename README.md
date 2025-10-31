@@ -151,15 +151,15 @@ Inspect or modify event payloads before they're sent to Umami:
 **Inline Mode:**
 - Define the function body directly in the admin
 - Use the "Test function" button to validate syntax before saving
-- The function receives `(url, data)` and should return the modified payload or a falsy value to cancel
+- The function receives `(payload, url)` and should return the modified payload or a falsy value to cancel
 
 Example:
 ```javascript
 // Only track page views, skip custom events
-if (data && data.name) {
+if (payload && payload.name) {
   return null; // cancel custom events
 }
-return { url, data }; // allow page views
+return payload; // allow page views
 ```
 
 For more details, see the [Umami Tracker Configuration](https://umami.is/docs/tracker-configuration) documentation.

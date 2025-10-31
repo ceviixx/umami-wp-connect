@@ -105,7 +105,6 @@
       var value = props.value;
       var onChange = props.onChange;
       var activeLink = getActiveFormat(value, 'core/link');
-      var activeUmami = getActiveFormat(value, 'umami/link-event');
 
       function getLinkRange(val) {
         var start = (typeof val.start === 'number') ? val.start : 0;
@@ -258,7 +257,23 @@
                             
               onChange(newValueLink);
             } else {
-              var v = removeFormat(value, 'umami/link-event', start, end);
+              var cleanRelTokens = activeRel.split(/\s+/).filter(Boolean).filter(function (t) { return !/^umami:/.test(t); });
+              var cleanRelJoined = cleanRelTokens.length > 0 ? cleanRelTokens.join(' ') : '';
+              
+              var cleanLinkAttrs = Object.assign({}, linkAttrsObj);
+              if (cleanRelJoined) {
+                cleanLinkAttrs.rel = cleanRelJoined;
+              } else {
+                delete cleanLinkAttrs.rel;
+              }
+              
+              var cleanValueLink = applyFormat(value, { 
+                type: 'core/link', 
+                attributes: cleanLinkAttrs,
+                unregisteredAttributes: {}
+              }, start, end);
+              
+              var v = removeFormat(cleanValueLink, 'umami/link-event', start, end);
               onChange(v);
             }
           }
@@ -279,12 +294,18 @@
 
       if (!activeLink) return null;
 
+      var hasUmamiData = false;
+      if (activeLink.attributes) {
+        var relStr = activeLink.attributes.rel || '';
+        hasUmamiData = /umami:[a-z0-9-]+/i.test(relStr);
+      }
+
       return wp.element.createElement(Fragment, {},
         wp.element.createElement(RichTextToolbarButton, {
           icon: 'chart-area',
           title: 'Umami Tracking',
           onClick: function () { setOpen(!isOpen); },
-          isActive: !!activeUmami,
+          isActive: hasUmamiData,
           className: 'umami-tracking-button'
         }),
         (isOpen) && wp.element.createElement(Popover, { position: 'bottom center', onClose: function () { setOpen(false); }, className: 'umami-tracking-popover components-card' },

@@ -38,11 +38,12 @@ add_action(
 			'umami_connect',
 			'Events overview',
 			'Events overview',
-			'manage_options',
+			'edit_posts',
 			'umami_connect_events_overview',
 			'umami_connect_render_events_overview_page'
 		);
 		add_action( "load-{$events_overview_page}", 'umami_connect_add_help_events_overview' );
+		add_action( "load-{$events_overview_page}", 'umami_connect_add_screen_options_events_overview' );
 
 		$advanced_page = add_submenu_page(
 			'umami_connect',
@@ -75,7 +76,7 @@ add_action(
 add_action(
 	'admin_init',
 	function () {
-		if ( isset( $_GET['page'] ) && $_GET['page'] === 'umami_connect_support' ) {
+		if ( isset( $_GET['page'] ) && sanitize_key( wp_unslash( $_GET['page'] ) ) === 'umami_connect_support' ) {
 			wp_safe_redirect( admin_url( 'admin.php?page=umami_connect_update' ), 301 );
 			exit;
 		}
@@ -197,21 +198,53 @@ function umami_connect_add_help_events_overview() {
 			'id'      => 'umami_help_events_overview',
 			'title'   => 'Overview',
 			'content' => '<p><strong>Events Overview</strong></p>' .
-						'<p>This page shows all custom events that have been configured in your Gutenberg blocks (like buttons and links).</p>' .
-						'<p>Use this overview to audit and manage which elements on your site are being tracked.</p>',
+						'<p>Overview of all configured tracking events in your Gutenberg blocks. Events are custom tracking points that measure specific user interactions on your website.</p>' .
+						'<p>This page helps you understand how visitors engage with your content beyond basic page views and manage all tracking configurations in one place.</p>',
 		)
 	);
 
 	$screen->add_help_tab(
 		array(
-			'id'      => 'umami_help_events_usage',
-			'title'   => 'Usage',
-			'content' => '<p><strong>View Events</strong><br>' .
-						'All events configured through the block editor are listed here with their event names and associated data.</p>' .
-						'<p><strong>Search</strong><br>' .
-						'Use the search box to filter events by name or data properties.</p>' .
-						'<p><strong>Edit Events</strong><br>' .
-						'To modify an event, navigate to the block editor and update the Umami tracking settings in the block inspector.</p>',
+			'id'      => 'umami_help_events_creating',
+			'title'   => 'Creating Events',
+			'content' => '<p><strong>Supported Blocks</strong><br>' .
+						'Buttons, Paragraphs, Headings, Quotes, and Pull Quotes can be configured for event tracking.</p>' .
+						'<p><strong>Block Inspector</strong><br>' .
+						'Select any supported block in Gutenberg and look for the "Umami Event Tracking" panel in the block inspector.</p>' .
+						'<p><strong>Event Configuration</strong><br>' .
+						'• <strong>Event Name:</strong> Add a descriptive name (e.g., "Newsletter Signup", "Download PDF")<br>' .
+						'• <strong>Data Pairs:</strong> Add key-value pairs to track additional context (optional)<br>' .
+						'• <strong>Link Events:</strong> Connect events to specific page URLs for cross-page tracking</p>',
+		)
+	);
+
+	$screen->add_help_tab(
+		array(
+			'id'      => 'umami_help_events_managing',
+			'title'   => 'Managing Events',
+			'content' => '<p><strong>Filter View</strong><br>' .
+						'Use "All", "Events", or "Candidates" to filter the display:<br>' .
+						'• <strong>Events:</strong> Blocks with configured event names and tracking data<br>' .
+						'• <strong>Candidates:</strong> Supported blocks without event configuration (potential events)</p>' .
+						'<p><strong>Search & Edit</strong><br>' .
+						'• Use the search box to find specific events by name or post title<br>' .
+						'• Click "Edit Page/Post" to open Gutenberg and modify event settings<br>' .
+						'• Use "Delete" to remove event tracking while preserving the original block</p>',
+		)
+	);
+
+	$screen->add_help_tab(
+		array(
+			'id'      => 'umami_help_events_best_practices',
+			'title'   => 'Best Practices',
+			'content' => '<p><strong>Event Naming</strong><br>' .
+						'Use clear, descriptive event names and avoid special characters for better dashboard readability.</p>' .
+						'<p><strong>Data Context</strong><br>' .
+						'Add data pairs to capture important context like user type, content category, or interaction details.</p>' .
+						'<p><strong>Testing & Maintenance</strong><br>' .
+						'• Test events in your Umami dashboard after configuration<br>' .
+						'• Regularly review and clean up unused event configurations<br>' .
+						'• Changes made in Gutenberg are reflected immediately in your tracking</p>',
 		)
 	);
 
@@ -291,7 +324,6 @@ function umami_connect_add_help_advanced() {
 				)
 			);
 			break;
-
 		case 'auto-track':
 			$screen->add_help_tab(
 				array(
@@ -304,7 +336,6 @@ function umami_connect_add_help_advanced() {
 				)
 			);
 			break;
-
 		case 'domains':
 			$screen->add_help_tab(
 				array(
@@ -317,7 +348,6 @@ function umami_connect_add_help_advanced() {
 				)
 			);
 			break;
-
 		case 'tag':
 			$screen->add_help_tab(
 				array(
@@ -329,7 +359,6 @@ function umami_connect_add_help_advanced() {
 				)
 			);
 			break;
-
 		case 'exclude-search':
 			$screen->add_help_tab(
 				array(
@@ -340,7 +369,6 @@ function umami_connect_add_help_advanced() {
 				)
 			);
 			break;
-
 		case 'exclude-hash':
 			$screen->add_help_tab(
 				array(
@@ -351,7 +379,6 @@ function umami_connect_add_help_advanced() {
 				)
 			);
 			break;
-
 		case 'dnt':
 			$screen->add_help_tab(
 				array(
@@ -362,7 +389,6 @@ function umami_connect_add_help_advanced() {
 				)
 			);
 			break;
-
 		case 'before-send':
 		default:
 			$screen->add_help_tab(
@@ -371,14 +397,62 @@ function umami_connect_add_help_advanced() {
 					'title'   => 'Overview',
 					'content' => '<p><strong>beforeSend</strong></p>' .
 								'<p>Let you inspect or modify the payload before it is sent. Return the payload to continue or a false-y value to cancel sending.</p>' .
-								'<p>Two modes:</p>' .
+								'<p>Three modes:</p>' .
 								'<ul>' .
-								'<li><strong>Function name</strong>: Provide the global function path (e.g., <code>MyApp.handlers.beforeSend</code>). Use the “Check function” button to verify it is available on the public site.</li>' .
-								'<li><strong>Inline</strong>: Define the function body directly. Use the “Test function” button to validate before saving.</li>' .
+								'<li><strong>Disabled</strong>: No beforeSend hook is active (default).</li>' .
+								'<li><strong>Function name</strong>: Provide the global function path (e.g., <code>MyApp.handlers.beforeSend</code>). Use the "Check function" button to verify it is available on the public site.</li>' .
+								'<li><strong>Inline</strong>: Define the function body directly. Use the "Test function" button to validate before saving.</li>' .
 								'</ul>' .
 								'<p>Maps to <code>data-before-send</code>.</p>',
 				)
 			);
 			break;
 	}
+}
+
+/**
+ * Add screen options for Events Overview page
+ */
+function umami_connect_add_screen_options_events_overview() {
+	$screen = get_current_screen();
+
+	if ( ! $screen || $screen->id !== 'umami-connect_page_umami_connect_events_overview' ) {
+		return;
+	}
+
+	add_screen_option(
+		'per_page',
+		array(
+			'label'   => __( 'Events per page', 'umami-connect' ),
+			'default' => 20,
+			'option'  => 'events_per_page',
+		)
+	);
+
+	add_filter( 'manage_' . $screen->id . '_columns', 'umami_connect_events_overview_columns' );
+
+	add_filter( 'set-screen-option', 'umami_connect_set_screen_option', 10, 3 );
+}
+
+/**
+ * Define available columns for Events Overview
+ */
+function umami_connect_events_overview_columns( $columns ) {
+	return array(
+		'event'      => __( 'Event', 'umami-connect' ),
+		'post'       => __( 'Post/Page', 'umami-connect' ),
+		'block_type' => __( 'Block Type', 'umami-connect' ),
+		'label'      => __( 'Label/Text', 'umami-connect' ),
+		'data_pairs' => __( 'Data Pairs', 'umami-connect' ),
+	);
+}
+
+/**
+ * Handle screen option saving
+ */
+function umami_connect_set_screen_option( $status, $option, $value ) {
+	if ( 'events_per_page' === $option ) {
+		return $value;
+	}
+	return $status;
 }

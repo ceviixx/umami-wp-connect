@@ -1,6 +1,6 @@
 <?php
 function umami_connect_advanced_page() {
-	$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'host-url';
+	$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'host-url'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$tabs = array(
 		'host-url'       => 'Host URL',
 		'auto-track'     => 'Auto track',
@@ -97,6 +97,10 @@ function umami_connect_advanced_page() {
 									<p style="margin: 0 0 8px;">Choose how to provide <code>beforeSend</code>:</p>
 									<div style="display:flex; gap:16px; align-items:center; margin-bottom:8px;">
 										<label style="display:inline-flex; align-items:center; gap:6px;">
+											<input type="radio" name="umami_tracker_before_send_mode" value="disabled" <?php checked( $mode, 'disabled' ); ?> />
+											<strong>Disabled</strong>
+										</label>
+										<label style="display:inline-flex; align-items:center; gap:6px;">
 											<input type="radio" name="umami_tracker_before_send_mode" value="function_name" <?php checked( $mode, 'function_name' ); ?> />
 											<strong>Function name</strong>
 										</label>
@@ -104,11 +108,17 @@ function umami_connect_advanced_page() {
 											<input type="radio" name="umami_tracker_before_send_mode" value="inline" <?php checked( $mode, 'inline' ); ?> />
 											<strong>Inline script</strong>
 										</label>
-									</div>
+									</div></fieldset>
+
+								<fieldset id="before_send_disabled_field" style="margin:8px 0 0;">
+									<p class="description">beforeSend hook is disabled. No function will be called before events are sent.</p>
+								</fieldset>
+
+								<fieldset>
 
 									<div style="margin:8px 0 0;" id="before_send_function_name_field">
 										<label for="umami_tracker_before_send" style="display:block; font-weight:600;">Global function name</label>
-										<input type="text" class="regular-text" id="umami_tracker_before_send" name="umami_tracker_before_send" value="<?php echo esc_attr( $function_name ); ?>" placeholder="beforeSendHandler" pattern="[A-Za-z_$][A-Za-z0-9_$.]*" title="Valid JS function name, e.g. beforeSendHandler or MyApp.handlers.beforeSend" />
+										<input type="text" class="regular-text" id="umami_tracker_before_send" name="umami_tracker_before_send" value="<?php echo esc_attr( $function_name ); ?>" placeholder="beforeSendHandler" pattern="^[A-Za-z_$][A-Za-z0-9_$]*(\.[A-Za-z_$][A-Za-z0-9_$]*)*$" title="Valid JS function name, e.g. beforeSendHandler or MyApp.handlers.beforeSend" />
 										<p>
 											<button type="button" class="button" id="umami_fn_check">Check function</button>
 										</p>
@@ -178,15 +188,25 @@ function umami_connect_advanced_page() {
 
 									function toggle() {
 										var checked = document.querySelector('input[name="umami_tracker_before_send_mode"]:checked');
-										var mode = checked ? checked.value : 'function_name';
-										if ( mode === 'function_name' ) {
+										var mode = checked ? checked.value : 'disabled';
+										var disabledField = document.getElementById('before_send_disabled_field');
+										
+										if ( mode === 'disabled' ) {
+											fnField.style.display = 'none';
+											inlineField.style.display = 'none';
+											disabledField.style.display = 'block';
+											fnInput.disabled = true;
+											inlineInput.disabled = true;
+										} else if ( mode === 'function_name' ) {
 											fnField.style.display = 'block';
 											inlineField.style.display = 'none';
+											disabledField.style.display = 'none';
 											fnInput.disabled = false;
 											inlineInput.disabled = true;
 										} else {
 											fnField.style.display = 'none';
 											inlineField.style.display = 'block';
+											disabledField.style.display = 'none';
 											fnInput.disabled = true;
 											inlineInput.disabled = false;
 										}
@@ -370,7 +390,7 @@ function umami_connect_advanced_page() {
 									if ( formEl ) {
 										formEl.addEventListener( 'submit', function( ev ) {
 											var checked = document.querySelector('input[name="umami_tracker_before_send_mode"]:checked');
-											var mode = checked ? checked.value : 'function_name';
+											var mode = checked ? checked.value : 'disabled';
 											if ( mode === 'inline' && ! inlineTestPassed ) {
 												ev.preventDefault();
 												if ( resultEl ) {
