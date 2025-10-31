@@ -4,7 +4,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 function umami_connect_render_events_overview_page() {
-	// Handle delete action.
 	if ( isset( $_POST['umami_delete_event'] ) && check_admin_referer( 'umami_delete_event', 'umami_delete_nonce' ) ) {
 		$post_id     = isset( $_POST['post_id'] ) ? intval( $_POST['post_id'] ) : 0;
 		$block_index = isset( $_POST['block_index'] ) ? sanitize_text_field( wp_unslash( $_POST['block_index'] ) ) : '';
@@ -27,7 +26,6 @@ function umami_connect_render_events_overview_page() {
 
 	$events = apply_filters( 'umami_connect_get_all_events', array() );
 
-	// Calculate filter counts.
 	$all_count        = count( $events );
 	$events_count     = 0;
 	$candidates_count = 0;
@@ -40,10 +38,8 @@ function umami_connect_render_events_overview_page() {
 		}
 	}
 
-	// Get current filter.
 	$current_filter = isset( $_GET['filter'] ) ? sanitize_key( wp_unslash( $_GET['filter'] ) ) : 'all';
 
-	// Auto-switch to 'all' if selected filter would show empty results.
 	$original_filter = isset( $_GET['filter'] ) ? sanitize_key( wp_unslash( $_GET['filter'] ) ) : 'all';
 	$filter_switched = false;
 
@@ -56,7 +52,6 @@ function umami_connect_render_events_overview_page() {
 		$filter_switched = ( $original_filter === 'candidates' );
 	}
 
-	// Show notice if filter was automatically switched.
 	if ( $filter_switched ) {
 		$switched_from = $original_filter === 'events' ? 'Events' : 'Candidates';
 		echo '<div class="notice notice-warning is-dismissible" style="margin:15px 0;">';
@@ -73,13 +68,10 @@ function umami_connect_render_events_overview_page() {
 		echo '</div>';
 		echo '</div>';
 	} else {
-		// Combined filter and search bar in one row.
 		echo '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; min-height: 32px;">';
 
-		// Filter links on the left.
 		echo '<ul class="subsubsub" style="margin: 0;">';
 
-		// All filter.
 		$all_class = $current_filter === 'all' ? 'current' : '';
 		$all_url   = remove_query_arg( 'filter' );
 		echo '<li class="all"><a href="' . esc_url( $all_url ) . '" class="' . esc_attr( $all_class ) . '">All <span class="count">(' . $all_count . ')</span></a>';
@@ -89,7 +81,6 @@ function umami_connect_render_events_overview_page() {
 		}
 		echo '</li>';
 
-		// Events filter (configured tracking).
 		if ( $events_count > 0 ) {
 			$events_class = $current_filter === 'events' ? 'current' : '';
 			$events_url   = add_query_arg( 'filter', 'events' );
@@ -101,7 +92,6 @@ function umami_connect_render_events_overview_page() {
 			echo '</li>';
 		}
 
-		// Candidates filter (potential tracking targets).
 		if ( $candidates_count > 0 ) {
 			$candidates_class = $current_filter === 'candidates' ? 'current' : '';
 			$candidates_url   = add_query_arg( 'filter', 'candidates' );
@@ -110,10 +100,8 @@ function umami_connect_render_events_overview_page() {
 
 		echo '</ul>';
 
-		// Search box on the right.
 		echo '<form method="get" style="margin: 0;">';
 		echo '<input type="hidden" name="page" value="umami_connect_events_overview">';
-		// Preserve current filter in search.
 		if ( $current_filter !== 'all' ) {
 			echo '<input type="hidden" name="filter" value="' . esc_attr( $current_filter ) . '">';
 		}
@@ -130,13 +118,11 @@ function umami_connect_render_events_overview_page() {
 		$filtered = array();
 
 		foreach ( $events as $row ) {
-			// Apply search filter.
 			$rowtext = strtolower( $row['event'] . ' ' . $row['post_title'] . ' ' . $row['label'] );
 			if ( $search !== '' && strpos( $rowtext, $search ) === false ) {
 				continue;
 			}
 
-			// Apply status filter.
 			$is_tracked = isset( $row['is_tracked'] ) ? $row['is_tracked'] : true;
 			if ( $current_filter === 'events' && ! $is_tracked ) {
 				continue;
