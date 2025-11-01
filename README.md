@@ -1,208 +1,245 @@
-# Umami Connect
+# Umami Connect for WordPress
 
-> Simple, privacy-focused analytics for WordPress — powered by [Umami](https://umami.is).
+> **Privacy-first website analytics made simple** — Connect your WordPress site to [Umami Analytics](https://umami.is) in minutes, not hours.
 
-**Umami Connect** seamlessly integrates Umami Analytics into your WordPress site with **zero configuration complexity**. Works with both **Umami Cloud** and **Self-hosted** installations. Auto-track links, buttons, forms, and custom events right from the Gutenberg editor.
+Transform how you understand your website visitors with **Umami Connect** — the most user-friendly WordPress plugin for privacy-focused analytics. Whether you're a blogger, business owner, or agency managing client sites, get powerful insights without compromising your visitors' privacy or dealing with complex setup processes.
 
 [![Latest Release](https://img.shields.io/github/v/release/ceviixx/umami-wp-connect?label=Latest)](https://github.com/ceviixx/umami-wp-connect/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/ceviixx/umami-wp-connect/total)](https://github.com/ceviixx/umami-wp-connect/releases)
 [![GitHub](https://img.shields.io/badge/GitHub-Issues-181717?logo=github)](https://github.com/ceviixx/umami-wp-connect/issues)
+[![Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?logo=github)](https://github.com/ceviixx/umami-wp-connect/discussions)
 [![Discord](https://img.shields.io/badge/Discord-Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/84w4CQU7Jb)
 
 [![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-21759B?logo=wordpress&logoColor=white)](https://wordpress.org/)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-777BB4?logo=php&logoColor=white)](https://php.net/)
 
-![umami Connect](screens/umami-connect-demo.gif)
+---
 
+## 🎯 Why Choose Umami Connect?
+
+### ✅ **Privacy-First Analytics**
+Umami Analytics is designed with privacy in mind - no cookies, no personal data collection. This plugin seamlessly integrates Umami's privacy-focused approach into WordPress.
+
+### ⚡ **Quick & Easy Setup**
+Choose Cloud or Self-hosted, enter your Website ID (and Host URL if self-hosted) — you're done. No technical knowledge required.
+
+> 💡 **Pro tip:** Enable WordPress pretty permalinks for the most accurate page tracking.
+
+### 🎨 **WordPress Native Experience** 
+Built specifically for WordPress with Gutenberg integration. Manage everything from your familiar WordPress admin interface.
+
+### 📊 **Smart Event Tracking**
+Track button clicks, link interactions, and form submissions automatically — or customize exactly what matters to you.
+
+
+---
+
+## 🚀 Perfect for Every WordPress Site
+
+<table align="center">
+<tr>
+<td align="center" width="50%">
+
+### 📝 **Content Creators & Bloggers**
+Track which articles engage readers most, monitor social shares, and understand your audience without invading their privacy.
+
+</td>
+<td align="center" width="50%">
+
+### 🏢 **Business Websites**
+Measure conversion funnels, track contact form submissions, and monitor customer journeys across your site.
+
+</td>
+</tr>
+</table>
+
+---
+
+## 📸 See It in Action
+
+> **🚧 Screenshots Update Coming Soon** — All screenshots are being refreshed to showcase the latest features and modern interface. Check back soon for the updated visual tour!
 
 <table>
   <tr>
-   <td><img src="screens/editor-tracking.png" alt="Editor tracking" width="200"></td>
-    <td><img src="./screens/setup-general.png" alt="Setup general" width="200"></td>
-    <td><img src="./screens/setup-self-protection.png" alt="Setup self protection" width="200"></td>
-    <td><img src="screens/setup-automation.png" alt="Setup automation" width="200"></td>
-    <td><img src="screens/setup-event-overview.png" alt="Setup event overview" width="200"></td>
+   <td><img src="screens/editor-tracking.png" alt="Gutenberg Event Tracking" width="200"></td>
+    <td><img src="./screens/setup-general.png" alt="Simple Setup Process" width="200"></td>
+    <td><img src="./screens/setup-self-protection.png" alt="Privacy Settings" width="200"></td>
+    <td><img src="screens/setup-automation.png" alt="Auto-Tracking Features" width="200"></td>
+    <td><img src="screens/setup-event-overview.png" alt="Event Management" width="200"></td>
   </tr>
 </table>
 
+---
 
+## 🌟 What Makes This Plugin Special
+
+### 🎯 **Intelligent Auto-Tracking**
+**Stop manually tagging every element.** Smart automation detects and tracks:
+- **Navigation clicks** — Understand how users move through your site
+- **Button interactions** — Measure engagement with your call-to-actions  
+- **Form submissions** — Track conversions without complex setup
+- **Content engagement** — See which sections capture attention
+
+### 🎨 **Seamless Gutenberg Integration**
+**Track custom events without touching code.** Use the visual block editor to:
+- Add event tracking to any button with the sidebar panel
+- Track link clicks within paragraphs, headings, and content blocks
+- Preview exactly what will be tracked before publishing
+- Manage all your events from one central dashboard
+
+### 🛡️ **Advanced Privacy Controls**
+**Respect your visitors while getting insights you need:**
+- **Self-protection mode** — Exclude your own visits from analytics
+- **Do Not Track respect** — Honor browser privacy preferences  
+- **Privacy-focused** — No personal data collection by design
+- **Custom domain restrictions** — Control exactly where tracking runs
+
+### ⚙️ **Professional-Grade Configuration**
+**Powerful options for advanced users:**
+- **beforeSend hooks** — Modify or filter events before they're sent
+- **Custom event tagging** — Organize analytics by campaign, region, or category
+- **URL cleanup options** — Control what URL data gets tracked
+- **Host override** — Use CDNs or custom collector endpoints
+
+### 📈 **Complete Event Management**
+**See and control all your tracking in one place:**
+- **Events Overview dashboard** — Visual list of all configured tracking
+- **Search and filter** — Find specific events across your entire site
+- **Quick edit links** — Jump directly to edit pages and posts
+- **Event validation** — Ensure tracking works correctly before going live
 
 ---
 
+## 📦 Quick Installation
 
-## Features
+### Method 1: Direct Download (Recommended)
+1. **Download** the latest release from our [GitHub Releases page](https://github.com/ceviixx/umami-wp-connect/releases)
+2. **Upload** via WordPress Admin → Plugins → Add New → Upload Plugin
+3. **Activate** the plugin
+4. **Configure** via the new "Umami Connect" menu in your WordPress admin
 
-### Core Tracking
-- Injects the Umami tracking script into your site's `<head>`
-- Easy setup in WordPress Admin:
-  - Cloud or Self-hosted mode
-  - Host URL (for self-hosted)
-  - Website ID (required)
-  - Script loading: async or defer
-
-### Auto-Tracking
-- Auto‑tracking out of the box:
-  - **Links:** adds `data-umami-event` to inline links
-  - **Buttons:** adds `data-umami-event` to Gutenberg buttons and native buttons
-  - **Forms:** adds `data-umami-event` on submit (uses `form:<id|name>` or `form_submit`)
-
-### Gutenberg Editor Integration
-- **Button block:** set custom event + key/value data in the sidebar
-- **Inline link tracking:** toolbar action to set event + key/value data on selected links
-
-### Advanced Configuration
-- **Host URL override:** Override the endpoint for analytics events (useful for CDN or different collector domains)
-- **Auto-track disable:** Disable Umami's automatic tracking for full manual control
-- **Domain restrictions:** Limit tracking to specific hostnames (comma-separated list)
-- **Event tagging:** Add tags to all events for filtering in reports
-- **URL cleanup:** Exclude search parameters or hash fragments from page views
-- **Do Not Track:** Respect browser DNT preferences
-- **beforeSend hook:** Inspect or modify payloads before sending
-  - Function name mode: Reference a global function (with validation)
-  - Inline mode: Define custom JavaScript logic (with test button)
-
-### Admin UX
-- **Events overview page:** search/sort through configured events
-- **Dashboard widget:** quick status and update notifications
-- **Update management:** release notes and one-click self-update with version badge
-- **Self-protection:** prevent logged-in users from being tracked
-- **Context-sensitive help:** per-page help tabs with detailed documentation
-
-### Where tracking works
-
-- Buttons
-  - Block: Button — the button link (`<a>`) is supported
-- Inline links inside blocks
-  - Paragraph, Heading, Excerpt, Quote, Pullquote, List, List Item, Columns, Cover, Group
-
-Note: If a block renders standard `<a>` links, inline link tracking will usually work.
-
----
-
-## Installation
-
-
-1. Download the latest release ZIP from the [GitHub Releases page](https://github.com/ceviixx/umami-wp-connect/releases) **or** clone the repository:
-   - **Release ZIP:** Go to the [Releases](https://github.com/ceviixx/umami-wp-connect/releases) tab and download the latest `.zip` file
-   - **Git:** `git clone https://github.com/ceviixx/umami-wp-connect.git`
-2. Install the plugin using one of the following methods:
-   - **Via ZIP upload:**
-     1. In your WordPress admin, go to **Plugins → Add New → Upload Plugin**
-     2. Select the downloaded ZIP file from the release and install it
-    - **Manually via folder:**
-      1. Unzip the release ZIP (or the cloned repo)
-      2. Copy the folder to:
-        ```bash
-        wp-content/plugins/umami-wp-connect
-        ```
-3. Activate the plugin in **WordPress Admin → Plugins**.
-
----
-
-## Getting started
-
-In your WordPress Admin go to **Umami Connect** and set:
-
-- Mode:
-  - Cloud: uses `https://cloud.umami.is/script.js`
-  - Self‑hosted: enter your custom host (without `/script.js`)
-- Website ID: required (from your Umami website settings, e.g. `123e4567-e89b-12d3-a456-426614174000`)
-- Script loading: `defer` (recommended) or `async`
-
-
-Tip: Enable pretty permalinks in WordPress for the best page view tracking.
-
----
-
-## Advanced Configuration
-
-The **Advanced** page provides fine-grained control over the Umami tracker behavior via `data-*` attributes:
-
-### Host URL Override
-Override the endpoint where analytics events are sent. Useful when:
-- Loading `script.js` from a CDN
-- Your Umami collector runs on a different domain
-- Example: `https://analytics.example.com`
-
-### Auto-Track Control
-Disable Umami's built-in auto-tracking for full manual control via JavaScript API.
-
-### Domain Restrictions
-Limit tracking to specific hostnames (comma-separated, no spaces).
-- Example: `example.com,blog.example.com`
-
-### Event Tagging
-Add a tag to all events for easy filtering in reports.
-- Example: `production` or `eu-region`
-
-### URL Cleanup
-- **Exclude search:** Ignore URL query parameters in page views
-- **Exclude hash:** Ignore URL hash fragments in page views
-
-### Do Not Track
-Respect the user's browser DNT preference.
-
-### beforeSend Hook
-Inspect or modify event payloads before they're sent to Umami:
-
-**Function Name Mode:**
-- Reference a global function (e.g., `MyApp.handlers.beforeSend`)
-- Use the "Check function" button to verify it exists on the public site
-
-**Inline Mode:**
-- Define the function body directly in the admin
-- Use the "Test function" button to validate syntax before saving
-- The function receives `(payload, url)` and should return the modified payload or a falsy value to cancel
-
-Example:
-```javascript
-// Only track page views, skip custom events
-if (payload && payload.name) {
-  return null; // cancel custom events
-}
-return payload; // allow page views
+### Method 2: Manual Installation
+```bash
+# Clone to your WordPress plugins directory
+git clone https://github.com/ceviixx/umami-wp-connect.git wp-content/plugins/umami-wp-connect
 ```
 
-For more details, see the [Umami Tracker Configuration](https://umami.is/docs/tracker-configuration) documentation.
+---
+
+## 🎯 Smart Auto-Tracking Setup
+
+Navigate to **Umami Connect → Automation** to enable intelligent tracking:
+
+### 📎 **Auto-track Links**
+Automatically monitor all navigation and external link clicks. Perfect for understanding user flow and content engagement.
+
+### 🔘 **Auto-track Buttons**  
+Capture interactions with all Gutenberg button blocks and HTML buttons. Ideal for measuring call-to-action performance.
+
+### 📝 **Auto-track Forms**
+Record form submissions across your site. Essential for tracking conversions, newsletter signups, and contact requests.
 
 ---
 
-## Usage
+## 🎨 Custom Event Tracking
 
-### Basic Tracking
-- Auto‑tracking works without extra steps if enabled in **Automation** settings:
-  - **Links:** automatic `data-umami-event` like `link:Text` and `data-umami-event-url` for the href
-  - **Buttons:** automatic `data-umami-event` like `button:Text`
-  - **Forms:** automatic `data-umami-event` like `form:<id|name>` on submit
+### In the Gutenberg Editor
 
-### Custom Events in Gutenberg
-- **Button block:** select a button → sidebar "Umami Tracking" → set Event Name and optional key/value pairs
-- **Inline link tracking:** select linked text in supported blocks → toolbar "Umami Tracking" → set Event Name and optional key/value pairs
+**For Buttons:**
+1. Select any Button block
+2. Open the **"Umami Tracking"** panel in the sidebar
+3. Add your **Event Name** (e.g., "Download Brochure", "Start Free Trial")
+4. Add **custom data pairs** for context (category, value, etc.)
 
-### Advanced Configuration
-- Go to **Umami Connect → Advanced** to access fine-grained tracker configuration
-- Configure host URL override, domain restrictions, event tagging, URL cleanup, DNT, and beforeSend hooks
-- Use the built-in validation tools (Check function, Test function) for beforeSend configuration
+**For Inline Links:**
+1. Select text with a link in paragraphs, headings, or lists
+2. Click the **"Umami Tracking"** button in the toolbar
+3. Configure your event name and data
+4. See the tracking indicator in the editor
 
-### Self-Protection
-- Enable "Do not track my own visits" to exclude logged-in WordPress users from analytics
-- Useful for keeping your data focused on actual visitors
+### Event Management Dashboard
 
----
-
-## Development
-
-
-- Main plugin entry: `umami-connect.php`
-- Admin logic/pages and filters: `includes/*`
-- Frontend:
-  - `assets/umami-autotrack.js` (helper + config; Umami script comes from your host)
-  - `assets/editor/umami-extend.js` (Gutenberg integration for buttons and inline links)
-
-Contributions and issues are welcome → GitHub Issues.
+Visit **Umami Connect → Events Overview** to:
+- **See all configured events** across your entire site
+- **Search by event name** or post title
+- **Filter by type** (Events, Candidates, or All)
+- **Quick edit** any page or post with tracking
+- **Validate** that events are working correctly
 
 ---
 
-**Need help or want to request a feature?**
+## 🔧 Advanced Configuration
 
-- Open an issue on [GitHub](https://github.com/ceviixx/umami-wp-connect/issues)
-- Join our [Discord](https://discord.gg/84w4CQU7Jb) for community chat and quick help
+Access **Umami Connect → Advanced** for professional-grade options:
+
+### 🌐 **Host URL Override**
+Route analytics through CDNs or custom domains for performance optimization.
+
+### 🎯 **Domain Restrictions**  
+Limit tracking to specific hostnames — perfect for staging vs. production environments.
+
+### 🏷️ **Event Tagging**
+Add global tags to segment analytics by campaign, region, user type, or any custom category.
+
+### 🧹 **URL Cleanup**
+Remove query parameters or hash fragments from page views for cleaner analytics data.
+
+### ⚙️ **beforeSend Hooks**
+**Three powerful modes for advanced users:**
+
+#### 🔴 **Disabled Mode**
+No preprocessing — events sent directly to Umami (default and recommended for most users).
+
+#### 🔗 **Function Name Mode**
+Reference a global JavaScript function for event processing:
+- Enter function name (e.g., `MyApp.analytics.beforeSend`)
+- Use built-in validation to test function availability
+- Perfect for developers with existing analytics infrastructure
+
+#### 📝 **Inline Script Mode**  
+Write custom JavaScript directly in the admin:
+- Full editor with syntax validation
+- Test function before saving
+- Real-time error checking and validation
+- Ideal for custom filtering or data enrichment
+
+---
+
+## 🛡️ Privacy & Protection
+
+### 🙈 **Self-Protection**
+Enable **"Do not track my own visits"** in **Umami Connect → Self Protection** to exclude logged-in WordPress users from analytics. Keep your data focused on real visitors, not your own site management activities.
+
+### 🚫 **Do Not Track Support**
+Respect visitors who enable Do Not Track in their browsers — configure in Advanced settings.
+
+### 🔒 **Privacy by Design**
+Umami Analytics is built with privacy as a core principle. For current details about privacy features, see the [official Umami documentation](https://umami.is/docs).
+
+---
+
+## 🆘 Need Help?
+
+### 📖 **Documentation & Tutorials**
+- **Built-in help:** Every admin page includes contextual help tabs
+- **Umami docs:** [Official Umami documentation](https://umami.is/docs)
+- **WordPress integration:** Help panels explain each feature in detail
+
+### 💬 **Community Support**
+- **GitHub Issues:** [Report bugs or request features](https://github.com/ceviixx/umami-wp-connect/issues)
+- **GitHub Discussions:** [Community questions and support](https://github.com/ceviixx/umami-wp-connect/discussions)
+- **Discord Community:** [Join the community](https://discord.gg/84w4CQU7Jb) for quick help and discussions
+
+---
+
+<div align="center">
+
+### Ready to Integrate?
+
+[**📥 Download Latest Release**](https://github.com/ceviixx/umami-wp-connect/releases/latest) • [**📝 View Documentation**](https://github.com/ceviixx/umami-wp-connect) • [**💬 Join Community**](https://discord.gg/84w4CQU7Jb)
+
+</div>
+
+---
+
+*Umami Connect is an independent WordPress plugin and is not officially affiliated with Umami Analytics.*
