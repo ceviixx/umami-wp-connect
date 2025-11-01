@@ -1,8 +1,8 @@
-# Umami Connect for WordPress
+# umami Connect for WordPress
 
 > **Privacy-first website analytics made simple** — Connect your WordPress site to [Umami Analytics](https://umami.is) in minutes, not hours.
 
-Transform how you understand your website visitors with **Umami Connect** — the most user-friendly WordPress plugin for privacy-focused analytics. Whether you're a blogger, business owner, or agency managing client sites, get powerful insights without compromising your visitors' privacy or dealing with complex setup processes.
+Transform how you understand your website visitors with **umami Connect** — the most user-friendly WordPress plugin for privacy-focused analytics. Whether you're a blogger, business owner, or agency managing client sites, get powerful insights without compromising your visitors' privacy or dealing with complex setup processes.
 
 [![Latest Release](https://img.shields.io/github/v/release/ceviixx/umami-wp-connect?label=Latest)](https://github.com/ceviixx/umami-wp-connect/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/ceviixx/umami-wp-connect/total)](https://github.com/ceviixx/umami-wp-connect/releases)
@@ -15,7 +15,7 @@ Transform how you understand your website visitors with **Umami Connect** — th
 
 ---
 
-## 🎯 Why Choose Umami Connect?
+## 🎯 Why Choose umami Connect?
 
 ### ✅ **Privacy-First Analytics**
 Umami Analytics is designed with privacy in mind - no cookies, no personal data collection. This plugin seamlessly integrates Umami's privacy-focused approach into WordPress.
@@ -116,7 +116,7 @@ Measure conversion funnels, track contact form submissions, and monitor customer
 1. **Download** the latest release from the [GitHub Releases page](https://github.com/ceviixx/umami-wp-connect/releases)
 2. **Upload** via WordPress Admin → Plugins → Add New → Upload Plugin
 3. **Activate** the plugin
-4. **Configure** via the new "Umami Connect" menu in your WordPress admin
+4. **Configure** via the new "umami Connect" menu in your WordPress admin
 
 ### Method 2: Manual Installation
 ```bash
@@ -128,7 +128,7 @@ git clone https://github.com/ceviixx/umami-wp-connect.git wp-content/plugins/uma
 
 ## 🎯 Smart Auto-Tracking Setup
 
-Navigate to **Umami Connect → Automation** to enable intelligent tracking:
+Navigate to **umami Connect → Automation** to enable intelligent tracking:
 
 ### 📎 **Auto-track Links**
 Automatically monitor all navigation and external link clicks. Perfect for understanding user flow and content engagement.
@@ -159,7 +159,7 @@ Record form submissions across your site. Essential for tracking conversions, ne
 
 ### Event Management Dashboard
 
-Visit **Umami Connect → Events Overview** to:
+Visit **umami Connect → Events Overview** to:
 - **See all configured events** across your entire site
 - **Search by event name** or post title
 - **Filter by type** (Events, Candidates, or All)
@@ -170,7 +170,7 @@ Visit **Umami Connect → Events Overview** to:
 
 ## 🔧 Advanced Configuration
 
-Access **Umami Connect → Advanced** for professional-grade options:
+Access **umami Connect → Advanced** for professional-grade options:
 
 ### 🌐 **Host URL Override**
 Route analytics through CDNs or custom domains for performance optimization.
@@ -208,7 +208,7 @@ Write custom JavaScript directly in the admin:
 ## 🛡️ Privacy & Protection
 
 ### 🙈 **Self-Protection**
-Enable **"Do not track my own visits"** in **Umami Connect → Self Protection** to exclude logged-in WordPress users from analytics. Keep your data focused on real visitors, not your own site management activities.
+Enable **"Do not track my own visits"** in **umami Connect → Self Protection** to exclude logged-in WordPress users from analytics. Keep your data focused on real visitors, not your own site management activities.
 
 ### 🚫 **Do Not Track Support**
 Respect visitors who enable Do Not Track in their browsers — configure in Advanced settings.
@@ -242,4 +242,4 @@ Umami Analytics is built with privacy as a core principle. For current details a
 
 ---
 
-*Umami Connect is an independent WordPress plugin and is not officially affiliated with Umami Analytics.*
+*umami Connect is an independent WordPress plugin and is not officially affiliated with Umami Analytics.*
