@@ -113,7 +113,7 @@ Measure conversion funnels, track contact form submissions, and monitor customer
 ## 📦 Quick Installation
 
 ### Method 1: Direct Download (Recommended)
-1. **Download** the latest release from our [GitHub Releases page](https://github.com/ceviixx/umami-wp-connect/releases)
+1. **Download** the latest release from the [GitHub Releases page](https://github.com/ceviixx/umami-wp-connect/releases)
 2. **Upload** via WordPress Admin → Plugins → Add New → Upload Plugin
 3. **Activate** the plugin
 4. **Configure** via the new "Umami Connect" menu in your WordPress admin
