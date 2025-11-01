@@ -13,6 +13,19 @@ Transform how you understand your website visitors with **umami Connect** — th
 [![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-21759B?logo=wordpress&logoColor=white)](https://wordpress.org/)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-777BB4?logo=php&logoColor=white)](https://php.net/)
 
+<div align="center">
+  <img src="screens/umami-connect-demo.gif" alt="Umami Connect Demo - Visual Event Tracking Setup" width="800">
+</div>
+
+<table align="center">
+  <tr>
+    <td align="center"><img src="screens/gutenberg/gutenberg-button.png" alt="Button Tracking" width="180"></td>
+    <td align="center"><img src="screens/gutenberg/gutenberg-link.png" alt="Link Tracking" width="180"></td>
+    <td align="center"><img src="screens/settings/settings-general.png" alt="Easy Setup" width="180"></td>
+    <td align="center"><img src="screens/settings/settings-event-overview.png" alt="Event Management" width="180"></td>
+  </tr>
+</table>
+
 ---
 
 ## 🎯 Why Choose umami Connect?
@@ -51,22 +64,6 @@ Measure conversion funnels, track contact form submissions, and monitor customer
 
 </td>
 </tr>
-</table>
-
----
-
-## 📸 See It in Action
-
-> **🚧 Screenshots Update Coming Soon** — All screenshots are being refreshed to showcase the latest features and modern interface. Check back soon for the updated visual tour!
-
-<table>
-  <tr>
-   <td><img src="screens/editor-tracking.png" alt="Gutenberg Event Tracking" width="200"></td>
-    <td><img src="./screens/setup-general.png" alt="Simple Setup Process" width="200"></td>
-    <td><img src="./screens/setup-self-protection.png" alt="Privacy Settings" width="200"></td>
-    <td><img src="screens/setup-automation.png" alt="Auto-Tracking Features" width="200"></td>
-    <td><img src="screens/setup-event-overview.png" alt="Event Management" width="200"></td>
-  </tr>
 </table>
 
 ---
