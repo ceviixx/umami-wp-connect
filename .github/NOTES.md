@@ -1,6 +1,12 @@
 # GIF image for landing page
 ```bash
-convert -delay 200 -loop 0 screens/editor-tracking.png screens/setup-general.png screens/setup-self-protection.png screens/setup-automation.png sreens/setup-event-overview.png screens/umami-connect-demo.gif
+convert -dither None -colors 256 \
+  \( screens/gutenberg/gutenberg-link-and-button.png -set delay 500 \) \
+  \( screens/settings/settings-general.png -set delay 200 \) \
+  \( screens/settings/settings-automation.png -set delay 200 \) \
+  \( screens/settings/settings-event-overview.png -set delay 200 \) \
+  -loop 0 \
+  screens/umami-connect-demo.gif
 ```
 
 
