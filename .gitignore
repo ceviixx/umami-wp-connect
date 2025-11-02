@@ -1,5 +1,4 @@
 .DS_Store
 *.zip
 output
-test-workflows.sh
 node_modules

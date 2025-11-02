@@ -1,5 +1,5 @@
 
-# Contributing to Umami Connect
+# Contributing to umami Connect
 
 Thank you for considering contributing! Your help in making this plugin better is appreciated.
 
