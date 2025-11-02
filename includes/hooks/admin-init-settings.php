@@ -419,6 +419,7 @@ add_action(
 			'umami_connect_automation'
 		);
 
+		/*
 		add_settings_field(
 			'umami_consent_required',
 			'Consent Required',
@@ -440,6 +441,7 @@ add_action(
 			'umami_connect_automation',
 			'umami_connect_automation'
 		);
+		*/
 
 		add_settings_section(
 			'umami_connect_advanced',
