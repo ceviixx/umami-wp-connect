@@ -1,6 +1,6 @@
 <?php
 function umami_connect_get_version_info() {
-	$main_plugin_file = dirname( __DIR__ ) . '/umami-connect.php';
+	$main_plugin_file = dirname( __DIR__, 2 ) . '/umami-connect.php';
 
 	if ( ! file_exists( $main_plugin_file ) ) {
 		return array(
