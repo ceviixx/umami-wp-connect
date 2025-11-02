@@ -325,24 +325,22 @@ add_action(
 		);
 
 		add_settings_field(
-			'umami_website_id',
-			'Website ID',
+			'umami_host',
+			'Host URL',
 			function () {
-				$value = get_option( 'umami_website_id', '' );
-				echo '<input type="text" id="umami_website_id" name="umami_website_id" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="12345678-1234-1234-1234-123456789abc" required />';
-				echo '<p class="description">Your unique Umami Website ID (UUID format).</p>';
+				$value = get_option( 'umami_host', '' );
+				echo '<input type="url" id="umami_host" name="umami_host" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="https://analytics.yourdomain.com" />';
 			},
 			'umami_connect',
 			'umami_connect_general'
 		);
 
 		add_settings_field(
-			'umami_host',
-			'Host URL',
+			'umami_website_id',
+			'Website ID',
 			function () {
-				$value = get_option( 'umami_host', '' );
-				echo '<input type="url" id="umami_host" name="umami_host" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="https://analytics.yourdomain.com" />';
-				echo '<p class="description">Required for self-hosted instances only.</p>';
+				$value = get_option( 'umami_website_id', '' );
+				echo '<input type="text" id="umami_website_id" name="umami_website_id" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="12345678-1234-1234-1234-123456789abc" required />';
 			},
 			'umami_connect',
 			'umami_connect_general'
@@ -357,7 +355,6 @@ add_action(
 				echo '<option value="async"' . selected( $value, 'async', false ) . '>Async</option>';
 				echo '<option value="defer"' . selected( $value, 'defer', false ) . '>Defer</option>';
 				echo '</select>';
-				echo '<p class="description">How the tracking script should be loaded.</p>';
 			},
 			'umami_connect',
 			'umami_connect_general'
