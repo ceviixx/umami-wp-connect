@@ -420,6 +420,7 @@ add_action(
 		);
 
 		/*
+		 * Commented out - Future features for consent management and debugging.
 		add_settings_field(
 			'umami_consent_required',
 			'Consent Required',
