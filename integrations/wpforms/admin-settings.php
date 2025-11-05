@@ -39,7 +39,7 @@ add_filter( 'wpforms_builder_settings_sections', 'umami_wpforms_add_settings_sec
  */
 function umami_wpforms_settings_content( $instance ) {
 	$form_data = isset( $instance->form_data ) ? $instance->form_data : array();
-	
+
 	// Get values from form_data settings, not post meta.
 	$event      = isset( $form_data['settings']['umami_event_name'] ) ? $form_data['settings']['umami_event_name'] : '';
 	$event_data = isset( $form_data['settings']['umami_event_data'] ) ? $form_data['settings']['umami_event_data'] : '';
@@ -171,7 +171,7 @@ function umami_wpforms_admin_print_kv_script() {
 			list.addEventListener('click', function(e){
 				if (e.target && e.target.classList.contains('umami-kv-remove')) {
 					var row = e.target.closest('.umami-kv-row');
-					if (row) { 
+					if (row) {
 						row.remove();
 						updateHiddenField();
 					}

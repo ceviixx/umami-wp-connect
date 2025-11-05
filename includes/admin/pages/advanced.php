@@ -1,6 +1,6 @@
 <?php
 function umami_connect_advanced_page() {
-	$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'host-url'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'host-url'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$tabs = array(
 		'host-url'       => 'Host URL',
 		'auto-track'     => 'Auto track',

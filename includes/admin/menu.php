@@ -439,12 +439,12 @@ function umami_connect_add_screen_options_events_overview() {
  */
 function umami_connect_events_overview_columns( $columns ) {
 	return array(
-		'event'      => __( 'Event', 'umami-connect' ),
-		'integration'=> __( 'Integration', 'umami-connect' ),
-		'post'       => __( 'Post/Page', 'umami-connect' ),
-		'block_type' => __( 'Block Type', 'umami-connect' ),
-		'label'      => __( 'Label/Text', 'umami-connect' ),
-		'data_pairs' => __( 'Data Pairs', 'umami-connect' ),
+		'event'       => __( 'Event', 'umami-connect' ),
+		'integration' => __( 'Integration', 'umami-connect' ),
+		'post'        => __( 'Post/Page', 'umami-connect' ),
+		'block_type'  => __( 'Block Type', 'umami-connect' ),
+		'label'       => __( 'Label/Text', 'umami-connect' ),
+		'data_pairs'  => __( 'Data Pairs', 'umami-connect' ),
 	);
 }
 
@@ -459,6 +459,11 @@ function umami_connect_set_screen_option( $status, $option, $value ) {
 }
 
 // Also hook the dynamic filter for this option key to ensure saving works on all WP versions.
-add_filter( 'set_screen_option_umami_connect_events_overview_per_page', function( $status, $option, $value ) {
-	return max( 1, (int) $value );
-}, 10, 3 );
+add_filter(
+	'set_screen_option_umami_connect_events_overview_per_page',
+	function ( $status, $option, $value ) {
+		return max( 1, (int) $value );
+	},
+	10,
+	3
+);

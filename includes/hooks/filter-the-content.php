@@ -85,7 +85,7 @@ add_filter(
 			}
 		}
 
-     // phpcs:disable WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+	 // phpcs:disable WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 		$get_own_text = function ( \DOMNode $node ) {
 			$txt = '';
 			foreach ( $node->childNodes as $child ) {
@@ -98,7 +98,7 @@ add_filter(
 			$txt = preg_replace( '/\s+/u', ' ', $txt );
 			return trim( $txt );
 		};
-     // phpcs:enable WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+	 // phpcs:enable WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 
 		if ( $autotrack_links ) {
 			$links = $xpath->query( '//a[not(contains(@class, "wp-block-button__link")) and not(contains(@class, "wp-element-button"))]' );
@@ -126,7 +126,7 @@ add_filter(
 
 				$text = $get_own_text( $link );
 				if ( $text === '' ) {
-                 // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+				 // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 					$text = trim( preg_replace( '/\s+/u', ' ', $link->textContent ) );
 				}
 				$href = $link->hasAttribute( 'href' ) ? $link->getAttribute( 'href' ) : '';
@@ -154,7 +154,7 @@ add_filter(
 
 				$form = $button;
 				while ( $form && strcasecmp( $form->nodeName, 'form' ) !== 0 ) {
-                 // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+				 // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 					$form = $form->parentNode;
 				}
 
@@ -186,7 +186,7 @@ add_filter(
 		$container = $dom->getElementsByTagName( 'div' )->item( 0 );
 		$html      = '';
 		if ( $container ) {
-            // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 			foreach ( $container->childNodes as $node ) {
 				$html .= $dom->saveHTML( $node );
 			}
@@ -196,4 +196,3 @@ add_filter(
 	},
 	20
 );
-

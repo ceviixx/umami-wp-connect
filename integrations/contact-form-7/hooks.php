@@ -41,32 +41,32 @@ function umami_cf7_inject_submit_attributes_shortcode( $output, $tag, $attr ) {
 
 	// Extract form ID from attributes.
 	$form_id_raw = isset( $attr['id'] ) ? $attr['id'] : 0;
-	$form_id = 0;
+	$form_id     = 0;
 
 	// CF7 uses the actual post ID, not the shortcode hex ID.
 	// Try to get the form by title first if we can't parse the ID.
 	if ( function_exists( 'wpcf7_contact_form' ) ) {
 		// Try numeric ID first.
 		if ( is_numeric( $form_id_raw ) ) {
-			$form_id = (int) $form_id_raw;
+			$form_id  = (int) $form_id_raw;
 			$cf7_form = wpcf7_contact_form( $form_id );
 		} else {
 			// If not numeric, search by title.
 			$cf7_form = null;
 			if ( isset( $attr['title'] ) ) {
-				$forms = get_posts( array(
-					'post_type' => 'wpcf7_contact_form',
-					'title' => $attr['title'],
-					'posts_per_page' => 1,
-				) );
+				$forms = get_posts(
+					array(
+						'post_type'      => 'wpcf7_contact_form',
+						'title'          => $attr['title'],
+						'posts_per_page' => 1,
+					)
+				);
 				if ( ! empty( $forms ) ) {
-					$form_id = $forms[0]->ID;
+					$form_id  = $forms[0]->ID;
 					$cf7_form = wpcf7_contact_form( $form_id );
 				}
 			}
-		}
-
-		if ( $cf7_form && method_exists( $cf7_form, 'id' ) ) {
+		}       if ( $cf7_form && method_exists( $cf7_form, 'id' ) ) {
 			$form_id = (int) $cf7_form->id();
 		}
 	}

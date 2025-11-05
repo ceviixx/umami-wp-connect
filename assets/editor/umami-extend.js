@@ -313,38 +313,38 @@
           onRequestClose: function () { setOpen(false); },
           style: { maxWidth: '500px' }
         },
-          wp.element.createElement('div', { style: { marginBottom: '16px' } },
-            wp.element.createElement(TextControl, { label: 'Event Name', value: eventName, onChange: setEventName, placeholder: 'e.g. link_click' })
-          ),
-          wp.element.createElement('div', { style: { marginBottom: '16px' } },
-            wp.element.createElement('label', { style: { display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px' } }, 'Event Data (Key/Value)'),
-            pairs.map(function (pair, idx) {
-              return wp.element.createElement(Flex, { key: idx, align: 'center', style: { gap: '8px', marginBottom: '8px' } },
-                wp.element.createElement(FlexItem, { isBlock: true, style: { flex: 1 } },
-                  wp.element.createElement(TextControl, {
-                    value: pair.key || '',
-                    placeholder: 'Key',
-                    onChange: function (val) { updatePair(idx, 'key', val); }
-                  })
-                ),
-                wp.element.createElement(FlexItem, { isBlock: true, style: { flex: 1 } },
-                  wp.element.createElement(TextControl, {
-                    value: pair.value || '',
-                    placeholder: 'Value',
-                    onChange: function (val) { updatePair(idx, 'value', val); }
-                  })
-                ),
-                wp.element.createElement(FlexItem, null,
-                  wp.element.createElement(Button, { isSmall: true, isDestructive: true, onClick: function () { removePair(idx); }, 'aria-label': 'Remove row' }, '×')
-                )
-              );
-            }),
-            wp.element.createElement(Button, { variant: 'secondary', onClick: addPair, isSmall: true, style: { marginTop: '8px' } }, '+ Add field')
-          ),
-          wp.element.createElement(Flex, { justify: 'flex-end', style: { gap: '8px', marginTop: '20px' } },
-            wp.element.createElement(Button, { variant: 'tertiary', onClick: function () { setOpen(false); } }, 'Cancel'),
-            wp.element.createElement(Button, { variant: 'primary', onClick: onSave }, 'Save')
-          )
+        wp.element.createElement('div', { style: { marginBottom: '16px' } },
+          wp.element.createElement(TextControl, { label: 'Event Name', value: eventName, onChange: setEventName, placeholder: 'e.g. link_click' })
+        ),
+        wp.element.createElement('div', { style: { marginBottom: '16px' } },
+          wp.element.createElement('label', { style: { display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px' } }, 'Event Data (Key/Value)'),
+          pairs.map(function (pair, idx) {
+            return wp.element.createElement(Flex, { key: idx, align: 'center', style: { gap: '8px', marginBottom: '8px' } },
+              wp.element.createElement(FlexItem, { isBlock: true, style: { flex: 1 } },
+                wp.element.createElement(TextControl, {
+                  value: pair.key || '',
+                  placeholder: 'Key',
+                  onChange: function (val) { updatePair(idx, 'key', val); }
+                })
+              ),
+              wp.element.createElement(FlexItem, { isBlock: true, style: { flex: 1 } },
+                wp.element.createElement(TextControl, {
+                  value: pair.value || '',
+                  placeholder: 'Value',
+                  onChange: function (val) { updatePair(idx, 'value', val); }
+                })
+              ),
+              wp.element.createElement(FlexItem, null,
+                wp.element.createElement(Button, { isSmall: true, isDestructive: true, onClick: function () { removePair(idx); }, 'aria-label': 'Remove row' }, '×')
+              )
+            );
+          }),
+          wp.element.createElement(Button, { variant: 'secondary', onClick: addPair, isSmall: true, style: { marginTop: '8px' } }, '+ Add field')
+        ),
+        wp.element.createElement(Flex, { justify: 'flex-end', style: { gap: '8px', marginTop: '20px' } },
+          wp.element.createElement(Button, { variant: 'tertiary', onClick: function () { setOpen(false); } }, 'Cancel'),
+          wp.element.createElement(Button, { variant: 'primary', onClick: onSave }, 'Save')
+        )
         )
       );
     }

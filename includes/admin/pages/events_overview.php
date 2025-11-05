@@ -25,17 +25,13 @@ function umami_connect_render_events_overview_page() {
 				} elseif ( 'integration_wpforms' === $event_type ) {
 					$result = umami_connect_delete_integration_wpforms( $post_id );
 				}
-			} else {
-				if ( empty( $block_index ) || ! is_string( $block_index ) ) {
+			} elseif ( empty( $block_index ) || ! is_string( $block_index ) ) {
 					echo '<div class="notice notice-error is-dismissible"><p><strong>Error: Invalid block index.</strong></p></div>';
-				} elseif ( ! in_array( $event_type, array( 'button', 'link' ), true ) ) {
-					echo '<div class="notice notice-error is-dismissible"><p><strong>Error: Invalid event type.</strong></p></div>';
-				} else {
-					$result = umami_connect_delete_event_from_block( $post_id, $block_index, $event_type );
-				}
-			}
-
-			if ( $result ) {
+			} elseif ( ! in_array( $event_type, array( 'button', 'link' ), true ) ) {
+				echo '<div class="notice notice-error is-dismissible"><p><strong>Error: Invalid event type.</strong></p></div>';
+			} else {
+				$result = umami_connect_delete_event_from_block( $post_id, $block_index, $event_type );
+			}   if ( $result ) {
 				echo '<div class="notice notice-success is-dismissible"><p><strong>Event deleted successfully.</strong></p></div>';
 			} elseif ( strpos( $event_type, 'integration_' ) === 0 ) {
 				echo '<div class="notice notice-error is-dismissible"><p><strong>Error:</strong> Could not delete integration event.</p></div>';
@@ -61,19 +57,22 @@ function umami_connect_render_events_overview_page() {
 	$events = apply_filters( 'umami_connect_get_all_events', array(), $per_page );
 
 	// Zähler für Views
-	$all_count = is_array( $events ) ? count( $events ) : 0;
-	$events_count = 0;
+	$all_count        = is_array( $events ) ? count( $events ) : 0;
+	$events_count     = 0;
 	$candidates_count = 0;
 	if ( ! empty( $events ) ) {
 		foreach ( $events as $e ) {
 			$is_tracked = isset( $e['is_tracked'] ) ? (bool) $e['is_tracked'] : true;
-			if ( $is_tracked ) { ++$events_count; } else { ++$candidates_count; }
+			if ( $is_tracked ) {
+				++$events_count;
+			} else {
+				++$candidates_count; }
 		}
 	}
 
 	// Aktueller Filter & Suche
 	$current_filter = isset( $_GET['filter'] ) ? sanitize_key( wp_unslash( $_GET['filter'] ) ) : 'all';
-	$search = isset( $_GET['s'] ) ? trim( strtolower( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) ) : '';
+	$search         = isset( $_GET['s'] ) ? trim( strtolower( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) ) : '';
 
 	// Views + Suche UI
 	echo '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; min-height: 32px;">';
@@ -106,7 +105,7 @@ function umami_connect_render_events_overview_page() {
 
 	// Hidden Columns aus Screen Options
 	$hidden_columns = get_hidden_columns( $screen );
-	$columns = umami_connect_events_overview_columns( array() );
+	$columns        = umami_connect_events_overview_columns( array() );
 
 	// Suche + Filter anwenden
 	$filtered = array();
@@ -128,8 +127,8 @@ function umami_connect_render_events_overview_page() {
 	}
 
 	// Sortierung
-	$orderby = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : 'event';
-	$order   = isset( $_GET['order'] ) ? strtolower( sanitize_key( wp_unslash( $_GET['order'] ) ) ) : 'asc';
+	$orderby      = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : 'event';
+	$order        = isset( $_GET['order'] ) ? strtolower( sanitize_key( wp_unslash( $_GET['order'] ) ) ) : 'asc';
 	$block_labels = array(
 		'core/button'       => 'Button',
 		'core/paragraph'    => 'Paragraph',
@@ -144,39 +143,48 @@ function umami_connect_render_events_overview_page() {
 		'core/group'        => 'Group',
 	);
 
-	usort( $filtered, function( $a, $b ) use ( $orderby, $order, $block_labels ) {
-		$a_val = '';
-		$b_val = '';
-		if ( 'block_type' === $orderby ) {
-			$a_val = strtolower( $block_labels[ $a['block_type'] ?? '' ] ?? ( $a['block_type'] ?? '' ) );
-			$b_val = strtolower( $block_labels[ $b['block_type'] ?? '' ] ?? ( $b['block_type'] ?? '' ) );
-		} elseif ( 'post_title' === $orderby || 'post' === $orderby ) {
-			$a_val = strtolower( $a['post_title'] ?? '' );
-			$b_val = strtolower( $b['post_title'] ?? '' );
-		} elseif ( 'integration_label' === $orderby || 'integration' === $orderby ) {
-			$a_val = strtolower( $a['integration_label'] ?? ( $a['integration'] ?? '' ) );
-			$b_val = strtolower( $b['integration_label'] ?? ( $b['integration'] ?? '' ) );
-		} else {
-			$a_val = strtolower( $a[ $orderby ] ?? '' );
-			$b_val = strtolower( $b[ $orderby ] ?? '' );
+	usort(
+		$filtered,
+		function ( $a, $b ) use ( $orderby, $order, $block_labels ) {
+			$a_val = '';
+			$b_val = '';
+			if ( 'block_type' === $orderby ) {
+				$a_val = strtolower( $block_labels[ $a['block_type'] ?? '' ] ?? ( $a['block_type'] ?? '' ) );
+				$b_val = strtolower( $block_labels[ $b['block_type'] ?? '' ] ?? ( $b['block_type'] ?? '' ) );
+			} elseif ( 'post_title' === $orderby || 'post' === $orderby ) {
+				$a_val = strtolower( $a['post_title'] ?? '' );
+				$b_val = strtolower( $b['post_title'] ?? '' );
+			} elseif ( 'integration_label' === $orderby || 'integration' === $orderby ) {
+				$a_val = strtolower( $a['integration_label'] ?? ( $a['integration'] ?? '' ) );
+				$b_val = strtolower( $b['integration_label'] ?? ( $b['integration'] ?? '' ) );
+			} else {
+				$a_val = strtolower( $a[ $orderby ] ?? '' );
+				$b_val = strtolower( $b[ $orderby ] ?? '' );
+			}
+			if ( $a_val === $b_val ) {
+				return 0; }
+			$cmp = ( $a_val < $b_val ) ? -1 : 1;
+			return ( 'desc' === $order ) ? -$cmp : $cmp;
 		}
-		if ( $a_val === $b_val ) { return 0; }
-		$cmp = ( $a_val < $b_val ) ? -1 : 1;
-		return ( 'desc' === $order ) ? -$cmp : $cmp;
-	} );
+	);
 
 	// Pagination berechnen
-	$total_items = count( $filtered );
-	$total_pages = (int) ceil( $total_items / max( 1, $per_page ) );
+	$total_items  = count( $filtered );
+	$total_pages  = (int) ceil( $total_items / max( 1, $per_page ) );
 	$current_page = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1;
-	$paged_rows = array_slice( $filtered, ( $current_page - 1 ) * $per_page, $per_page );
+	$paged_rows   = array_slice( $filtered, ( $current_page - 1 ) * $per_page, $per_page );
 
 	// Helper: Sortier-Link (als Closure, kein globaler Funktionsname)
-	$umami_events_sort_link = function( $label, $col ) {
+	$umami_events_sort_link = function ( $label, $col ) {
 		$current = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : 'event';
 		$order   = isset( $_GET['order'] ) ? strtolower( sanitize_key( wp_unslash( $_GET['order'] ) ) ) : 'asc';
 		$next    = ( $current === $col && $order === 'asc' ) ? 'desc' : 'asc';
-		$url     = add_query_arg( array( 'orderby' => $col, 'order' => $next ) );
+		$url     = add_query_arg(
+			array(
+				'orderby' => $col,
+				'order'   => $next,
+			)
+		);
 		$arrow   = ( $current === $col ) ? ( ' <span style="font-size:0.9em;">' . ( $order === 'asc' ? '▲' : '▼' ) . '</span>' ) : '';
 		return '<a href="' . esc_url( $url ) . '">' . esc_html( $label ) . $arrow . '</a>';
 	};
@@ -193,10 +201,13 @@ function umami_connect_render_events_overview_page() {
 		echo '<table class="wp-list-table widefat fixed striped">';
 		echo '<thead><tr>';
 		foreach ( $columns as $column_key => $column_name ) {
-			if ( in_array( $column_key, $hidden_columns, true ) ) { continue; }
+			if ( in_array( $column_key, $hidden_columns, true ) ) {
+				continue; }
 			$sortable_key = $column_key;
-			if ( 'post' === $column_key ) { $sortable_key = 'post_title'; }
-			if ( 'integration' === $column_key ) { $sortable_key = 'integration_label'; }
+			if ( 'post' === $column_key ) {
+				$sortable_key = 'post_title'; }
+			if ( 'integration' === $column_key ) {
+				$sortable_key = 'integration_label'; }
 			if ( in_array( $column_key, array( 'event', 'post', 'block_type', 'label', 'integration' ), true ) ) {
 				echo '<th scope="col" class="manage-column column-' . esc_attr( $column_key ) . '">' . $umami_events_sort_link( $column_name, $sortable_key ) . '</th>';
 			} else {
@@ -206,10 +217,13 @@ function umami_connect_render_events_overview_page() {
 		echo '</tr></thead>';
 		echo '<tfoot><tr>';
 		foreach ( $columns as $column_key => $column_name ) {
-			if ( in_array( $column_key, $hidden_columns, true ) ) { continue; }
+			if ( in_array( $column_key, $hidden_columns, true ) ) {
+				continue; }
 			$sortable_key = $column_key;
-			if ( 'post' === $column_key ) { $sortable_key = 'post_title'; }
-			if ( 'integration' === $column_key ) { $sortable_key = 'integration_label'; }
+			if ( 'post' === $column_key ) {
+				$sortable_key = 'post_title'; }
+			if ( 'integration' === $column_key ) {
+				$sortable_key = 'integration_label'; }
 			if ( in_array( $column_key, array( 'event', 'post', 'block_type', 'label', 'integration' ), true ) ) {
 				echo '<th scope="col" class="manage-column column-' . esc_attr( $column_key ) . '">' . $umami_events_sort_link( $column_name, $sortable_key ) . '</th>';
 			} else {
@@ -242,7 +256,7 @@ function umami_connect_render_events_overview_page() {
 				if ( ! empty( $row['edit_link'] ) ) {
 					$actions['edit'] = '<a href="' . esc_url( $row['edit_link'] ) . '" target="_blank">' . esc_html( $row['edit_label'] ?? __( 'Edit', 'umami-connect' ) ) . '</a>';
 				} elseif ( ! empty( $row['post_id'] ) && $block_index ) {
-					$edit_label = ( 'page' === $post_type ) ? __( 'Edit Page', 'umami-connect' ) : __( 'Edit Post', 'umami-connect' );
+					$edit_label      = ( 'page' === $post_type ) ? __( 'Edit Page', 'umami-connect' ) : __( 'Edit Post', 'umami-connect' );
 					$actions['edit'] = '<a href="' . esc_url( get_edit_post_link( (int) $row['post_id'] ) ) . '" target="_blank">' . esc_html( $edit_label ) . '</a>';
 				}
 				$is_integration = is_string( $event_type ) && strpos( $event_type, 'integration_' ) === 0;
@@ -313,11 +327,14 @@ function umami_connect_render_events_overview_page() {
 			echo '<div class="tablenav bottom">';
 			echo '<div class="alignleft actions bulkactions"></div>';
 			echo '<div class="tablenav-pages">';
+			/* translators: %s: Number of items. */
 			echo '<span class="displaying-num">' . sprintf( _n( '%s item', '%s items', $total_items, 'umami-connect' ), number_format_i18n( $total_items ) ) . '</span>';
 
 			$base = remove_query_arg( 'paged' );
-			if ( $current_filter !== 'all' ) { $base = add_query_arg( 'filter', $current_filter, $base ); }
-			if ( $search !== '' ) { $base = add_query_arg( 's', $search, $base ); }
+			if ( $current_filter !== 'all' ) {
+				$base = add_query_arg( 'filter', $current_filter, $base ); }
+			if ( $search !== '' ) {
+				$base = add_query_arg( 's', $search, $base ); }
 
 			echo '<span class="pagination-links">';
 			if ( $current_page > 1 ) {
@@ -357,7 +374,7 @@ function umami_connect_render_events_overview_page() {
 		wp_enqueue_script( 'wp-a11y' );
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
 		wp_enqueue_script( 'jquery-ui-dialog' );
-		?>
+	?>
 
 		<div id="umami-delete-dialog" title="<?php esc_attr_e( 'Confirm Event Deletion', 'umami-connect' ); ?>" style="display: none;">
 			<div style="padding: 8px 0;">
@@ -439,7 +456,7 @@ function umami_connect_render_events_overview_page() {
 		});
 		</script>
 		<?php
-	echo '</div>';
+		echo '</div>';
 }
 
 add_filter(
@@ -448,12 +465,14 @@ add_filter(
 		$result = is_array( $events ) ? $events : array();
 
 		// Fetch all published posts and pages; pagination is handled by the List Table.
-		$posts = get_posts( array(
-			'post_type'      => array( 'post', 'page' ),
-			'post_status'    => 'publish',
-			'posts_per_page' => -1,
-			'fields'         => 'ids',
-		) );
+		$posts = get_posts(
+			array(
+				'post_type'      => array( 'post', 'page' ),
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			)
+		);
 
 		function find_umami_events( $blocks, &$result, $post_id, $post_title, $parent_path = '' ) {
 			foreach ( $blocks as $idx => $block ) {
@@ -476,15 +495,15 @@ add_filter(
 						$data_pairs = $block['attrs']['umamiDataPairs'];
 					}
 					$result[] = array(
-						'event'       => $event,
-						'post_id'     => $post_id,
-						'post_title'  => $post_title,
-						'block_type'  => $block_name,
-						'label'       => $label,
-						'data_pairs'  => $data_pairs,
-						'block_index' => $block_path,
-						'event_type'  => 'button',
-						'is_tracked'  => true,
+						'event'             => $event,
+						'post_id'           => $post_id,
+						'post_title'        => $post_title,
+						'block_type'        => $block_name,
+						'label'             => $label,
+						'data_pairs'        => $data_pairs,
+						'block_index'       => $block_path,
+						'event_type'        => 'button',
+						'is_tracked'        => true,
 						'integration'       => 'gutenberg',
 						'integration_label' => 'Gutenberg',
 						'integration_color' => '#2271b1',
@@ -502,15 +521,15 @@ add_filter(
 								$link_url  = isset( $ev['linkUrl'] ) ? (string) $ev['linkUrl'] : '';
 								$label     = trim( $link_text ) . ( $link_url ? ' → ' . $link_url : '' );
 								$result[]  = array(
-									'event'       => $event_name !== '' ? $event_name : 'link_click',
-									'post_id'     => $post_id,
-									'post_title'  => $post_title,
-									'block_type'  => $block_name,
-									'label'       => $label,
-									'data_pairs'  => $pairs,
-									'block_index' => $block_path,
-									'event_type'  => 'link',
-									'is_tracked'  => true,
+									'event'             => $event_name !== '' ? $event_name : 'link_click',
+									'post_id'           => $post_id,
+									'post_title'        => $post_title,
+									'block_type'        => $block_name,
+									'label'             => $label,
+									'data_pairs'        => $pairs,
+									'block_index'       => $block_path,
+									'event_type'        => 'link',
+									'is_tracked'        => true,
 									'integration'       => 'gutenberg',
 									'integration_label' => 'Gutenberg',
 									'integration_color' => '#2271b1',
@@ -529,15 +548,15 @@ add_filter(
 
 					if ( $block_name === 'core/button' && ! empty( $label ) ) {
 						$result[] = array(
-							'event'       => '(Candidate)',
-							'post_id'     => $post_id,
-							'post_title'  => $post_title,
-							'block_type'  => $block_name,
-							'label'       => $label,
-							'data_pairs'  => array(),
-							'block_index' => $block_path,
-							'event_type'  => 'none',
-							'is_tracked'  => false,
+							'event'             => '(Candidate)',
+							'post_id'           => $post_id,
+							'post_title'        => $post_title,
+							'block_type'        => $block_name,
+							'label'             => $label,
+							'data_pairs'        => array(),
+							'block_index'       => $block_path,
+							'event_type'        => 'none',
+							'is_tracked'        => false,
 							'integration'       => 'gutenberg',
 							'integration_label' => 'Gutenberg',
 							'integration_color' => '#2271b1',
@@ -561,7 +580,7 @@ add_filter(
 										'block_index' => $block_path,
 										'event_type'  => 'none',
 										'is_tracked'  => false,
-										'integration'       => 'gutenberg',
+										'integration' => 'gutenberg',
 										'integration_label' => 'Gutenberg',
 										'integration_color' => '#2271b1',
 									);
@@ -579,7 +598,8 @@ add_filter(
 
 		foreach ( $posts as $post_id ) {
 			$post = get_post( $post_id );
-			if ( ! $post ) { continue; }
+			if ( ! $post ) {
+				continue; }
 			$blocks = parse_blocks( $post->post_content );
 			find_umami_events( $blocks, $result, $post->ID, $post->post_title );
 		}
@@ -689,7 +709,13 @@ function umami_connect_delete_integration_wpforms( $form_id ) {
 		$encoded = wp_json_encode( $decoded );
 	}
 
-	$result = wp_update_post( array( 'ID' => $form_id, 'post_content' => $encoded ), true );
+	$result = wp_update_post(
+		array(
+			'ID'           => $form_id,
+			'post_content' => $encoded,
+		),
+		true
+	);
 	if ( is_wp_error( $result ) ) {
 		return false;
 	}
@@ -732,9 +758,9 @@ function remove_event_from_block_by_path( &$blocks, $target_path, $event_type, &
 
 				if ( $attrs_changed ) {
 					if ( isset( $block['innerHTML'] ) ) {
-						$clean_html = $block['innerHTML'];
-						$clean_html = preg_replace( '/\s+data-umami-event="[^"]*"/', '', $clean_html );
-						$clean_html = preg_replace( '/\s+data-umami-event-[^=\s]*="[^"]*"/', '', $clean_html );
+						$clean_html         = $block['innerHTML'];
+						$clean_html         = preg_replace( '/\s+data-umami-event="[^"]*"/', '', $clean_html );
+						$clean_html         = preg_replace( '/\s+data-umami-event-[^=\s]*="[^"]*"/', '', $clean_html );
 						$block['innerHTML'] = $clean_html;
 					}
 
@@ -742,9 +768,9 @@ function remove_event_from_block_by_path( &$blocks, $target_path, $event_type, &
 						$inner_content_count = count( $block['innerContent'] );
 						for ( $i = 0; $i < $inner_content_count; $i++ ) {
 							if ( is_string( $block['innerContent'][ $i ] ) ) {
-								$clean_content = $block['innerContent'][ $i ];
-								$clean_content = preg_replace( '/\s+data-umami-event="[^"]*"/', '', $clean_content );
-								$clean_content = preg_replace( '/\s+data-umami-event-[^=\s]*="[^"]*"/', '', $clean_content );
+								$clean_content               = $block['innerContent'][ $i ];
+								$clean_content               = preg_replace( '/\s+data-umami-event="[^"]*"/', '', $clean_content );
+								$clean_content               = preg_replace( '/\s+data-umami-event-[^=\s]*="[^"]*"/', '', $clean_content );
 								$block['innerContent'][ $i ] = $clean_content;
 							}
 						}
@@ -770,15 +796,15 @@ function remove_event_from_block_by_path( &$blocks, $target_path, $event_type, &
 						$clean_html = preg_replace_callback(
 							'/\s+rel="([^"]*)"/',
 							function ( $matches ) {
-								$rel_value = $matches[1];
-								$tokens = preg_split( '/\s+/', trim( $rel_value ) );
+								$rel_value    = $matches[1];
+								$tokens       = preg_split( '/\s+/', trim( $rel_value ) );
 								$clean_tokens = array_filter(
 									$tokens,
 									function ( $token ) {
 										return ! preg_match( '/^umami[:\-]/', $token );
 									}
 								);
-								$clean_rel = implode( ' ', $clean_tokens );
+								$clean_rel    = implode( ' ', $clean_tokens );
 
 								if ( empty( trim( $clean_rel ) ) ) {
 									return '';
@@ -808,15 +834,15 @@ function remove_event_from_block_by_path( &$blocks, $target_path, $event_type, &
 								$clean_content = preg_replace_callback(
 									'/\s+rel="([^"]*)"/',
 									function ( $matches ) {
-										$rel_value = $matches[1];
-										$tokens = preg_split( '/\s+/', trim( $rel_value ) );
+										$rel_value    = $matches[1];
+										$tokens       = preg_split( '/\s+/', trim( $rel_value ) );
 										$clean_tokens = array_filter(
 											$tokens,
 											function ( $token ) {
 												return ! preg_match( '/^umami[:\-]/', $token );
 											}
 										);
-										$clean_rel = implode( ' ', $clean_tokens );
+										$clean_rel    = implode( ' ', $clean_tokens );
 
 										if ( empty( trim( $clean_rel ) ) ) {
 											return '';

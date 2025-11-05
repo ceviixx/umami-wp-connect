@@ -43,13 +43,13 @@ class Umami_Connect_Autoloader {
 	private static function build_file_map() {
 		self::$file_map = array(
 			// Core files (load first).
-			'core' => array(
+			'core'        => array(
 				'constants.php',
 				'version_check.php',
 			),
 
 			// Admin files.
-			'admin' => array(
+			'admin'       => array(
 				'menu.php',
 			),
 
@@ -64,7 +64,7 @@ class Umami_Connect_Autoloader {
 			),
 
 			// Hooks (filters and actions).
-			'hooks' => array(
+			'hooks'       => array(
 				'filter-plugin-action-links.php',
 				'filter-render-block.php',
 				'filter-the-content.php',
@@ -77,7 +77,7 @@ class Umami_Connect_Autoloader {
 			),
 
 			// Dashboard components.
-			'dashboard' => array(
+			'dashboard'   => array(
 				'dashboard-status-widget.php',
 			),
 		);
@@ -129,7 +129,7 @@ class Umami_Connect_Autoloader {
 
 		foreach ( self::$file_map as $directory => $files ) {
 			foreach ( $files as $file ) {
-				$file_path = self::$plugin_dir . 'includes/' . $directory . '/' . $file;
+				$file_path                                = self::$plugin_dir . 'includes/' . $directory . '/' . $file;
 				$loaded_files[ $directory . '/' . $file ] = file_exists( $file_path );
 			}
 		}
