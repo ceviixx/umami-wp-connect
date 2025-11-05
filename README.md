@@ -32,10 +32,32 @@ Transform how you understand your website visitors with **umami Connect** — th
 ## Key Features
 
 - **Visual Event Tracking** — Add tracking to buttons and links directly in Gutenberg editor
+- **Form Integration** — Native tracking for Contact Form 7 and WPForms submissions
 - **Smart Auto-Tracking** — Automatically track links, buttons, and form submissions  
 - **Privacy Controls** — Self-protection mode, Do Not Track support, domain restrictions
 - **Event Management** — View and manage all your tracking from one dashboard
 - **Advanced Options** — beforeSend hooks, custom tagging, URL cleanup
+
+---
+
+## Supported Integrations
+
+> Configure tracking directly in your form editors — no custom code required
+
+<table align="center">
+  <tr>
+    <td align="center" width="50%">
+      <img src="screens/contact-form-7/contact-form-7-form.png" alt="Contact Form 7 Integration" width="400"><br>
+      <strong>Contact Form 7</strong>
+    </td>
+    <td align="center" width="50%">
+      <img src="screens/wpforms/wpforms-form.png" alt="WPForms Integration" width="400"><br>
+      <strong>WPForms</strong>
+    </td>
+  </tr>
+</table>
+
+*More integrations planned — [suggest yours](https://github.com/ceviixx/umami-wp-connect/issues/new?template=feature_request.yml&labels=enhancement)*
 
 ---
 

@@ -48,7 +48,8 @@ jobs:
       - name: Run ESLint
         run: |
           echo "🔍 Running ESLint..."
-          npx eslint assets/ --max-warnings 0
+          # Scan core assets and integration JS (e.g., Gutenberg extension)
+          npx eslint assets/ integrations/gutenberg/ --max-warnings 0 || exit 1
 
   php-lint:
     name: PHP Lint

@@ -8,8 +8,9 @@ add_filter(
 
 		$autotrack_links   = get_option( 'umami_autotrack_links', '1' ) === '1';
 		$autotrack_buttons = get_option( 'umami_autotrack_buttons', '1' ) === '1';
+		$autotrack_forms   = get_option( 'umami_autotrack_forms', '1' ) === '1';
 
-		if ( ! $autotrack_links && ! $autotrack_buttons ) {
+		if ( ! $autotrack_links && ! $autotrack_buttons && ! $autotrack_forms ) {
 			return $content;
 		}
 		if ( ! is_string( $content ) || $content === '' ) {
@@ -144,6 +145,44 @@ add_filter(
 			}
 		}
 
+		if ( $autotrack_forms ) {
+			$submit_buttons = $xpath->query( '//form//input[@type="submit"] | //form//button[@type="submit"] | //form//button[not(@type)]' );
+			foreach ( $submit_buttons as $button ) {
+				if ( $button->hasAttribute( 'data-umami-event' ) || $button->hasAttribute( 'data-umami-skip' ) ) {
+					continue;
+				}
+
+				$form = $button;
+				while ( $form && strcasecmp( $form->nodeName, 'form' ) !== 0 ) {
+                 // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+					$form = $form->parentNode;
+				}
+
+				if ( ! $form || strcasecmp( $form->nodeName, 'form' ) !== 0 ) {
+					continue;
+				}
+
+				if ( $form->hasAttribute( 'data-umami-skip' ) ) {
+					continue;
+				}
+
+				$event_name = 'form_submit';
+				$aria_label = $form->hasAttribute( 'aria-label' ) ? trim( $form->getAttribute( 'aria-label' ) ) : '';
+				$form_id    = $form->hasAttribute( 'id' ) ? trim( $form->getAttribute( 'id' ) ) : '';
+				$form_name  = $form->hasAttribute( 'name' ) ? trim( $form->getAttribute( 'name' ) ) : '';
+
+				if ( $aria_label !== '' ) {
+					$event_name = 'form:' . $aria_label;
+				} elseif ( $form_id !== '' ) {
+					$event_name = 'form:' . $form_id;
+				} elseif ( $form_name !== '' ) {
+					$event_name = 'form:' . $form_name;
+				}
+
+				$button->setAttribute( 'data-umami-event', $event_name );
+			}
+		}
+
 		$container = $dom->getElementsByTagName( 'div' )->item( 0 );
 		$html      = '';
 		if ( $container ) {
@@ -156,43 +195,5 @@ add_filter(
 		return $html ? $html : $content;
 	},
 	20
-);
-
-add_action(
-	'wp_footer',
-	function () {
-		if ( is_admin() ) {
-			return;
-		}
-
-		$autotrack_forms = get_option( 'umami_autotrack_forms', '1' ) === '1';
-		if ( ! $autotrack_forms ) {
-			return;
-		}
-
-		?>
-	<script>
-	(function() {
-		document.addEventListener('DOMContentLoaded', function() {
-			var forms = document.querySelectorAll('form:not([data-umami-event]):not([data-umami-skip])');
-			forms.forEach(function(form) {
-				var id = form.getAttribute('id');
-				var name = form.getAttribute('name');
-				var eventName = 'form_submit';
-
-				if (id) {
-					eventName = 'form:' + id;
-				} else if (name) {
-					eventName = 'form:' + name;
-				}
-
-				form.setAttribute('data-umami-event', eventName);
-			});
-		});
-	})();
-	</script>
-		<?php
-	},
-	100
 );
 

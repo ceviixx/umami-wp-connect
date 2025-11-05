@@ -50,7 +50,7 @@ jobs:
           echo "🔍 Validating directory structure..."
           
           # Check for standard WordPress plugin directories
-          for dir in includes assets; do
+          for dir in includes assets integrations; do
             if [ ! -d "$dir" ]; then
               echo "❌ Required directory '$dir' not found"
               exit 1

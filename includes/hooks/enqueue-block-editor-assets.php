@@ -13,12 +13,5 @@ add_action(
 			'1.1.1',
 			true
 		);
-
-		wp_enqueue_style(
-			'umami-extend-editor-style',
-			plugins_url( 'assets/editor/umami-extend.css', UMAMI_CONNECT_PLUGIN_FILE ),
-			array( 'wp-components' ),
-			'1.0.0'
-		);
 	}
 );

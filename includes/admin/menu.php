@@ -198,7 +198,7 @@ function umami_connect_add_help_events_overview() {
 			'id'      => 'umami_help_events_overview',
 			'title'   => 'Overview',
 			'content' => '<p><strong>Events Overview</strong></p>' .
-						'<p>Overview of all configured tracking events in your Gutenberg blocks. Events are custom tracking points that measure specific user interactions on your website.</p>' .
+						'<p>Overview of all configured tracking events across your site. Events are custom tracking points that measure specific user interactions on your website.</p>' .
 						'<p>This page helps you understand how visitors engage with your content beyond basic page views and manage all tracking configurations in one place.</p>',
 		)
 	);
@@ -207,14 +207,14 @@ function umami_connect_add_help_events_overview() {
 		array(
 			'id'      => 'umami_help_events_creating',
 			'title'   => 'Creating Events',
-			'content' => '<p><strong>Supported Blocks</strong><br>' .
-						'Buttons, Paragraphs, Headings, Quotes, and Pull Quotes can be configured for event tracking.</p>' .
-						'<p><strong>Block Inspector</strong><br>' .
-						'Select any supported block in Gutenberg and look for the "Umami Event Tracking" panel in the block inspector.</p>' .
+			'content' => '<p><strong>Event Sources</strong><br>' .
+						'Events can be configured in multiple places across your site, including editor blocks and form integrations.</p>' .
 						'<p><strong>Event Configuration</strong><br>' .
 						'• <strong>Event Name:</strong> Add a descriptive name (e.g., "Newsletter Signup", "Download PDF")<br>' .
 						'• <strong>Data Pairs:</strong> Add key-value pairs to track additional context (optional)<br>' .
-						'• <strong>Link Events:</strong> Connect events to specific page URLs for cross-page tracking</p>',
+						'• <strong>Link Events:</strong> Connect events to specific page URLs for cross-page tracking</p>' .
+						'<p><strong>Where to Configure</strong><br>' .
+						'Look for "Umami Event Tracking" or "Umami Tracking" settings in block inspectors, form editors, or plugin configuration panels.</p>',
 		)
 	);
 
@@ -224,12 +224,12 @@ function umami_connect_add_help_events_overview() {
 			'title'   => 'Managing Events',
 			'content' => '<p><strong>Filter View</strong><br>' .
 						'Use "All", "Events", or "Candidates" to filter the display:<br>' .
-						'• <strong>Events:</strong> Blocks with configured event names and tracking data<br>' .
-						'• <strong>Candidates:</strong> Supported blocks without event configuration (potential events)</p>' .
+						'• <strong>Events:</strong> Configured tracking events with active event names<br>' .
+						'• <strong>Candidates:</strong> Available tracking opportunities without event configuration</p>' .
 						'<p><strong>Search & Edit</strong><br>' .
-						'• Use the search box to find specific events by name or post title<br>' .
-						'• Click "Edit Page/Post" to open Gutenberg and modify event settings<br>' .
-						'• Use "Delete" to remove event tracking while preserving the original block</p>',
+						'• Use the search box to find specific events by name or source<br>' .
+						'• Click "Edit" to open the configuration interface for that event<br>' .
+						'• Use "Delete" to remove event tracking while preserving the original content</p>',
 		)
 	);
 
@@ -244,7 +244,7 @@ function umami_connect_add_help_events_overview() {
 						'<p><strong>Testing & Maintenance</strong><br>' .
 						'• Test events in your Umami dashboard after configuration<br>' .
 						'• Regularly review and clean up unused event configurations<br>' .
-						'• Changes made in Gutenberg are reflected immediately in your tracking</p>',
+						'• Configuration changes are reflected immediately in your tracking</p>',
 		)
 	);
 
@@ -425,7 +425,7 @@ function umami_connect_add_screen_options_events_overview() {
 		array(
 			'label'   => __( 'Events per page', 'umami-connect' ),
 			'default' => 20,
-			'option'  => 'events_per_page',
+			'option'  => 'umami_connect_events_overview_per_page',
 		)
 	);
 
@@ -440,6 +440,7 @@ function umami_connect_add_screen_options_events_overview() {
 function umami_connect_events_overview_columns( $columns ) {
 	return array(
 		'event'      => __( 'Event', 'umami-connect' ),
+		'integration'=> __( 'Integration', 'umami-connect' ),
 		'post'       => __( 'Post/Page', 'umami-connect' ),
 		'block_type' => __( 'Block Type', 'umami-connect' ),
 		'label'      => __( 'Label/Text', 'umami-connect' ),
@@ -451,8 +452,13 @@ function umami_connect_events_overview_columns( $columns ) {
  * Handle screen option saving
  */
 function umami_connect_set_screen_option( $status, $option, $value ) {
-	if ( 'events_per_page' === $option ) {
-		return $value;
+	if ( 'umami_connect_events_overview_per_page' === $option ) {
+		return max( 1, (int) $value );
 	}
 	return $status;
 }
+
+// Also hook the dynamic filter for this option key to ensure saving works on all WP versions.
+add_filter( 'set_screen_option_umami_connect_events_overview_per_page', function( $status, $option, $value ) {
+	return max( 1, (int) $value );
+}, 10, 3 );
