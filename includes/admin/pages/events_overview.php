@@ -285,7 +285,7 @@ function umami_connect_render_events_overview_page() {
 				} elseif ( ! empty( $row['edit_label'] ) ) {
 					$title = trim( (string) $row['edit_label'] );
 				}
-				
+
 				if ( ! empty( $title ) ) {
 					echo esc_html( $title );
 				} elseif ( ! empty( $row['post_id'] ) ) {
