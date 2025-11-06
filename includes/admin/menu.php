@@ -441,7 +441,7 @@ function umami_connect_events_overview_columns( $columns ) {
 	return array(
 		'event'       => __( 'Event', 'umami-connect' ),
 		'integration' => __( 'Integration', 'umami-connect' ),
-		'post'        => __( 'Post/Page', 'umami-connect' ),
+		'post'        => __( 'Source', 'umami-connect' ),
 		'block_type'  => __( 'Block Type', 'umami-connect' ),
 		'label'       => __( 'Label/Text', 'umami-connect' ),
 		'data_pairs'  => __( 'Data Pairs', 'umami-connect' ),

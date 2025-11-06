@@ -44,7 +44,7 @@ function umami_connect_render_events_overview_page() {
 	echo '<div class="wrap">';
 	echo '<h1><b>umami Connect</b></h1>
 		<h3>Event overview</h3>';
-	echo '<p>Overview of all configured tracking events across your site. Click "Edit" to manage individual events.</p>';
+	echo '<p>Overview of all configured tracking events from Gutenberg blocks and integrations. Click "Edit" to manage individual events.</p>';
 
 	$screen = get_current_screen();
 	// Per-page aus Screen Options lesen (eigener Key)
@@ -244,7 +244,7 @@ function umami_connect_render_events_overview_page() {
 			echo '<tr>';
 
 			if ( ! in_array( 'event', $hidden_columns, true ) ) {
-				echo '<td class="title column-title has-row-actions column-primary">';
+				echo '<td class="event column-event has-row-actions column-primary">';
 				if ( $is_tracked ) {
 					echo '<strong><code>' . esc_html( (string) $row['event'] ) . '</code></strong>';
 				} else {
@@ -279,10 +279,17 @@ function umami_connect_render_events_overview_page() {
 
 			if ( ! in_array( 'post', $hidden_columns, true ) ) {
 				echo '<td class="column-post">';
-				if ( ! empty( $row['edit_link'] ) ) {
-					echo '<a href="' . esc_url( (string) $row['edit_link'] ) . '" target="_blank">' . esc_html( (string) ( $row['post_title'] ?? ( $row['edit_label'] ?? '' ) ) ) . '</a>';
+				$title = '';
+				if ( ! empty( $row['post_title'] ) ) {
+					$title = trim( (string) $row['post_title'] );
+				} elseif ( ! empty( $row['edit_label'] ) ) {
+					$title = trim( (string) $row['edit_label'] );
+				}
+				
+				if ( ! empty( $title ) ) {
+					echo esc_html( $title );
 				} elseif ( ! empty( $row['post_id'] ) ) {
-					echo '<a href="' . esc_url( get_edit_post_link( (int) $row['post_id'] ) ) . '" target="_blank">' . esc_html( (string) ( $row['post_title'] ?? '' ) ) . '</a>';
+					echo '<em>' . esc_html__( '(no title)', 'umami-connect' ) . '</em>';
 				} else {
 					echo '&mdash;';
 				}

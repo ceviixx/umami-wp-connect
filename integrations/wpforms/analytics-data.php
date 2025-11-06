@@ -90,7 +90,7 @@ add_filter(
 				'event'             => $is_tracked ? (string) $event_name : '(Candidate)',
 				'post_id'           => (int) $form_id,
 				'post_title'        => $label,
-				'block_type'        => 'wpforms',
+				'block_type'        => 'WPForms',
 				'label'             => $label,
 				'data_pairs'        => $pairs,
 				'block_index'       => '',

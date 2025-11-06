@@ -72,7 +72,7 @@ add_filter(
 				'event'             => $is_tracked ? (string) $event_name : '(Candidate)',
 				'post_id'           => (int) $form_id,
 				'post_title'        => $label,
-				'block_type'        => 'contact-form-7',
+				'block_type'        => 'CF7',
 				'label'             => $label,
 				'data_pairs'        => $pairs,
 				'block_index'       => '',
