@@ -15,15 +15,15 @@ Transform how you understand your website visitors with **umami Connect** — th
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-777BB4?logo=php&logoColor=white)](https://php.net/)
 
 <div align="center">
-  <img src="screens/umami-connect-demo.gif" alt="Umami Connect Demo - Visual Event Tracking Setup" width="800">
+  <img src="screens/core/umami-connect-demo.gif" alt="Umami Connect Demo - Visual Event Tracking Setup" width="800">
 </div>
 
 <table align="center">
   <tr>
-    <td align="center"><img src="screens/gutenberg/gutenberg-button.png" alt="Button Tracking" width="180"></td>
-    <td align="center"><img src="screens/gutenberg/gutenberg-link.png" alt="Link Tracking" width="180"></td>
-    <td align="center"><img src="screens/settings/settings-general.png" alt="Easy Setup" width="180"></td>
-    <td align="center"><img src="screens/settings/settings-event-overview.png" alt="Event Management" width="180"></td>
+    <td align="center"><img src="screens/core/gutenberg/gutenberg-button.png" alt="Button Tracking" width="180"></td>
+    <td align="center"><img src="screens/core/gutenberg/gutenberg-link.png" alt="Link Tracking" width="180"></td>
+    <td align="center"><img src="screens/core/settings/settings-general.png" alt="Easy Setup" width="180"></td>
+    <td align="center"><img src="screens/core/settings/settings-event-overview.png" alt="Event Management" width="180"></td>
   </tr>
 </table>
 
@@ -47,11 +47,11 @@ Transform how you understand your website visitors with **umami Connect** — th
 <table align="center">
   <tr>
     <td align="center" width="50%">
-      <img src="screens/contact-form-7/contact-form-7-form.png" alt="Contact Form 7 Integration" width="400"><br>
+      <img src="screens/integrations/contact-form-7-form.png" alt="Contact Form 7 Integration" width="400"><br>
       <strong>Contact Form 7</strong>
     </td>
     <td align="center" width="50%">
-      <img src="screens/wpforms/wpforms-form.png" alt="WPForms Integration" width="400"><br>
+      <img src="screens/integrations/wpforms-form.png" alt="WPForms Integration" width="400"><br>
       <strong>WPForms</strong>
     </td>
   </tr>
