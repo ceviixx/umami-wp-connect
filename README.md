@@ -4,9 +4,11 @@
 
 Transform how you understand your website visitors with **umami Connect** — the most user-friendly WordPress plugin for privacy-focused analytics. Whether you're a blogger, business owner, or agency managing client sites, get powerful insights without compromising your visitors' privacy or dealing with complex setup processes.
 
-[![Latest Release](https://img.shields.io/github/v/release/ceviixx/umami-wp-connect?label=Latest)](https://github.com/ceviixx/umami-wp-connect/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/ceviixx/umami-wp-connect/total)](https://github.com/ceviixx/umami-wp-connect/releases)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/ceviixx/umami-wp-connect/blob/main/LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/ceviixx/umami-wp-connect?logo=github&label=Release)](https://github.com/ceviixx/umami-wp-connect/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/ceviixx/umami-wp-connect/total?logo=github&label=Downloads)](https://github.com/ceviixx/umami-wp-connect/releases)
+[![GitHub Stars](https://img.shields.io/github/stars/ceviixx/umami-wp-connect?logo=github&label=Stars)](https://github.com/ceviixx/umami-wp-connect/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/ceviixx/umami-wp-connect?logo=github&label=Forks)](https://github.com/ceviixx/umami-wp-connect/network/members)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?logo=opensourceinitiative&logoColor=white)](https://github.com/ceviixx/umami-wp-connect/blob/main/LICENSE)
 [![GitHub](https://img.shields.io/badge/GitHub-Issues-181717?logo=github)](https://github.com/ceviixx/umami-wp-connect/issues)
 [![Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?logo=github)](https://github.com/ceviixx/umami-wp-connect/discussions)
 [![Discord](https://img.shields.io/badge/Discord-Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/84w4CQU7Jb)
