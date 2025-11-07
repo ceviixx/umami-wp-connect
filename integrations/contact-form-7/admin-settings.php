@@ -83,7 +83,7 @@ function umami_cf7_render_editor_panel( $post ) { // phpcs:ignore WordPress.Nami
  * Print footer script to handle dynamic add/remove for key/value rows on CF7 admin screens.
  */
 function umami_cf7_admin_print_kv_script() {
-	// Nur auf CF7-Edit-Seite ausgeben.
+	// Only output on CF7 edit page.
 	$is_cf7_page = ( isset( $_GET['page'] ) && 'wpcf7' === $_GET['page'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$is_edit     = ( isset( $_GET['action'] ) && 'edit' === $_GET['action'] && isset( $_GET['post'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	if ( ! $is_cf7_page || ! $is_edit ) {

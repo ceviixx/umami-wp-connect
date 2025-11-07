@@ -107,7 +107,6 @@ add_filter(
 		}
 
 		return $events;
-		return $events;
 	},
 	15,
 	2

@@ -65,7 +65,8 @@ add_filter(
 						);
 					}
 				}
-			}       $is_tracked = ( $event_name !== '' );
+			}
+			$is_tracked = ( $event_name !== '' );
 			$label              = get_the_title( $form_id );
 
 			$events[] = array(

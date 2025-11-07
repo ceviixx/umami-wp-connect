@@ -66,7 +66,8 @@ function umami_cf7_inject_submit_attributes_shortcode( $output, $tag, $attr ) {
 					$cf7_form = wpcf7_contact_form( $form_id );
 				}
 			}
-		}       if ( $cf7_form && method_exists( $cf7_form, 'id' ) ) {
+		}
+		if ( $cf7_form && method_exists( $cf7_form, 'id' ) ) {
 			$form_id = (int) $cf7_form->id();
 		}
 	}

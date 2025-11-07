@@ -200,6 +200,5 @@ function umami_wpforms_handle_delete_integration( $result, $event_type, $post_id
 	clean_post_cache( $form_id );
 	return true;
 }
-add_filter( 'umami_connect_delete_integration_event', 'umami_wpforms_handle_delete_integration', 10, 3 );
-
+// Register deletion handler once (removed duplicate registration).
 add_filter( 'umami_connect_delete_integration_event', 'umami_wpforms_handle_delete_integration', 10, 3 );
