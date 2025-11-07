@@ -114,3 +114,27 @@ function umami_cf7_inject_submit_attributes_shortcode( $output, $tag, $attr ) {
 	return $output;
 }
 add_filter( 'do_shortcode_tag', 'umami_cf7_inject_submit_attributes_shortcode', 10, 3 );
+
+/**
+ * Handle deletion of CF7 integration events.
+ *
+ * @param bool   $result     Current result (false by default).
+ * @param string $event_type Event type identifier.
+ * @param int    $post_id    Form ID.
+ * @return bool Success status.
+ */
+function umami_cf7_handle_delete_integration( $result, $event_type, $post_id ) {
+	if ( 'integration_cf7' !== $event_type ) {
+		return $result;
+	}
+
+	$form_id = absint( $post_id );
+	if ( ! $form_id ) {
+		return false;
+	}
+
+	delete_post_meta( $form_id, UMAMI_CF7_META_EVENT_NAME );
+	delete_post_meta( $form_id, UMAMI_CF7_META_EVENT_DATA );
+	return true;
+}
+add_filter( 'umami_connect_delete_integration_event', 'umami_cf7_handle_delete_integration', 10, 3 );

@@ -12,13 +12,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Frontend only and only if WPForms is available.
-if ( is_admin() || ! function_exists( 'wpforms' ) ) {
+// Guard: run only if WPForms is available.
+if ( ! function_exists( 'wpforms' ) ) {
 	return;
 }
 
 /**
  * Inject Umami attributes into WPForms submit buttons by scanning post content.
+ *
+ * Only runs on frontend.
  *
  * Strategy:
  * - Detect WPForms form IDs in the rendered content (e.g., wpforms-form-123).
@@ -33,6 +35,11 @@ if ( is_admin() || ! function_exists( 'wpforms' ) ) {
  * @return string Modified content.
  */
 function umami_wpforms_inject_submit_attributes_in_content( $content ) {
+	// Only run on frontend
+	if ( is_admin() ) {
+		return $content;
+	}
+
 	if ( ! is_string( $content ) || $content === '' ) {
 		return $content;
 	}
@@ -129,3 +136,70 @@ function umami_wpforms_inject_submit_attributes_in_content( $content ) {
 	return $content;
 }
 add_filter( 'the_content', 'umami_wpforms_inject_submit_attributes_in_content', 19 );
+
+/**
+ * Handle deletion of WPForms integration events.
+ *
+ * @param bool   $result     Current result (false by default).
+ * @param string $event_type Event type identifier.
+ * @param int    $post_id    Form ID.
+ * @return bool Success status.
+ */
+function umami_wpforms_handle_delete_integration( $result, $event_type, $post_id ) {
+	if ( 'integration_wpforms' !== $event_type ) {
+		return $result;
+	}
+
+	$form_id = absint( $post_id );
+	if ( ! $form_id ) {
+		return false;
+	}
+
+	$post = get_post( $form_id );
+	if ( ! $post ) {
+		return false;
+	}
+
+	$decoded = null;
+	if ( function_exists( 'wpforms_decode' ) ) {
+		$decoded = wpforms_decode( $post->post_content );
+	} else {
+		$decoded = json_decode( $post->post_content, true );
+	}
+
+	if ( ! is_array( $decoded ) ) {
+		return false;
+	}
+
+	if ( ! isset( $decoded['settings'] ) || ! is_array( $decoded['settings'] ) ) {
+		$decoded['settings'] = array();
+	}
+
+	$decoded['settings']['umami_event_name'] = '';
+	$decoded['settings']['umami_event_data'] = '';
+
+	$encoded = '';
+	if ( function_exists( 'wpforms_encode' ) ) {
+		$encoded = wpforms_encode( $decoded );
+	} else {
+		$encoded = wp_json_encode( $decoded );
+	}
+
+	$update_result = wp_update_post(
+		array(
+			'ID'           => $form_id,
+			'post_content' => $encoded,
+		),
+		true
+	);
+
+	if ( is_wp_error( $update_result ) ) {
+		return false;
+	}
+
+	clean_post_cache( $form_id );
+	return true;
+}
+add_filter( 'umami_connect_delete_integration_event', 'umami_wpforms_handle_delete_integration', 10, 3 );
+
+add_filter( 'umami_connect_delete_integration_event', 'umami_wpforms_handle_delete_integration', 10, 3 );

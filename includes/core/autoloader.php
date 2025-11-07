@@ -55,6 +55,7 @@ class Umami_Connect_Autoloader {
 
 			// Admin pages.
 			'admin/pages' => array(
+				'welcome.php',
 				'general.php',
 				'self_protection.php',
 				'automation.php',
@@ -205,3 +206,5 @@ class Umami_Connect_Autoloader {
 		}
 	}
 }
+
+require_once __DIR__ . '/../hooks/admin-footer.php';

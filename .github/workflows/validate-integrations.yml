@@ -1,0 +1,117 @@
+name: Validate Integrations
+
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  validate:
+    name: Validate integrations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+
+      - name: Validate integration folders (inline PHP)
+        run: |
+          php -r '
+          error_reporting(E_ALL);
+          define("ABSPATH", getcwd());
+          if (!function_exists("__")) { function __($t,$d=null){ return $t; } }
+          $dir = "integrations";
+          if (!is_dir($dir)) { echo "::error ::integrations/ not found\n"; exit(1); }
+          $ents = scandir($dir) ?: [];
+          $folders = [];
+          foreach ($ents as $e) {
+            if ($e === "." || $e === "..") continue;
+            if (is_dir("$dir/$e") && $e !== "_example") { $folders[] = $e; }
+          }
+          require "$dir/registry.php";
+          if (!function_exists("umami_connect_get_integrations")) { echo "::error ::Registry function missing (umami_connect_get_integrations)\n"; exit(1); }
+          $reg = umami_connect_get_integrations();
+          if (!is_array($reg)) { echo "::error ::Registry not array\n"; exit(1); }
+          $errors = [];
+          $warnings = [];
+
+          // Helper to add error/warn
+          $addErr = function($m) use (&$errors){ $errors[] = $m; };
+          $addWarn = function($m) use (&$warnings){ $warnings[] = $m; };
+
+          // 1) Validate each folder has registry entry and correct schema
+          foreach ($folders as $key) {
+            if (!array_key_exists($key, $reg)) { $addErr("Folder '$key' has no registry entry"); continue; }
+            $cfg = $reg[$key];
+
+            // key/slug format
+            if (!preg_match("/^[a-z0-9\-]+$/", $key)) {
+              $addErr("Integration key/folder '$key' must be lower-case letters, numbers and dashes only");
+            }
+            // files
+            if (!isset($cfg["files"]) || !is_array($cfg["files"])) {
+              $addErr("Integration '$key' must define 'files' as an array in registry");
+            } else if (count($cfg["files"]) === 0) {
+              // Allow empty 'files' but warn if a folder exists (treated as core integration)
+              if (is_dir("$dir/$key")) {
+                $addWarn("Integration '$key' has empty registry 'files' but a folder exists; treated as core. Ensure loading is handled elsewhere.");
+              }
+            } else {
+              $listed = [];
+              foreach ($cfg["files"] as $f) {
+                if (!is_string($f) || trim($f) === "") { $addErr("Integration '$key' has invalid file entry (must be non-empty string)"); continue; }
+                $base = basename($f);
+                if (in_array($base, $listed, true)) {
+                  $addWarn("Integration '$key' registry 'files' contains duplicate entry: $base");
+                }
+                $listed[] = $base;
+                if (!preg_match("/^[A-Za-z0-9_\-]+\.php$/", $base)) {
+                  $addWarn("Integration '$key' file entry '$f' should be a PHP file in the integration root");
+                }
+                if (!file_exists("$dir/$key/" . $base)) {
+                  $addErr("Integration '$key' file missing: " . $base);
+                }
+              }
+              // Warn for extra PHP files not referenced
+              $phpFiles = glob("$dir/$key/*.php") ?: [];
+              foreach ($phpFiles as $pf) {
+                $bn = basename($pf);
+                if (!in_array($bn, $listed, true)) {
+                  $addWarn("Integration '$key' has unlisted PHP file: $bn (consider adding to registry 'files')");
+                }
+              }
+            }
+
+            // soft rule: description length
+            if (isset($cfg["description"]) && is_string($cfg["description"])) {
+              if (mb_strlen(trim(strip_tags($cfg["description"]))) < 10) {
+                $addWarn("Integration '$key' description is quite short; consider expanding for clarity");
+              }
+            }
+          }
+
+          // 2) Validate registry keys that have files also have a folder
+          foreach ($reg as $key => $cfg) {
+            if (!empty($cfg["files"]) && is_array($cfg["files"])) {
+              if (!is_dir("$dir/$key")) {
+                $addErr("Registry entry '$key' lists files but folder '$dir/$key' is missing");
+              }
+            }
+          }
+
+          foreach ($warnings as $w) { echo "::warning ::$w\n"; }
+          if ($errors) {
+            foreach ($errors as $e) { echo "::error ::$e\n"; }
+            exit(1);
+          }
+          echo "[integrations:validate] OK — ".count($folders)." integration folder(s) validated.\n";
+          '

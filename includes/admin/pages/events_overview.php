@@ -11,33 +11,36 @@ function umami_connect_render_events_overview_page() {
 	}
 
 	if ( isset( $_POST['umami_delete_event'] ) && check_admin_referer( 'umami_delete_event', 'umami_delete_nonce' ) ) {
-		$post_id     = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0; // For integrations: form ID
+		$post_id     = isset( $_POST['post_id'] ) ? sanitize_text_field( wp_unslash( $_POST['post_id'] ) ) : ''; // Can be numeric post ID or string form_id
 		$block_index = isset( $_POST['block_index'] ) ? sanitize_text_field( wp_unslash( $_POST['block_index'] ) ) : '';
 		$event_type  = isset( $_POST['event_type'] ) ? sanitize_key( wp_unslash( $_POST['event_type'] ) ) : 'button';
 
-		if ( ! $post_id || $post_id <= 0 ) {
-			echo '<div class="notice notice-error is-dismissible"><p><strong>Error: Invalid ID.</strong></p></div>';
+		$result = false;
+
+		if ( strpos( $event_type, 'integration_' ) === 0 ) {
+			// Integration events - pass form_id/identifier as-is to the filter
+			$result = apply_filters( 'umami_connect_delete_integration_event', false, $event_type, $post_id );
 		} else {
-			$result = false;
-			if ( strpos( $event_type, 'integration_' ) === 0 ) {
-				if ( 'integration_cf7' === $event_type ) {
-					$result = umami_connect_delete_integration_cf7( $post_id );
-				} elseif ( 'integration_wpforms' === $event_type ) {
-					$result = umami_connect_delete_integration_wpforms( $post_id );
-				}
+			// Gutenberg block events - require valid numeric post_id
+			$numeric_post_id = absint( $post_id );
+			if ( ! $numeric_post_id || $numeric_post_id <= 0 ) {
+				echo '<div class="notice notice-error is-dismissible"><p><strong>Error: Invalid ID.</strong></p></div>';
 			} elseif ( empty( $block_index ) || ! is_string( $block_index ) ) {
-					echo '<div class="notice notice-error is-dismissible"><p><strong>Error: Invalid block index.</strong></p></div>';
+				echo '<div class="notice notice-error is-dismissible"><p><strong>Error: Invalid block index.</strong></p></div>';
 			} elseif ( ! in_array( $event_type, array( 'button', 'link' ), true ) ) {
 				echo '<div class="notice notice-error is-dismissible"><p><strong>Error: Invalid event type.</strong></p></div>';
 			} else {
-				$result = umami_connect_delete_event_from_block( $post_id, $block_index, $event_type );
-			}   if ( $result ) {
-				echo '<div class="notice notice-success is-dismissible"><p><strong>Event deleted successfully.</strong></p></div>';
-			} elseif ( strpos( $event_type, 'integration_' ) === 0 ) {
-				echo '<div class="notice notice-error is-dismissible"><p><strong>Error:</strong> Could not delete integration event.</p></div>';
-			} else {
-				echo '<div class="notice notice-error is-dismissible"><p><strong>Error:</strong> Could not delete event.</p></div>';
+				$result = umami_connect_delete_event_from_block( $numeric_post_id, $block_index, $event_type );
 			}
+		}
+
+		if ( $result ) {
+			echo '<div class="notice notice-success is-dismissible"><p><strong>Event deleted successfully.</strong></p></div>';
+		} elseif ( strpos( $event_type, 'integration_' ) === 0 ) {
+			echo '<div class="notice notice-error is-dismissible"><p><strong>Error:</strong> Could not delete integration event.</p></div>';
+		} elseif ( ! empty( $post_id ) && absint( $post_id ) > 0 ) {
+			// Only show generic error if we had a valid post_id but deletion failed
+			echo '<div class="notice notice-error is-dismissible"><p><strong>Error:</strong> Could not delete event.</p></div>';
 		}
 	}
 
@@ -56,50 +59,160 @@ function umami_connect_render_events_overview_page() {
 	// Alle Events von Core & Integrationen holen
 	$events = apply_filters( 'umami_connect_get_all_events', array(), $per_page );
 
-	// Zähler für Views
-	$all_count        = is_array( $events ) ? count( $events ) : 0;
+	// Current Filter & Search
+	$current_filter = isset( $_GET['filter'] ) ? sanitize_key( wp_unslash( $_GET['filter'] ) ) : 'all';
+	$search         = isset( $_GET['s'] ) ? trim( strtolower( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) ) : '';
+
+	// Zähler für Views (nach Search-Filter)
+	$all_count        = 0;
 	$events_count     = 0;
 	$candidates_count = 0;
 	if ( ! empty( $events ) ) {
+		// Load integrations for label matching in search
+		$all_integrations = umami_connect_get_integrations();
+
 		foreach ( $events as $e ) {
+			// Apply search filter for counting
+			if ( $search !== '' ) {
+				$integration_label = '';
+				$integration_key   = isset( $e['integration'] ) ? (string) $e['integration'] : '';
+				if ( $integration_key !== '' && isset( $all_integrations[ $integration_key ]['label'] ) ) {
+					$integration_label = (string) $all_integrations[ $integration_key ]['label'];
+				}
+				// Fallback: use provided integration_label from row if registry lookup failed
+				if ( $integration_label === '' && isset( $e['integration_label'] ) && is_string( $e['integration_label'] ) ) {
+					$integration_label = $e['integration_label'];
+				}
+				$rowtext = strtolower( ( $e['event'] ?? '' ) . ' ' . ( $e['post_title'] ?? '' ) . ' ' . ( $e['label'] ?? '' ) . ' ' . $integration_label . ' ' . $integration_key );
+				if ( strpos( $rowtext, $search ) === false ) {
+					continue;
+				}
+			}
+
+			++$all_count;
 			$is_tracked = isset( $e['is_tracked'] ) ? (bool) $e['is_tracked'] : true;
 			if ( $is_tracked ) {
 				++$events_count;
 			} else {
-				++$candidates_count; }
+				++$candidates_count;
+			}
 		}
 	}
 
-	// Aktueller Filter & Suche
-	$current_filter = isset( $_GET['filter'] ) ? sanitize_key( wp_unslash( $_GET['filter'] ) ) : 'all';
-	$search         = isset( $_GET['s'] ) ? trim( strtolower( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) ) : '';
-
-	// Views + Suche UI
+	// Views + Search UI
 	echo '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; min-height: 32px;">';
 	echo '<ul class="subsubsub" style="margin: 0;">';
 	$base_url = remove_query_arg( array( 'filter', 'paged' ) );
-	echo '<li class="all"><a href="' . esc_url( $base_url ) . '" class="' . ( $current_filter === 'all' ? 'current' : '' ) . '">All <span class="count">(' . (int) $all_count . ')</span></a>' . ( ( $events_count > 0 || $candidates_count > 0 ) ? ' | ' : '' ) . '</li>';
-	if ( $events_count > 0 ) {
-		$url = add_query_arg( 'filter', 'events', $base_url );
-		echo '<li class="events"><a href="' . esc_url( $url ) . '" class="' . ( $current_filter === 'events' ? 'current' : '' ) . '">Events <span class="count">(' . (int) $events_count . ')</span></a>' . ( $candidates_count > 0 ? ' | ' : '' ) . '</li>';
-	}
-	if ( $candidates_count > 0 ) {
-		$url = add_query_arg( 'filter', 'candidates', $base_url );
-		echo '<li class="candidates"><a href="' . esc_url( $url ) . '" class="' . ( $current_filter === 'candidates' ? 'current' : '' ) . '">Candidates <span class="count">(' . (int) $candidates_count . ')</span></a></li>';
-	}
+
+	// All filter - always visible
+	echo '<li class="all"><a href="' . esc_url( $base_url ) . '" class="' . ( $current_filter === 'all' ? 'current' : '' ) . '">All <span class="count">(' . (int) $all_count . ')</span></a> | </li>';
+
+	// Events filter - always visible
+	$events_url = add_query_arg( 'filter', 'events', $base_url );
+	echo '<li class="events"><a href="' . esc_url( $events_url ) . '" class="' . ( $current_filter === 'events' ? 'current' : '' ) . '">Events <span class="count">(' . (int) $events_count . ')</span></a> | </li>';
+
+	// Candidates filter - always visible
+	$candidates_url = add_query_arg( 'filter', 'candidates', $base_url );
+	echo '<li class="candidates"><a href="' . esc_url( $candidates_url ) . '" class="' . ( $current_filter === 'candidates' ? 'current' : '' ) . '">Candidates <span class="count">(' . (int) $candidates_count . ')</span></a></li>';
+
 	echo '</ul>';
 	echo '<form method="get" style="margin: 0;">';
 	echo '<input type="hidden" name="page" value="umami_connect_events_overview">';
 	if ( $current_filter !== 'all' ) {
 		echo '<input type="hidden" name="filter" value="' . esc_attr( $current_filter ) . '">';
 	}
-	echo '<div class="search-box" style="display:flex; align-items:center; gap:8px;">';
+	echo '<div class="search-box" style="display:flex; align-items:center; gap:8px; position:relative;">';
 	echo '<label class="screen-reader-text" for="event-search-input">' . esc_html__( 'Search events', 'umami-connect' ) . ':</label>';
-	echo '<input type="search" id="event-search-input" name="s" value="' . esc_attr( isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '' ) . '" placeholder="' . esc_attr__( 'Search events...', 'umami-connect' ) . '" style="width: 200px;" />';
+	echo '<div style="position:relative;">';
+	echo '<input type="search" id="event-search-input" name="s" value="' . esc_attr( isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '' ) . '" placeholder="' . esc_attr__( 'Search events...', 'umami-connect' ) . '" style="width: 200px;" autocomplete="off" />';
+	echo '<div id="search-suggestions" style="display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #ddd; border-top:none; box-shadow:0 2px 4px rgba(0,0,0,0.1); z-index:1000; max-height:200px; overflow-y:auto;"></div>';
+	echo '</div>';
 	echo '<input type="submit" id="search-submit" class="button" value="' . esc_attr__( 'Search', 'umami-connect' ) . '">';
 	echo '</div>';
 	echo '</form>';
 	echo '</div>';
+
+	// Build integration suggestions data (include color)
+	$integration_suggestions = array();
+	if ( ! isset( $all_integrations ) || empty( $all_integrations ) ) {
+		$all_integrations = umami_connect_get_integrations();
+	}
+	if ( ! empty( $all_integrations ) && is_array( $all_integrations ) ) {
+		foreach ( $all_integrations as $key => $config ) {
+			if ( isset( $config['check'] ) && is_callable( $config['check'] ) && call_user_func( $config['check'] ) ) {
+				$integration_suggestions[] = array(
+					'label' => isset( $config['label'] ) ? $config['label'] : ucfirst( str_replace( '-', ' ', $key ) ),
+					'key'   => $key,
+					'color' => isset( $config['color'] ) ? $config['color'] : '#777777',
+				);
+			}
+		}
+	}
+
+	echo '<script>
+	(function() {
+		var searchInput = document.getElementById("event-search-input");
+		var suggestionsBox = document.getElementById("search-suggestions");
+		var integrations = ' . wp_json_encode( $integration_suggestions ) . ';
+
+		searchInput.addEventListener("input", function() {
+			var value = this.value.toLowerCase().trim();
+
+			if (value.length === 0) {
+				suggestionsBox.style.display = "none";
+				return;
+			}
+
+			var matches = integrations.filter(function(int) {
+				return int.label.toLowerCase().indexOf(value) === 0;
+			});
+
+			if (matches.length === 0) {
+				suggestionsBox.style.display = "none";
+				return;
+			}
+
+			var html = "";
+			matches.forEach(function(int) {
+				var dot = "<span class=\\"integration-dot\\" style=\\"display:inline-block;width:10px;height:10px;border-radius:50%;background:" + (int.color || \'#777\') + ";margin-right:8px;vertical-align:middle;\\"></span>";
+				html += "<div class=\\"suggestion-item\\" style=\\"padding:8px 12px; cursor:pointer; border-bottom:1px solid #f0f0f0; display:flex; align-items:center;\\" data-value=\\"" + int.label + "\\">" + dot + "<span>" + int.label + "</span></div>";
+			});
+
+			suggestionsBox.innerHTML = html;
+			suggestionsBox.style.display = "block";
+
+			// Add click handlers
+			var items = suggestionsBox.querySelectorAll(".suggestion-item");
+			items.forEach(function(item) {
+				item.addEventListener("mouseenter", function() {
+					this.style.backgroundColor = "#f0f0f0";
+				});
+				item.addEventListener("mouseleave", function() {
+					this.style.backgroundColor = "";
+				});
+				item.addEventListener("click", function() {
+					searchInput.value = this.getAttribute("data-value");
+					suggestionsBox.style.display = "none";
+					searchInput.form.submit();
+				});
+			});
+		});
+
+		// Close suggestions on click outside
+		document.addEventListener("click", function(e) {
+			if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+				suggestionsBox.style.display = "none";
+			}
+		});
+
+		// Close on escape
+		searchInput.addEventListener("keydown", function(e) {
+			if (e.key === "Escape") {
+				suggestionsBox.style.display = "none";
+			}
+		});
+	})();
+	</script>';
 
 	// Filter-Umschaltung nicht nötig: Views basieren direkt auf den gelieferten Counts der List Table
 
@@ -107,11 +220,25 @@ function umami_connect_render_events_overview_page() {
 	$hidden_columns = get_hidden_columns( $screen );
 	$columns        = umami_connect_events_overview_columns( array() );
 
-	// Suche + Filter anwenden
+	// Sarch + Filter apply
 	$filtered = array();
 	if ( ! empty( $events ) ) {
+		// Load integrations for label matching in search
+		$all_integrations = umami_connect_get_integrations();
+
 		foreach ( $events as $row ) {
-			$rowtext = strtolower( ( $row['event'] ?? '' ) . ' ' . ( $row['post_title'] ?? '' ) . ' ' . ( $row['label'] ?? '' ) );
+			// Build search text including integration label
+			$integration_label = '';
+			$integration_key   = isset( $row['integration'] ) ? (string) $row['integration'] : '';
+			if ( $integration_key !== '' && isset( $all_integrations[ $integration_key ]['label'] ) ) {
+				$integration_label = (string) $all_integrations[ $integration_key ]['label'];
+			}
+			// Fallback: use provided integration_label from row if registry lookup failed
+			if ( $integration_label === '' && isset( $row['integration_label'] ) && is_string( $row['integration_label'] ) ) {
+				$integration_label = $row['integration_label'];
+			}
+
+			$rowtext = strtolower( ( $row['event'] ?? '' ) . ' ' . ( $row['post_title'] ?? '' ) . ' ' . ( $row['label'] ?? '' ) . ' ' . $integration_label . ' ' . $integration_key );
 			if ( $search !== '' && strpos( $rowtext, $search ) === false ) {
 				continue;
 			}
@@ -126,7 +253,7 @@ function umami_connect_render_events_overview_page() {
 		}
 	}
 
-	// Sortierung
+	// Sort
 	$orderby      = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : 'event';
 	$order        = isset( $_GET['order'] ) ? strtolower( sanitize_key( wp_unslash( $_GET['order'] ) ) ) : 'asc';
 	$block_labels = array(
@@ -168,13 +295,13 @@ function umami_connect_render_events_overview_page() {
 		}
 	);
 
-	// Pagination berechnen
+	// Pagination calculation
 	$total_items  = count( $filtered );
 	$total_pages  = (int) ceil( $total_items / max( 1, $per_page ) );
 	$current_page = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1;
 	$paged_rows   = array_slice( $filtered, ( $current_page - 1 ) * $per_page, $per_page );
 
-	// Helper: Sortier-Link (als Closure, kein globaler Funktionsname)
+	// Helper: Order-Link
 	$umami_events_sort_link = function ( $label, $col ) {
 		$current = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : 'event';
 		$order   = isset( $_GET['order'] ) ? strtolower( sanitize_key( wp_unslash( $_GET['order'] ) ) ) : 'asc';
@@ -233,103 +360,118 @@ function umami_connect_render_events_overview_page() {
 		echo '</tr></tfoot>';
 		echo '<tbody>';
 
-		foreach ( $paged_rows as $row ) {
-			$block_type  = $row['block_type'] ?? '';
-			$block_label = $block_labels[ $block_type ] ?? $block_type;
-			$block_index = $row['block_index'] ?? '';
-			$event_type  = $row['event_type'] ?? 'button';
-			$is_tracked  = isset( $row['is_tracked'] ) ? (bool) $row['is_tracked'] : true;
-			$post_type   = ! empty( $row['post_id'] ) ? get_post_type( $row['post_id'] ) : '';
-
-			echo '<tr>';
-
-			if ( ! in_array( 'event', $hidden_columns, true ) ) {
-				echo '<td class="event column-event has-row-actions column-primary">';
-				if ( $is_tracked ) {
-					echo '<strong><code>' . esc_html( (string) $row['event'] ) . '</code></strong>';
-				} else {
-					echo '<strong style="color:#999;"><em>' . esc_html( (string) $row['event'] ) . '</em></strong>';
-				}
-
-				// Row actions
-				$actions = array();
-				if ( ! empty( $row['edit_link'] ) ) {
-					$actions['edit'] = '<a href="' . esc_url( $row['edit_link'] ) . '" target="_blank">' . esc_html( $row['edit_label'] ?? __( 'Edit', 'umami-connect' ) ) . '</a>';
-				} elseif ( ! empty( $row['post_id'] ) && $block_index ) {
-					$edit_label      = ( 'page' === $post_type ) ? __( 'Edit Page', 'umami-connect' ) : __( 'Edit Post', 'umami-connect' );
-					$actions['edit'] = '<a href="' . esc_url( get_edit_post_link( (int) $row['post_id'] ) ) . '" target="_blank">' . esc_html( $edit_label ) . '</a>';
-				}
-				$is_integration = is_string( $event_type ) && strpos( $event_type, 'integration_' ) === 0;
-				if ( $is_tracked && $event_type !== 'none' && ( $block_index || $is_integration ) ) {
-					$actions['delete'] = '<a href="#" class="delete-event submitdelete" data-post-id="' . esc_attr( (string) ( $row['post_id'] ?? 0 ) ) . '" data-block-index="' . esc_attr( (string) $block_index ) . '" data-event-type="' . esc_attr( (string) $event_type ) . '" style="color:#b32d2e;">' . esc_html__( 'Delete', 'umami-connect' ) . '</a>';
-				}
-				if ( ! empty( $actions ) ) {
-					echo '<div class="row-actions">' . implode( ' | ', $actions ) . '</div>';
-				}
-				echo '<button type="button" class="toggle-row"><span class="screen-reader-text">' . esc_html__( 'Show more details', 'umami-connect' ) . '</span></button>';
-				echo '</td>';
+		// Default WP List Table empty state row if no items on this page (after filters/search)
+		$visible_count = 0;
+		foreach ( $columns as $column_key => $column_name ) {
+			if ( in_array( $column_key, $hidden_columns, true ) ) {
+				continue;
 			}
+			$visible_count++;
+		}
 
-			if ( ! in_array( 'integration', $hidden_columns, true ) ) {
-				$label = isset( $row['integration_label'] ) ? $row['integration_label'] : ( isset( $row['integration'] ) ? $row['integration'] : 'Core' );
-				$color = isset( $row['integration_color'] ) ? $row['integration_color'] : '#2271b1';
-				$style = 'display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:' . esc_attr( $color ) . ';color:#fff;';
-				echo '<td class="column-integration"><span style="' . esc_attr( $style ) . '">' . esc_html( (string) $label ) . '</span></td>';
-			}
+		if ( empty( $paged_rows ) ) {
+			echo '<tr class="no-items"><td class="colspanchange" colspan="' . (int) $visible_count . '">' . esc_html__( 'No events found.', 'umami-connect' ) . '</td></tr>';
+		} else {
+			foreach ( $paged_rows as $row ) {
+				$block_type  = $row['block_type'] ?? '';
+				$block_label = $block_labels[ $block_type ] ?? $block_type;
+				$block_index = $row['block_index'] ?? '';
+				$event_type  = $row['event_type'] ?? 'button';
+				$is_tracked  = isset( $row['is_tracked'] ) ? (bool) $row['is_tracked'] : true;
+				$post_type   = ! empty( $row['post_id'] ) ? get_post_type( $row['post_id'] ) : '';
 
-			if ( ! in_array( 'post', $hidden_columns, true ) ) {
-				echo '<td class="column-post">';
-				$title = '';
-				if ( ! empty( $row['post_title'] ) ) {
-					$title = trim( (string) $row['post_title'] );
-				} elseif ( ! empty( $row['edit_label'] ) ) {
-					$title = trim( (string) $row['edit_label'] );
-				}
+				echo '<tr>';
 
-				if ( ! empty( $title ) ) {
-					echo esc_html( $title );
-				} elseif ( ! empty( $row['post_id'] ) ) {
-					echo '<em>' . esc_html__( '(no title)', 'umami-connect' ) . '</em>';
-				} else {
-					echo '&mdash;';
-				}
-				echo '</td>';
-			}
-
-			if ( ! in_array( 'block_type', $hidden_columns, true ) ) {
-				echo '<td class="column-block_type">' . esc_html( (string) $block_label ) . '</td>';
-			}
-
-			if ( ! in_array( 'label', $hidden_columns, true ) ) {
-				echo '<td class="column-label">' . esc_html( (string) ( $row['label'] ?? '' ) ) . '</td>';
-			}
-
-			if ( ! in_array( 'data_pairs', $hidden_columns, true ) ) {
-				echo '<td class="column-data_pairs">';
-				if ( ! empty( $row['data_pairs'] ) && is_array( $row['data_pairs'] ) ) {
-					$pairs = array();
-					foreach ( $row['data_pairs'] as $pair ) {
-						if ( ! empty( $pair['key'] ) ) {
-							$pairs[] = '<li><span>' . esc_html( (string) $pair['key'] ) . '</span>: <b>' . esc_html( (string) ( $pair['value'] ?? '' ) ) . '</b></li>';
-						}
+				if ( ! in_array( 'event', $hidden_columns, true ) ) {
+					echo '<td class="event column-event has-row-actions column-primary">';
+					if ( $is_tracked ) {
+						echo '<strong><code>' . esc_html( (string) $row['event'] ) . '</code></strong>';
+					} else {
+						echo '<strong style="color:#999;"><em>' . esc_html( (string) $row['event'] ) . '</em></strong>';
 					}
-					if ( ! empty( $pairs ) ) {
-						echo '<ul style="margin:0 0 0 18px; padding:0; list-style:disc;">' . implode( '', $pairs ) . '</ul>';
+
+					// Row actions
+					$actions = array();
+					if ( ! empty( $row['edit_link'] ) ) {
+						$actions['edit'] = '<a href="' . esc_url( $row['edit_link'] ) . '" target="_blank">' . esc_html( $row['edit_label'] ?? __( 'Edit', 'umami-connect' ) ) . '</a>';
+					} elseif ( ! empty( $row['post_id'] ) && $block_index ) {
+						$edit_label      = ( 'page' === $post_type ) ? __( 'Edit Page', 'umami-connect' ) : __( 'Edit Post', 'umami-connect' );
+						$actions['edit'] = '<a href="' . esc_url( get_edit_post_link( (int) $row['post_id'] ) ) . '" target="_blank">' . esc_html( $edit_label ) . '</a>';
+					}
+					$is_integration = is_string( $event_type ) && strpos( $event_type, 'integration_' ) === 0;
+					if ( $is_tracked && $event_type !== 'none' && ( $block_index || $is_integration ) ) {
+						// For integrations, use form_id if available, otherwise post_id
+						$delete_id = $is_integration && isset( $row['form_id'] ) ? $row['form_id'] : ( $row['post_id'] ?? 0 );
+						$actions['delete'] = '<a href="#" class="delete-event submitdelete" data-post-id="' . esc_attr( (string) $delete_id ) . '" data-block-index="' . esc_attr( (string) $block_index ) . '" data-event-type="' . esc_attr( (string) $event_type ) . '" style="color:#b32d2e;">' . esc_html__( 'Delete', 'umami-connect' ) . '</a>';
+					}
+					if ( ! empty( $actions ) ) {
+						echo '<div class="row-actions">' . implode( ' | ', $actions ) . '</div>';
+					}
+					echo '<button type="button" class="toggle-row"><span class="screen-reader-text">' . esc_html__( 'Show more details', 'umami-connect' ) . '</span></button>';
+					echo '</td>';
+				}
+
+				if ( ! in_array( 'integration', $hidden_columns, true ) ) {
+					$label = isset( $row['integration_label'] ) ? $row['integration_label'] : ( isset( $row['integration'] ) ? $row['integration'] : 'Core' );
+					$color = isset( $row['integration_color'] ) ? $row['integration_color'] : '#2271b1';
+					$style = 'display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:' . esc_attr( $color ) . ';color:#fff;';
+					echo '<td class="column-integration"><span style="' . esc_attr( $style ) . '">' . esc_html( (string) $label ) . '</span></td>';
+				}
+
+				if ( ! in_array( 'post', $hidden_columns, true ) ) {
+					echo '<td class="column-post">';
+					$title = '';
+					if ( ! empty( $row['post_title'] ) ) {
+						$title = trim( (string) $row['post_title'] );
+					} elseif ( ! empty( $row['edit_label'] ) ) {
+						$title = trim( (string) $row['edit_label'] );
+					}
+
+					if ( ! empty( $title ) ) {
+						echo esc_html( $title );
+					} elseif ( ! empty( $row['post_id'] ) ) {
+						echo '<em>' . esc_html__( '(no title)', 'umami-connect' ) . '</em>';
+					} else {
+						echo '&mdash;';
+					}
+					echo '</td>';
+				}
+
+				if ( ! in_array( 'block_type', $hidden_columns, true ) ) {
+					echo '<td class="column-block_type">' . esc_html( (string) $block_label ) . '</td>';
+				}
+
+				if ( ! in_array( 'label', $hidden_columns, true ) ) {
+					echo '<td class="column-label">' . esc_html( (string) ( $row['label'] ?? '' ) ) . '</td>';
+				}
+
+				if ( ! in_array( 'data_pairs', $hidden_columns, true ) ) {
+					echo '<td class="column-data_pairs">';
+					if ( ! empty( $row['data_pairs'] ) && is_array( $row['data_pairs'] ) ) {
+						$pairs = array();
+						foreach ( $row['data_pairs'] as $pair ) {
+							if ( ! empty( $pair['key'] ) ) {
+								$pairs[] = '<li><span>' . esc_html( (string) $pair['key'] ) . '</span>: <b>' . esc_html( (string) ( $pair['value'] ?? '' ) ) . '</b></li>';
+							}
+						}
+						if ( ! empty( $pairs ) ) {
+							echo '<ul style="margin:0 0 0 18px; padding:0; list-style:disc;">' . implode( '', $pairs ) . '</ul>';
+						} else {
+							echo '<span style="color:#888;">&ndash;</span>';
+						}
 					} else {
 						echo '<span style="color:#888;">&ndash;</span>';
 					}
-				} else {
-					echo '<span style="color:#888;">&ndash;</span>';
+					echo '</td>';
 				}
-				echo '</td>';
-			}
 
-			echo '</tr>';
+				echo '</tr>';
+			}
 		}
 
 		echo '</tbody></table>';
 
-		// Pagination unten
+		// Pagination bottom
 		if ( $total_pages > 1 ) {
 			echo '<div class="tablenav bottom">';
 			echo '<div class="alignleft actions bulkactions"></div>';
@@ -521,26 +663,26 @@ add_filter(
 						$event_name = isset( $ev['event'] ) ? trim( (string) $ev['event'] ) : '';
 						$pairs      = array();
 						if ( ! empty( $ev['pairs'] ) && is_array( $ev['pairs'] ) ) {
-									$pairs = $ev['pairs'];
+							$pairs = $ev['pairs'];
 						}
 						if ( $event_name !== '' || ! empty( $pairs ) ) {
-								$link_text = isset( $ev['linkText'] ) ? (string) $ev['linkText'] : '';
-								$link_url  = isset( $ev['linkUrl'] ) ? (string) $ev['linkUrl'] : '';
-								$label     = trim( $link_text ) . ( $link_url ? ' → ' . $link_url : '' );
-								$result[]  = array(
-									'event'             => $event_name !== '' ? $event_name : 'link_click',
-									'post_id'           => $post_id,
-									'post_title'        => $post_title,
-									'block_type'        => $block_name,
-									'label'             => $label,
-									'data_pairs'        => $pairs,
-									'block_index'       => $block_path,
-									'event_type'        => 'link',
-									'is_tracked'        => true,
-									'integration'       => 'gutenberg',
-									'integration_label' => 'Gutenberg',
-									'integration_color' => '#2271b1',
-								);
+							$link_text = isset( $ev['linkText'] ) ? (string) $ev['linkText'] : '';
+							$link_url  = isset( $ev['linkUrl'] ) ? (string) $ev['linkUrl'] : '';
+							$label     = trim( $link_text ) . ( $link_url ? ' → ' . $link_url : '' );
+							$result[]  = array(
+								'event'             => $event_name !== '' ? $event_name : 'link_click',
+								'post_id'           => $post_id,
+								'post_title'        => $post_title,
+								'block_type'        => $block_name,
+								'label'             => $label,
+								'data_pairs'        => $pairs,
+								'block_index'       => $block_path,
+								'event_type'        => 'link',
+								'is_tracked'        => true,
+								'integration'       => 'gutenberg',
+								'integration_label' => 'Gutenberg',
+								'integration_color' => '#2271b1',
+							);
 						}
 					}
 				}
@@ -657,77 +799,6 @@ function umami_connect_delete_event_from_block( $post_id, $block_index, $event_t
 	}
 
 	return false;
-}
-
-
-/**
- * Clear Umami tracking for a Contact Form 7 form (integration deletion).
- */
-function umami_connect_delete_integration_cf7( $form_id ) {
-	$form_id = absint( $form_id );
-	if ( ! $form_id ) {
-		return false;
-	}
-	// Meta keys from CF7 integration
-	$meta_event = defined( 'UMAMI_CF7_META_EVENT_NAME' ) ? UMAMI_CF7_META_EVENT_NAME : '_umami_cf7_custom_event';
-	$meta_data  = defined( 'UMAMI_CF7_META_EVENT_DATA' ) ? UMAMI_CF7_META_EVENT_DATA : '_umami_cf7_event_data';
-
-	delete_post_meta( $form_id, $meta_event );
-	delete_post_meta( $form_id, $meta_data );
-	return true;
-}
-
-/**
- * Clear Umami tracking for a WPForms form (integration deletion).
- */
-function umami_connect_delete_integration_wpforms( $form_id ) {
-	$form_id = absint( $form_id );
-	if ( ! $form_id ) {
-		return false;
-	}
-
-	$post = get_post( $form_id );
-	if ( ! $post ) {
-		return false;
-	}
-
-	$decoded = null;
-	if ( function_exists( 'wpforms_decode' ) ) {
-		$decoded = wpforms_decode( $post->post_content );
-	} else {
-		$decoded = json_decode( $post->post_content, true );
-	}
-
-	if ( ! is_array( $decoded ) ) {
-		return false;
-	}
-
-	if ( ! isset( $decoded['settings'] ) || ! is_array( $decoded['settings'] ) ) {
-		$decoded['settings'] = array();
-	}
-
-	$decoded['settings']['umami_event_name'] = '';
-	$decoded['settings']['umami_event_data'] = '';
-
-	$encoded = '';
-	if ( function_exists( 'wpforms_encode' ) ) {
-		$encoded = wpforms_encode( $decoded );
-	} else {
-		$encoded = wp_json_encode( $decoded );
-	}
-
-	$result = wp_update_post(
-		array(
-			'ID'           => $form_id,
-			'post_content' => $encoded,
-		),
-		true
-	);
-	if ( is_wp_error( $result ) ) {
-		return false;
-	}
-	clean_post_cache( $form_id );
-	return true;
 }
 
 
