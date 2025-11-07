@@ -48,7 +48,8 @@ jobs:
       - name: Run ESLint
         run: |
           echo "🔍 Running ESLint..."
-          npx eslint assets/ --max-warnings 0
+          # Scan core assets
+          npx eslint assets/ --max-warnings 0 || exit 1
 
   php-lint:
     name: PHP Lint
@@ -79,6 +80,7 @@ jobs:
               <exclude name="WordPress.PHP.YodaConditions"/>
               <exclude name="Squiz.Commenting.FileComment"/>
               <exclude name="Squiz.Commenting.FunctionComment"/>
+              <exclude name="Squiz.Commenting.InlineComment"/>
               <exclude name="Generic.Commenting.DocComment"/>
               <exclude name="WordPress.Security.EscapeOutput"/>
               <!-- Allow native DOM object members like $nodeValue, $textContent -->

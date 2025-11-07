@@ -2,7 +2,7 @@
   const { addFilter } = wp.hooks;
   const { createHigherOrderComponent } = wp.compose;
   const { InspectorControls, RichTextToolbarButton } = wp.blockEditor || wp.editor;
-  const { PanelBody, Popover, TextControl, Button, Flex, FlexItem } = wp.components;
+  const { PanelBody, Modal, TextControl, Button, Flex, FlexItem } = wp.components;
   const { Fragment, useEffect } = wp.element;
   const { getActiveFormat, applyFormat, removeFormat, registerFormatType } = wp.richText;
 
@@ -164,10 +164,10 @@
           }
           if (found) {
             setEventName(found.event || '');
-            setPairs(Array.isArray(found.pairs) && found.pairs.length ? found.pairs : [{ key: '', value: '' }]);
+            setPairs(Array.isArray(found.pairs) && found.pairs.length ? found.pairs : []);
           } else {
             setEventName('');
-            setPairs([{ key: '', value: '' }]);
+            setPairs([]);
           }
         } catch (e) {
           // Ignore parsing errors when reading link attributes.
@@ -308,44 +308,43 @@
           isActive: hasUmamiData,
           className: 'umami-tracking-button'
         }),
-        (isOpen) && wp.element.createElement(Popover, { position: 'bottom center', onClose: function () { setOpen(false); }, className: 'umami-tracking-popover components-card' },
-          wp.element.createElement('div', { className: 'umami-popover-inner' },
-            wp.element.createElement('div', { className: 'umami-popover-header' },
-              wp.element.createElement('span', { className: 'umami-popover-title' }, 'Umami Link Tracking')
-            ),
-            wp.element.createElement('div', { className: 'umami-popover-section' },
-              wp.element.createElement(TextControl, { label: 'Event Name', value: eventName, onChange: setEventName, placeholder: 'e.g. link_click' })
-            ),
-            wp.element.createElement('div', { className: 'umami-popover-section' },
-              wp.element.createElement('div', { className: 'components-base-control__label' }, 'Event Data (Key/Value)'),
-              pairs.map(function (pair, idx) {
-                return wp.element.createElement(Flex, { key: idx, className: 'umami-pair-row', align: 'center' },
-                  wp.element.createElement(FlexItem, { isBlock: true, style: { flex: 1 } },
-                    wp.element.createElement(TextControl, {
-                      value: pair.key || '',
-                      placeholder: 'Key',
-                      onChange: function (val) { updatePair(idx, 'key', val); }
-                    })
-                  ),
-                  wp.element.createElement(FlexItem, { isBlock: true, style: { flex: 1 } },
-                    wp.element.createElement(TextControl, {
-                      value: pair.value || '',
-                      placeholder: 'Value',
-                      onChange: function (val) { updatePair(idx, 'value', val); }
-                    })
-                  ),
-                  wp.element.createElement(FlexItem, null,
-                    wp.element.createElement(Button, { isSmall: true, isDestructive: true, onClick: function () { removePair(idx); }, 'aria-label': 'Remove row' }, '×')
-                  )
-                );
-              }),
-              wp.element.createElement(Button, { variant: 'secondary', onClick: addPair, isSmall: true }, '+ Add field')
-            ),
-            wp.element.createElement('div', { className: 'umami-popover-footer' },
-              wp.element.createElement(Button, { variant: 'tertiary', onClick: function () { setOpen(false); } }, 'Cancel'),
-              wp.element.createElement(Button, { variant: 'primary', onClick: onSave }, 'Save')
-            )
-          )
+        (isOpen) && wp.element.createElement(Modal, {
+          title: 'Umami Link Tracking',
+          onRequestClose: function () { setOpen(false); },
+          style: { maxWidth: '500px' }
+        },
+        wp.element.createElement('div', { style: { marginBottom: '16px' } },
+          wp.element.createElement(TextControl, { label: 'Event Name', value: eventName, onChange: setEventName, placeholder: 'e.g. link_click' })
+        ),
+        wp.element.createElement('div', { style: { marginBottom: '16px' } },
+          wp.element.createElement('label', { style: { display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px' } }, 'Event Data (Key/Value)'),
+          pairs.map(function (pair, idx) {
+            return wp.element.createElement(Flex, { key: idx, align: 'center', style: { gap: '8px', marginBottom: '8px' } },
+              wp.element.createElement(FlexItem, { isBlock: true, style: { flex: 1 } },
+                wp.element.createElement(TextControl, {
+                  value: pair.key || '',
+                  placeholder: 'Key',
+                  onChange: function (val) { updatePair(idx, 'key', val); }
+                })
+              ),
+              wp.element.createElement(FlexItem, { isBlock: true, style: { flex: 1 } },
+                wp.element.createElement(TextControl, {
+                  value: pair.value || '',
+                  placeholder: 'Value',
+                  onChange: function (val) { updatePair(idx, 'value', val); }
+                })
+              ),
+              wp.element.createElement(FlexItem, null,
+                wp.element.createElement(Button, { isSmall: true, isDestructive: true, onClick: function () { removePair(idx); }, 'aria-label': 'Remove row' }, '×')
+              )
+            );
+          }),
+          wp.element.createElement(Button, { variant: 'secondary', onClick: addPair, isSmall: true, style: { marginTop: '8px' } }, '+ Add field')
+        ),
+        wp.element.createElement(Flex, { justify: 'flex-end', style: { gap: '8px', marginTop: '20px' } },
+          wp.element.createElement(Button, { variant: 'tertiary', onClick: function () { setOpen(false); } }, 'Cancel'),
+          wp.element.createElement(Button, { variant: 'primary', onClick: onSave }, 'Save')
+        )
         )
       );
     }

@@ -10,9 +10,9 @@ add_action(
 			return;
 		}
 
-		$website_id  = get_option( 'umami_website_id', '' );
-		$mode        = get_option( 'umami_mode', 'cloud' );
-		$host_input  = get_option( 'umami_host', '' );
+		$website_id = get_option( 'umami_website_id', '' );
+		$mode       = get_option( 'umami_mode', 'cloud' );
+		$host_input = get_option( 'umami_host', '' );
 
 		if ( ! $website_id ) {
 			return;

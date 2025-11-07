@@ -7,15 +7,37 @@ add_action(
 			'umami Connect',
 			'umami Connect',
 			'manage_options',
-			'umami_connect',
-			'umami_connect_settings_page',
+			'umami_connect_welcome',
+			// Make top-level open the Welcome page; submenus below will include Welcome first and General second.
+			'umami_connect_welcome_page',
 			'dashicons-chart-area',
 			90
 		);
-		add_action( "load-{$general_page}", 'umami_connect_add_help' );
+		// Help tabs for General will be attached to the General submenu handle below.
+
+		// Add Welcome submenu first (same slug as parent) so it appears at the top.
+		$welcome_page = add_submenu_page(
+			'umami_connect_welcome',
+			'Welcome',
+			'Welcome',
+			'manage_options',
+			'umami_connect_welcome',
+			'umami_connect_welcome_page'
+		);
+
+		// Add General settings submenu (separate slug) second.
+		$general_submenu_page = add_submenu_page(
+			'umami_connect_welcome',
+			'General',
+			'General',
+			'manage_options',
+			'umami_connect',
+			'umami_connect_settings_page'
+		);
+		add_action( "load-{$general_submenu_page}", 'umami_connect_add_help' );
 
 		$self_protection_page = add_submenu_page(
-			'umami_connect',
+			'umami_connect_welcome',
 			'Self protection',
 			'Self protection',
 			'manage_options',
@@ -25,7 +47,7 @@ add_action(
 		add_action( "load-{$self_protection_page}", 'umami_connect_add_help_self_protection' );
 
 		$automation_page = add_submenu_page(
-			'umami_connect',
+			'umami_connect_welcome',
 			'Automation',
 			'Automation',
 			'manage_options',
@@ -35,7 +57,7 @@ add_action(
 		add_action( "load-{$automation_page}", 'umami_connect_add_help_automation' );
 
 		$events_overview_page = add_submenu_page(
-			'umami_connect',
+			'umami_connect_welcome',
 			'Events overview',
 			'Events overview',
 			'edit_posts',
@@ -46,7 +68,7 @@ add_action(
 		add_action( "load-{$events_overview_page}", 'umami_connect_add_screen_options_events_overview' );
 
 		$advanced_page = add_submenu_page(
-			'umami_connect',
+			'umami_connect_welcome',
 			'Advanced',
 			'Advanced',
 			'manage_options',
@@ -61,7 +83,7 @@ add_action(
 		}
 
 		$update_page = add_submenu_page(
-			'umami_connect',
+			'umami_connect_welcome',
 			'Update',
 			$update_menu_title,
 			'manage_options',
@@ -118,8 +140,8 @@ function umami_connect_add_help() {
 
 	$screen->set_help_sidebar(
 		'<p><strong>Support & Resources</strong></p>' .
-		'<p><a href="https://github.com/ceviixx/umami-wp-connect" target="_blank">GitHub</a></p>' .
-		'<p><a href="https://discord.gg/84w4CQU7Jb" target="_blank">Discord</a></p>' .
+		'<p><a href="https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '" target="_blank">GitHub</a></p>' .
+		'<p><a href="' . UMAMI_CONNECT_DISCORD_INVITE . '" target="_blank">Discord</a></p>' .
 		'<p><a href="https://umami.is/docs" target="_blank">Umami Documentation</a></p>'
 	);
 }
@@ -149,8 +171,8 @@ function umami_connect_add_help_self_protection() {
 
 	$screen->set_help_sidebar(
 		'<p><strong>Support & Resources</strong></p>' .
-		'<p><a href="https://github.com/ceviixx/umami-wp-connect" target="_blank">GitHub</a></p>' .
-		'<p><a href="https://discord.gg/84w4CQU7Jb" target="_blank">Discord</a></p>' .
+		'<p><a href="https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '" target="_blank">GitHub</a></p>' .
+		'<p><a href="' . UMAMI_CONNECT_DISCORD_INVITE . '" target="_blank">Discord</a></p>' .
 		'<p><a href="https://umami.is/docs" target="_blank">Umami Documentation</a></p>'
 	);
 }
@@ -184,8 +206,8 @@ function umami_connect_add_help_automation() {
 
 	$screen->set_help_sidebar(
 		'<p><strong>Support & Resources</strong></p>' .
-		'<p><a href="https://github.com/ceviixx/umami-wp-connect" target="_blank">GitHub</a></p>' .
-		'<p><a href="https://discord.gg/84w4CQU7Jb" target="_blank">Discord</a></p>' .
+		'<p><a href="https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '" target="_blank">GitHub</a></p>' .
+		'<p><a href="' . UMAMI_CONNECT_DISCORD_INVITE . '" target="_blank">Discord</a></p>' .
 		'<p><a href="https://umami.is/docs" target="_blank">Umami Documentation</a></p>'
 	);
 }
@@ -198,7 +220,7 @@ function umami_connect_add_help_events_overview() {
 			'id'      => 'umami_help_events_overview',
 			'title'   => 'Overview',
 			'content' => '<p><strong>Events Overview</strong></p>' .
-						'<p>Overview of all configured tracking events in your Gutenberg blocks. Events are custom tracking points that measure specific user interactions on your website.</p>' .
+						'<p>Overview of all configured tracking events across your site. Events are custom tracking points that measure specific user interactions on your website.</p>' .
 						'<p>This page helps you understand how visitors engage with your content beyond basic page views and manage all tracking configurations in one place.</p>',
 		)
 	);
@@ -207,14 +229,14 @@ function umami_connect_add_help_events_overview() {
 		array(
 			'id'      => 'umami_help_events_creating',
 			'title'   => 'Creating Events',
-			'content' => '<p><strong>Supported Blocks</strong><br>' .
-						'Buttons, Paragraphs, Headings, Quotes, and Pull Quotes can be configured for event tracking.</p>' .
-						'<p><strong>Block Inspector</strong><br>' .
-						'Select any supported block in Gutenberg and look for the "Umami Event Tracking" panel in the block inspector.</p>' .
+			'content' => '<p><strong>Event Sources</strong><br>' .
+						'Events can be configured in multiple places across your site, including editor blocks and form integrations.</p>' .
 						'<p><strong>Event Configuration</strong><br>' .
 						'• <strong>Event Name:</strong> Add a descriptive name (e.g., "Newsletter Signup", "Download PDF")<br>' .
 						'• <strong>Data Pairs:</strong> Add key-value pairs to track additional context (optional)<br>' .
-						'• <strong>Link Events:</strong> Connect events to specific page URLs for cross-page tracking</p>',
+						'• <strong>Link Events:</strong> Connect events to specific page URLs for cross-page tracking</p>' .
+						'<p><strong>Where to Configure</strong><br>' .
+						'Look for "Umami Tracking" settings in block inspectors, form editors, or plugin configuration panels.</p>',
 		)
 	);
 
@@ -224,12 +246,12 @@ function umami_connect_add_help_events_overview() {
 			'title'   => 'Managing Events',
 			'content' => '<p><strong>Filter View</strong><br>' .
 						'Use "All", "Events", or "Candidates" to filter the display:<br>' .
-						'• <strong>Events:</strong> Blocks with configured event names and tracking data<br>' .
-						'• <strong>Candidates:</strong> Supported blocks without event configuration (potential events)</p>' .
+						'• <strong>Events:</strong> Configured tracking events with active event names<br>' .
+						'• <strong>Candidates:</strong> Available tracking opportunities without event configuration</p>' .
 						'<p><strong>Search & Edit</strong><br>' .
-						'• Use the search box to find specific events by name or post title<br>' .
-						'• Click "Edit Page/Post" to open Gutenberg and modify event settings<br>' .
-						'• Use "Delete" to remove event tracking while preserving the original block</p>',
+						'• Use the search box to find specific events by name or source<br>' .
+						'• Click "Edit" to open the configuration interface for that event<br>' .
+						'• Use "Delete" to remove event tracking while preserving the original content</p>',
 		)
 	);
 
@@ -244,14 +266,14 @@ function umami_connect_add_help_events_overview() {
 						'<p><strong>Testing & Maintenance</strong><br>' .
 						'• Test events in your Umami dashboard after configuration<br>' .
 						'• Regularly review and clean up unused event configurations<br>' .
-						'• Changes made in Gutenberg are reflected immediately in your tracking</p>',
+						'• Configuration changes are reflected immediately in your tracking</p>',
 		)
 	);
 
 	$screen->set_help_sidebar(
 		'<p><strong>Support & Resources</strong></p>' .
-		'<p><a href="https://github.com/ceviixx/umami-wp-connect" target="_blank">GitHub</a></p>' .
-		'<p><a href="https://discord.gg/84w4CQU7Jb" target="_blank">Discord</a></p>' .
+		'<p><a href="https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '" target="_blank">GitHub</a></p>' .
+		'<p><a href="' . UMAMI_CONNECT_DISCORD_INVITE . '" target="_blank">Discord</a></p>' .
 		'<p><a href="https://umami.is/docs" target="_blank">Umami Documentation</a></p>'
 	);
 }
@@ -286,8 +308,8 @@ function umami_connect_add_help_update() {
 
 	$screen->set_help_sidebar(
 		'<p><strong>Support & Resources</strong></p>' .
-		'<p><a href="https://github.com/ceviixx/umami-wp-connect" target="_blank">GitHub</a></p>' .
-		'<p><a href="https://discord.gg/84w4CQU7Jb" target="_blank">Discord</a></p>' .
+		'<p><a href="https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '" target="_blank">GitHub</a></p>' .
+		'<p><a href="' . UMAMI_CONNECT_DISCORD_INVITE . '" target="_blank">Discord</a></p>' .
 		'<p><a href="https://umami.is/docs" target="_blank">Umami Documentation</a></p>'
 	);
 }
@@ -299,8 +321,8 @@ function umami_connect_add_help_advanced() {
 
 	$screen->set_help_sidebar(
 		'<p><strong>Support & Resources</strong></p>' .
-		'<p><a href="https://github.com/ceviixx/umami-wp-connect" target="_blank">GitHub</a></p>' .
-		'<p><a href="https://discord.gg/84w4CQU7Jb" target="_blank">Discord</a></p>' .
+		'<p><a href="https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '" target="_blank">GitHub</a></p>' .
+		'<p><a href="' . UMAMI_CONNECT_DISCORD_INVITE . '" target="_blank">Discord</a></p>' .
 		'<p><a href="https://umami.is/docs/tracker-configuration" target="_blank">Tracker configuration</a></p>'
 	);
 
@@ -416,7 +438,11 @@ function umami_connect_add_help_advanced() {
 function umami_connect_add_screen_options_events_overview() {
 	$screen = get_current_screen();
 
-	if ( ! $screen || $screen->id !== 'umami-connect_page_umami_connect_events_overview' ) {
+	if ( ! $screen ) {
+		return;
+	}
+	// Be robust to parent slug changes: only proceed for the Events Overview page regardless of parent.
+	if ( ! preg_match( '/_page_umami_connect_events_overview$/', (string) $screen->id ) ) {
 		return;
 	}
 
@@ -425,7 +451,7 @@ function umami_connect_add_screen_options_events_overview() {
 		array(
 			'label'   => __( 'Events per page', 'umami-connect' ),
 			'default' => 20,
-			'option'  => 'events_per_page',
+			'option'  => 'umami_connect_events_overview_per_page',
 		)
 	);
 
@@ -439,11 +465,12 @@ function umami_connect_add_screen_options_events_overview() {
  */
 function umami_connect_events_overview_columns( $columns ) {
 	return array(
-		'event'      => __( 'Event', 'umami-connect' ),
-		'post'       => __( 'Post/Page', 'umami-connect' ),
-		'block_type' => __( 'Block Type', 'umami-connect' ),
-		'label'      => __( 'Label/Text', 'umami-connect' ),
-		'data_pairs' => __( 'Data Pairs', 'umami-connect' ),
+		'event'       => __( 'Event', 'umami-connect' ),
+		'integration' => __( 'Integration', 'umami-connect' ),
+		'post'        => __( 'Source', 'umami-connect' ),
+		'block_type'  => __( 'Block Type', 'umami-connect' ),
+		'label'       => __( 'Label/Text', 'umami-connect' ),
+		'data_pairs'  => __( 'Data Pairs', 'umami-connect' ),
 	);
 }
 
@@ -451,8 +478,18 @@ function umami_connect_events_overview_columns( $columns ) {
  * Handle screen option saving
  */
 function umami_connect_set_screen_option( $status, $option, $value ) {
-	if ( 'events_per_page' === $option ) {
-		return $value;
+	if ( 'umami_connect_events_overview_per_page' === $option ) {
+		return max( 1, (int) $value );
 	}
 	return $status;
 }
+
+// Also hook the dynamic filter for this option key to ensure saving works on all WP versions.
+add_filter(
+	'set_screen_option_umami_connect_events_overview_per_page',
+	function ( $status, $option, $value ) {
+		return max( 1, (int) $value );
+	},
+	10,
+	3
+);

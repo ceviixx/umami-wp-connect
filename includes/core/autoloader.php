@@ -43,18 +43,19 @@ class Umami_Connect_Autoloader {
 	private static function build_file_map() {
 		self::$file_map = array(
 			// Core files (load first).
-			'core' => array(
+			'core'        => array(
 				'constants.php',
 				'version_check.php',
 			),
 
 			// Admin files.
-			'admin' => array(
+			'admin'       => array(
 				'menu.php',
 			),
 
 			// Admin pages.
 			'admin/pages' => array(
+				'welcome.php',
 				'general.php',
 				'self_protection.php',
 				'automation.php',
@@ -64,7 +65,7 @@ class Umami_Connect_Autoloader {
 			),
 
 			// Hooks (filters and actions).
-			'hooks' => array(
+			'hooks'       => array(
 				'filter-plugin-action-links.php',
 				'filter-render-block.php',
 				'filter-the-content.php',
@@ -73,12 +74,11 @@ class Umami_Connect_Autoloader {
 				'wp-head-before-send-check.php',
 				'wp-head-script-injection.php',
 				'wp-head-user-exclusion.php',
-				'wp-enqueue-scripts-frontend.php',
 				'enqueue-block-editor-assets.php',
 			),
 
 			// Dashboard components.
-			'dashboard' => array(
+			'dashboard'   => array(
 				'dashboard-status-widget.php',
 			),
 		);
@@ -87,6 +87,9 @@ class Umami_Connect_Autoloader {
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			self::$file_map['core'][] = 'autoloader-debug.php';
 		}
+
+		// Defer loading of integrations via registry until plugins_loaded.
+		add_action( 'plugins_loaded', array( __CLASS__, 'load_integrations_from_registry' ) );
 	}
 
 	/**
@@ -127,7 +130,7 @@ class Umami_Connect_Autoloader {
 
 		foreach ( self::$file_map as $directory => $files ) {
 			foreach ( $files as $file ) {
-				$file_path = self::$plugin_dir . 'includes/' . $directory . '/' . $file;
+				$file_path                                = self::$plugin_dir . 'includes/' . $directory . '/' . $file;
 				$loaded_files[ $directory . '/' . $file ] = file_exists( $file_path );
 			}
 		}
@@ -151,4 +154,57 @@ class Umami_Connect_Autoloader {
 			self::load_file( $directory, $file );
 		}
 	}
+
+	/**
+	 * Load integrations from the registry file.
+	 */
+	public static function load_integrations_from_registry() {
+		$registry_file = self::$plugin_dir . 'integrations/registry.php';
+
+		if ( ! file_exists( $registry_file ) ) {
+			return;
+		}
+
+		require_once $registry_file;
+
+		if ( ! function_exists( 'umami_connect_get_integrations' ) ) {
+			return;
+		}
+
+		$integrations = umami_connect_get_integrations();
+
+		if ( ! is_array( $integrations ) ) {
+			return;
+		}
+
+		foreach ( $integrations as $key => $config ) {
+			// Validate config structure.
+			if ( empty( $config['files'] ) || ! is_array( $config['files'] ) ) {
+				continue;
+			}
+
+			$should_load = true;
+			if ( isset( $config['check'] ) ) {
+				if ( is_callable( $config['check'] ) ) {
+					$should_load = (bool) call_user_func( $config['check'] );
+				} elseif ( is_string( $config['check'] ) && function_exists( $config['check'] ) ) {
+					$should_load = (bool) call_user_func( $config['check'] );
+				}
+			}
+
+			if ( ! $should_load ) {
+				continue;
+			}
+
+			$base = self::$plugin_dir . 'integrations/' . $key . '/';
+			foreach ( $config['files'] as $file ) {
+				$file_path = $base . $file;
+				if ( file_exists( $file_path ) ) {
+					require_once $file_path;
+				}
+			}
+		}
+	}
 }
+
+require_once __DIR__ . '/../hooks/admin-footer.php';

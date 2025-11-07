@@ -1,88 +1,167 @@
 
 # Contributing to umami Connect
 
-Thank you for considering contributing! Your help in making this plugin better is appreciated.
+Thanks for your interest in improving the plugin! This guide focuses on **adding a new integration** (e.g. for a form plugin, e‑commerce, or block library). If you just want to report an issue or request a feature, head to:
 
-## Quick Start
-
-1. **Fork the repository**
-2. Clone your fork and create a new branch from `main`:
-   ```bash
-   git clone https://github.com/YOUR-USERNAME/umami-wp-connect.git
-   cd umami-wp-connect
-   git checkout -b feature/your-feature-name
-   ```
-3. Make your changes
-4. Push to your fork and open a pull request against `main`
+- Issues: https://github.com/ceviixx/umami-wp-connect/issues
+- Discussions: https://github.com/ceviixx/umami-wp-connect/discussions
 
 ---
+## 1. Fork & Clone (dev branch)
 
-## Code Style
+```bash
+git clone https://github.com/YOUR-USERNAME/umami-wp-connect.git
+cd umami-wp-connect
+git remote add upstream https://github.com/ceviixx/umami-wp-connect.git
+git fetch upstream
+git checkout -b feature/my-integration upstream/dev
+```
 
-### PHP
-- Follow WordPress Coding Standards
-- Use tabs for indentation (WordPress convention)
-- Run PHPCS locally: `phpcs --standard=WordPress .` (see `.github/workflows/lint.yml` for inline config)
-- PHPCS errors are blocking; warnings are advisory
+Always branch off `dev` (not `main`). Keep your fork synced:
 
-### JavaScript
-- Follow WordPress JavaScript Coding Standards
-- Declare `wp` as a global when using WordPress APIs
-- Use ESLint (see inline config in `.github/workflows/lint.yml`)
-
-### General
-- Write clear, descriptive variable and function names
-- Add inline comments for complex logic
-- Keep functions focused and single-purpose
+```bash
+git fetch upstream
+git merge upstream/dev
+```
 
 ---
+## 2. How Integrations Are Loaded
 
-## Commit Messages
+Integrations are registered in `integrations/registry.php` via `umami_connect_get_integrations()`. Each entry uses the **integration key** (folder name) and defines:
 
-Use **conventional commits** for clarity:
+```php
+$key => array(
+  'label'       => 'Human Name',
+  'description' => __( 'Short explainer shown in UI.', 'umami-connect' ),
+  'color'       => '#hexcolor',   // Used in admin lists
+  'check'       => function () {  // Return true if plugin is active
+    return function_exists( 'some_plugin_function' );
+  },
+  'files'       => array(         // Files loaded if check() is true
+    'hooks.php',
+    'admin-settings.php',
+    'analytics-data.php',
+  ),
+)
+```
 
-- `feat: add custom event tracking for forms`
-- `fix: resolve autotrack issue with dynamic links`
-- `chore: update dependencies`
-- `docs: improve README installation steps`
-- `refactor: simplify render_block filter`
-- `test: add workflow for structure check`
-
-**Format:** `<type>(<scope>): <description>`
-
----
-
-## Pull Request Guidelines
-
-- **Target branch:** `main`
-- **Title:** Use conventional commit format (e.g., `feat: add consent gate option`)
-- **Description:**
-  - What changed and why
-  - Related issues (e.g., `Closes #42`)
-  - Screenshots or GIFs if UI-related
-  - Breaking changes (if any)
-- **Keep PRs focused:** one feature or fix per PR
-- **CI checks:** All GitHub Actions workflows (Lint, Security, Syntax, Structure) must pass before merge
-- **Respond to reviews:** address feedback promptly
+The autoloader (`includes/core/autoloader.php`) calls the `check` closure; if it returns `true`, it requires each file listed under `files` inside `integrations/<key>/`.
 
 ---
+## 3. Required Files (Typical Pattern)
 
-## Branch Naming
+Create a new directory: `integrations/<your-key>/` (use lowercase, dashes instead of spaces). Add these files as needed:
 
-- `feature/` — new features (e.g., `feature/consent-gate`)
-- `bugfix/` — bug fixes (e.g., `bugfix/autotrack-links`)
-- `chore/` — maintenance, tooling, CI (e.g., `chore/update-phpcs`)
-- `docs/` — documentation only (e.g., `docs/readme-badges`)
+| File | Purpose |
+|------|---------|
+| `analytics-data.php` | Pushes integration-specific events & candidates into the Events Overview (via `add_filter('umami_connect_get_all_events', ...)`). |
+| `hooks.php` | Runtime tracking hooks (inject attributes, listen to actions, send JS events). Keep defensive checks. |
+| `admin-settings.php` | (Optional) Adds settings UI for custom event names/data under the integration’s native admin/editor. |
+
+Some integrations might also need `event-provider.php` or additional helpers, but keep it minimal.
+
+### Example Starter
+
+Instead of inline examples, see the template in `integrations/_example/` which includes:
+
+- `README.md` (how to adapt)
+- `analytics-data.php` (event provider pattern)
+- `hooks.php` (attribute injection pattern)
+- `admin-settings.php` (optional settings scaffold)
+
+Copy that folder, rename it to your integration key, then adjust code and add a registry entry.
+
+Keep functions `prefixed` (`umami_<integration>_...`) and avoid class names unless needed. Procedural is fine.
 
 ---
+## 4. Event Data Structure
 
-## Need Help?
+Each event array must include at least:
 
-- Open an [issue](https://github.com/ceviixx/umami-wp-connect/issues) if you're stuck or have questions
-- Join our [Discord](https://discord.gg/84w4CQU7Jb) for quick help
+- `event` — Actual event name or `(Candidate)` placeholder
+- `post_id` — Related content/form ID (or 0 if not applicable)
+- `post_title` — Human label for display
+- `block_type` — Short source tag (e.g. `CF7`, `WPForms`, `WooCommerce`)
+- `label` — Same or different from title
+- `data_pairs` — Array of pairs: `[ ['key'=>'foo','value'=>'bar'], ... ]`
+- `event_type` — Unique type when tracked (e.g. `integration_cf7`); `none` for candidates
+- `is_tracked` — Boolean
+- `integration` — Integration key (folder name)
+- `integration_label` / `integration_color` — For UI coloring/filtering
+- `edit_link` / `edit_label` — Direct admin URL to edit tracking settings
+
+Search & filtering rely on `event`, `post_title`, `label`, `integration_label`, and `integration`.
 
 ---
+## 5. Defensive Checks
 
-## Code of Conduct
+Always guard your files so they only run if the dependent plugin is active:
 
-Be respectful, friendly, and constructive. Let's build something great together.
+```php
+if ( ! function_exists( 'myform' ) ) { return; }
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+```
+
+Never fatal-error if something is missing—just return early.
+
+---
+## 7. Testing Your Integration
+
+1. Activate the dependent plugin locally.
+2. Configure your integration’s event name(s) in its admin/editor UI (if provided).
+3. Visit the frontend and trigger the action (submit form, click button, add to cart, etc.).
+4. Open the Events Overview in umami Connect settings; confirm events appear and filter by your integration.
+5. Check the browser devtools for `umami.track()` calls or server-side hook execution.
+
+Optional: add a quick screenshot/GIF to the PR showing the event captured.
+
+---
+## 8. Submitting the Pull Request
+
+```bash
+git add .
+git commit -m "feat(integration): add MyForm integration"
+git push origin feature/my-integration
+```
+
+Open a PR against `dev` with:
+- Motivation & scope
+- List of added files
+- Any limitations or TODOs
+- Screenshots (admin + event capture)
+
+Label it with `enhancement` (or let triage adjust).
+
+---
+## 9. Common Pitfalls & Tips
+
+| Issue | Solution |
+|-------|----------|
+| Events not showing | Confirm `integration` key matches folder name and registry key. |
+| Attributes not injected | Ensure hook runs on frontend (avoid `is_admin()`) and regex matches output. |
+| Wrong color/dot | Provide `integration_color` consistently in events. |
+| Duplicate loading | Keep file list minimal; avoid requiring same file twice. |
+| JSON meta invalid | Validate with `json_decode()` and fallback when parsing custom data. |
+
+---
+## 10. Style & Conventions
+
+- PHP: WordPress standards (tabs). Keep procedural unless complexity warrants classes.
+- Function names: `umami_<integration>_<action>`.
+- Avoid heavy dependencies—stay lean.
+- Keep performance: bail early, avoid scanning huge content unnecessarily.
+
+---
+## 11. Maintainer Review Checklist (You Can Self-Check)
+
+- Registry entry added correctly
+- Guard clauses present in each integration file
+- No fatal errors if dependency missing
+- All text translatable, escaped
+- Event arrays contain required keys
+- Works in Events Overview filter/search
+- PR targets `dev`
+
+
+
+Thanks for contributing integrations—each one makes analytics easier for more users 🎉
