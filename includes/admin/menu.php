@@ -131,7 +131,11 @@ function umami_connect_add_help() {
 						'<p><strong>Website ID</strong><br>' .
 						'Your unique Umami Website ID in UUID format (e.g., 12345678-1234-1234-1234-123456789abc). Find this in your Umami dashboard under Settings → Websites.</p>' .
 						'<p><strong>Host URL</strong><br>' .
-						'Only required for self-hosted instances. Enter your Umami installation URL (e.g., https://analytics.yourdomain.com).</p>' .
+						   'Only required for self-hosted instances. Enter your Umami installation URL.<br>' .
+						   '<strong>Examples:</strong><br>' .
+						   '- Base URL: <code>https://analytics.yourdomain.com</code> (will use <code>/script.js</code>)<br>' .
+						   '- Custom path: <code>https://analytics.yourdomain.com/custom</code> or <code>https://analytics.yourdomain.com/custom.js</code> (will use exactly what you enter after the hostname, with or without <code>.js</code>)<br>' .
+						   'If you enter only the base URL, <code>/script.js</code> will be appended automatically. If you provide any path after the hostname, it will be used exactly as entered—regardless of whether it ends with <code>.js</code> or not.</p>' .
 						'<p><strong>Script Loading</strong><br>' .
 						'<strong>defer</strong>: Execute after HTML is parsed (recommended).<br>' .
 						'<strong>async</strong>: Load as soon as possible (may execute before DOM is ready).</p>',

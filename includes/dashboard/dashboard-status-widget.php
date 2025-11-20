@@ -14,10 +14,11 @@ add_action(
 				$event_key_value_count = 0;
 				$event_names           = array();
 				foreach ( $events as $row ) {
-					if ( ! empty( $row['event'] ) ) {
+					$is_tracked = isset( $row['is_tracked'] ) ? (bool) $row['is_tracked'] : true;
+					if ( $is_tracked && ! empty( $row['event'] ) ) {
 						$event_names[ $row['event'] ] = true;
 					}
-					if ( ! empty( $row['data_pairs'] ) && is_array( $row['data_pairs'] ) ) {
+					if ( $is_tracked && ! empty( $row['data_pairs'] ) && is_array( $row['data_pairs'] ) ) {
 						$event_key_value_count += count( $row['data_pairs'] );
 					}
 				}
@@ -52,7 +53,24 @@ add_action(
 				echo '</table>';
 				echo '</div>';
 				echo '</div>';
-				echo '<style>.umami-health-widget .umami-status-label.orange{color:#d63638;} .umami-health-widget .umami-status-label.green{color:#46b450;} .umami-progress-wrapper.orange svg circle:last-child{stroke:#d63638;} .umami-progress-wrapper.green svg circle:last-child{stroke:#46b450;}</style>';
+
+				$mode = get_option( 'umami_mode', 'cloud' );
+				$host = get_option( 'umami_host', '' );
+				$login_url = '';
+				if ( $mode === 'self' && ! empty( $host ) ) {
+					$login_url = rtrim( $host, '/' ) . '/login';
+				} else {
+					$login_url = 'https://cloud.umami.is/login';
+				}
+				echo '<hr style="border:0; border-top:1px solid #e0e0e0; margin:18px -12px 0 -12px; padding:0; width:calc(100% + 24px);" />';
+				echo '<div style="padding-top:8px; text-align:right;">'
+					. '<a href="' . esc_url( $login_url ) . '" target="_blank" rel="noopener noreferrer" style="color:#21759b; font-size:13px; text-decoration:none; font-weight:400; display:inline-flex; align-items:center; gap:3px;">Umami Login'
+					. '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#21759b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:1px;"><path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'
+					. '</a>'
+					. '</div>';
+				echo '<style>'
+					. '.umami-health-widget .umami-status-label.orange{color:#d63638;} .umami-health-widget .umami-status-label.green{color:#46b450;} .umami-progress-wrapper.orange svg circle:last-child{stroke:#d63638;} .umami-progress-wrapper.green svg circle:last-child{stroke:#46b450;}'
+					. '</style>';
 			}
 		);
 	}
