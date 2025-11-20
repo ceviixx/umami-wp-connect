@@ -190,7 +190,8 @@ add_action(
 						$value = 'https://' . $value;
 					}
 
-					return esc_url_raw( rtrim( $value, '/' ) );
+					$value = rtrim( $value, '/' );
+					return esc_url_raw( $value );
 				},
 				'default'           => '',
 			)
@@ -330,6 +331,33 @@ add_action(
 			function () {
 				$value = get_option( 'umami_host', '' );
 				echo '<input type="url" id="umami_host" name="umami_host" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="https://analytics.yourdomain.com" />';
+				echo '<p class="description" id="umami_host_subtitle" style="margin-top: 8px; color: #646970; font-style: italic; font-size: 12px;"></p>';
+				echo '<script>
+				(function(){
+					var input = document.getElementById("umami_host");
+					var subtitle = document.getElementById("umami_host_subtitle");
+					
+					function update() {
+						var val = input.value.trim();
+						if (!val) {
+							subtitle.textContent = "";
+							return;
+						}
+						
+						if (!/^https?:\/\//i.test(val)) val = "https://" + val;
+						val = val.replace(/\/+$/, "");
+						
+						var hasPath = val.match(/^https?:\/\/[^\/]+(\/)/);
+						subtitle.textContent = "Tracking Script URL: " + val + (hasPath ? "" : "/script.js");
+					}
+					
+					if (input && subtitle) {
+						update();
+						input.addEventListener("input", update);
+						input.addEventListener("blur", update);
+					}
+				})();
+				</script>';
 			},
 			'umami_connect',
 			'umami_connect_general'

@@ -27,7 +27,9 @@ add_action(
 		}
 
 		$script_url = $base_host;
-		if ( ! preg_match( '~\.js(\?.*)?$~i', $script_url ) ) {
+		$parsed = wp_parse_url( $script_url );
+		$has_path = isset( $parsed['path'] ) && $parsed['path'] !== '' && $parsed['path'] !== '/';
+		if ( ! $has_path ) {
 			$script_url = rtrim( $script_url, '/' ) . '/script.js';
 		}
 
