@@ -89,7 +89,7 @@ function umami_connect_advanced_page() {
 							<th scope="row"><label>beforeSend</label></th>
 							<td>
 								<?php
-								$mode          = get_option( 'umami_tracker_before_send_mode', 'function_name' );
+												$mode          = get_option( 'umami_tracker_before_send_mode', 'disabled' );
 								$function_name = get_option( 'umami_tracker_before_send', '' );
 								$inline_code   = get_option( 'umami_tracker_before_send_inline', '' );
 								?>
@@ -110,13 +110,13 @@ function umami_connect_advanced_page() {
 										</label>
 									</div></fieldset>
 
-								<fieldset id="before_send_disabled_field" style="margin:8px 0 0;">
+								<fieldset id="before_send_disabled_field" style="margin:8px 0 0;<?php echo $mode !== 'disabled' ? 'display:none;' : ''; ?>">
 									<p class="description">beforeSend hook is disabled. No function will be called before events are sent.</p>
 								</fieldset>
 
 								<fieldset>
 
-									<div style="margin:8px 0 0;" id="before_send_function_name_field">
+									<div style="margin:8px 0 0;<?php echo $mode !== 'function_name' ? 'display:none;' : ''; ?>" id="before_send_function_name_field">
 										<label for="umami_tracker_before_send" style="display:block; font-weight:600;">Global function name</label>
 										<input type="text" class="regular-text" id="umami_tracker_before_send" name="umami_tracker_before_send" value="<?php echo esc_attr( $function_name ); ?>" placeholder="beforeSendHandler" pattern="^[A-Za-z_$][A-Za-z0-9_$]*(\.[A-Za-z_$][A-Za-z0-9_$]*)*$" title="Valid JS function name, e.g. beforeSendHandler or MyApp.handlers.beforeSend" />
 										<p>
@@ -126,7 +126,7 @@ function umami_connect_advanced_page() {
 										<p class="description">Reference an existing global function (available on the frontend), e.g. <code>beforeSendHandler</code>.</p>
 									</div>
 
-									<div style="margin:16px 0 0;" id="before_send_inline_field">
+									<div style="margin:16px 0 0;<?php echo $mode !== 'inline' ? 'display:none;' : ''; ?>" id="before_send_inline_field">
 										<label for="umami_tracker_before_send_inline" style="display:block; font-weight:600;">Inline function</label>
 										<textarea class="large-text code" rows="10" id="umami_tracker_before_send_inline" name="umami_tracker_before_send_inline" placeholder="function(payload, url) {&#10;  // Inspect or modify payload&#10;  return payload;&#10;}"><?php echo esc_textarea( $inline_code ); ?></textarea>
 										<p>
@@ -214,7 +214,8 @@ function umami_connect_advanced_page() {
 										updateSubmitState( mode );
 									}
 
-									radios.forEach( function( r ) { r.addEventListener( 'change', toggle ); } );
+													radios.forEach( function( r ) { r.addEventListener( 'change', toggle ); } );
+													toggle();
 									if ( insertBtn ) {
 										insertBtn.addEventListener( 'click', function() {
 											var example = "function(payload, url) {\n  // Block events for preview URLs\n  if (url.includes('preview=true')) return false;\n  // Attach custom info\n  payload.locale = document.documentElement.lang || 'en';\n  return payload;\n}";
