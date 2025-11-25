@@ -12,8 +12,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Constants for meta keys.
-define( 'UMAMI_WPFORMS_META_EVENT_NAME', '_umami_wpforms_custom_event' );
-define( 'UMAMI_WPFORMS_META_EVENT_DATA', '_umami_wpforms_event_data' );
+if ( ! defined( 'UMAMI_WPFORMS_META_EVENT_NAME' ) ) {
+	define( 'UMAMI_WPFORMS_META_EVENT_NAME', '_umami_wpforms_custom_event' );
+}
+if ( ! defined( 'UMAMI_WPFORMS_META_EVENT_DATA' ) ) {
+	define( 'UMAMI_WPFORMS_META_EVENT_DATA', '_umami_wpforms_event_data' );
+}
 
 // Guard: run only if WPForms is present (admin side).
 if ( ! is_admin() || ! function_exists( 'wpforms' ) ) {
