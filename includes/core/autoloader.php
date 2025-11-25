@@ -62,6 +62,7 @@ class Umami_Connect_Autoloader {
 				'update.php',
 				'events_overview.php',
 				'advanced.php',
+				'statistics.php',
 			),
 
 			// Hooks (filters and actions).

@@ -4,7 +4,7 @@ add_filter(
 	'admin_footer_text',
 	function ( $footer_text ) {
 		$screen = get_current_screen();
-		if ( empty( $screen ) || strpos( $screen->base, 'umami_connect' ) === false ) {
+		if ( empty( $screen ) || ( strpos( $screen->base, 'umami' ) === false ) ) {
 			return $footer_text;
 		}
 		$github = 'https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO;
@@ -16,7 +16,7 @@ add_filter(
 	'update_footer',
 	function ( $text ) {
 		$screen = get_current_screen();
-		if ( empty( $screen ) || strpos( $screen->base, 'umami_connect' ) === false ) {
+		if ( empty( $screen ) || ( strpos( $screen->base, 'umami' ) === false ) ) {
 			return $text;
 		}
 		if ( ! function_exists( 'umami_connect_get_plugin_version' ) ) {

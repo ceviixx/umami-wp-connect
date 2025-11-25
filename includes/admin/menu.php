@@ -2,20 +2,50 @@
 add_action(
 	'admin_menu',
 	function () {
+		$share_url = get_option( 'umami_advanced_share_url' );
+		$allowed_roles = get_option( 'umami_statistics_allowed_roles', array() );
+		if ( ! is_array( $allowed_roles ) ) {
+			$allowed_roles = array();
+		}
+		$user = wp_get_current_user();
+		$user_roles = (array) $user->roles;
+		$has_access = in_array( 'administrator', $user_roles );
+		if ( ! $has_access ) {
+			foreach ( $allowed_roles as $role ) {
+				if ( in_array( $role, $user_roles ) ) {
+					$has_access = true;
+					break;
+				}
+			}
+		}
+		if ( ! empty( $share_url ) && $has_access ) {
+			add_menu_page(
+				'umami Statistics',
+				'umami Statistics',
+				'read',
+				'umami-statistics',
+				'umami_statistics_page',
+				'dashicons-chart-bar',
+				58
+			);
+		}
+	}
+);
+
+add_action(
+	'admin_menu',
+	function () {
 
 		$general_page = add_menu_page(
 			'umami Connect',
 			'umami Connect',
 			'manage_options',
 			'umami_connect_welcome',
-			// Make top-level open the Welcome page; submenus below will include Welcome first and General second.
 			'umami_connect_welcome_page',
 			'dashicons-chart-area',
 			90
 		);
-		// Help tabs for General will be attached to the General submenu handle below.
 
-		// Add Welcome submenu first (same slug as parent) so it appears at the top.
 		$welcome_page = add_submenu_page(
 			'umami_connect_welcome',
 			'Welcome',
@@ -25,7 +55,6 @@ add_action(
 			'umami_connect_welcome_page'
 		);
 
-		// Add General settings submenu (separate slug) second.
 		$general_submenu_page = add_submenu_page(
 			'umami_connect_welcome',
 			'General',
@@ -60,7 +89,7 @@ add_action(
 			'umami_connect_welcome',
 			'Events overview',
 			'Events overview',
-			'edit_posts',
+			'manage_options',
 			'umami_connect_events_overview',
 			'umami_connect_render_events_overview_page'
 		);
@@ -108,39 +137,7 @@ add_action(
 function umami_connect_add_help() {
 	$screen = get_current_screen();
 
-	$screen->add_help_tab(
-		array(
-			'id'      => 'umami_help_setup',
-			'title'   => 'Setup',
-			'content' => '<p><strong>Quick Setup Guide</strong></p>' .
-						'<ol>' .
-						'<li>Create an account at <a href="https://umami.is" target="_blank">umami.is</a> (Cloud) or set up your own Umami instance (Self-hosted).</li>' .
-						'<li>Add your website in your Umami dashboard and copy the Website ID.</li>' .
-						'<li>Paste the Website ID below and select your mode (Cloud or Self-hosted).</li>' .
-						'<li>Save the settings - tracking will start automatically.</li>' .
-						'</ol>',
-		)
-	);
-
-	$screen->add_help_tab(
-		array(
-			'id'      => 'umami_help_settings',
-			'title'   => 'Settings',
-			'content' => '<p><strong>Mode</strong><br>' .
-						'Choose between Cloud (umami.is hosted service) or Self-hosted (your own Umami instance).</p>' .
-						'<p><strong>Website ID</strong><br>' .
-						'Your unique Umami Website ID in UUID format (e.g., 12345678-1234-1234-1234-123456789abc). Find this in your Umami dashboard under Settings → Websites.</p>' .
-						'<p><strong>Host URL</strong><br>' .
-						   'Only required for self-hosted instances. Enter your Umami installation URL.<br>' .
-						   '<strong>Examples:</strong><br>' .
-						   '- Base URL: <code>https://analytics.yourdomain.com</code> (will use <code>/script.js</code>)<br>' .
-						   '- Custom path: <code>https://analytics.yourdomain.com/custom</code> or <code>https://analytics.yourdomain.com/custom.js</code> (will use exactly what you enter after the hostname, with or without <code>.js</code>)<br>' .
-						   'If you enter only the base URL, <code>/script.js</code> will be appended automatically. If you provide any path after the hostname, it will be used exactly as entered—regardless of whether it ends with <code>.js</code> or not.</p>' .
-						'<p><strong>Script Loading</strong><br>' .
-						'<strong>defer</strong>: Execute after HTML is parsed (recommended).<br>' .
-						'<strong>async</strong>: Load as soon as possible (may execute before DOM is ready).</p>',
-		)
-	);
+	$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'setup'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 	$screen->set_help_sidebar(
 		'<p><strong>Support & Resources</strong></p>' .
@@ -148,6 +145,69 @@ function umami_connect_add_help() {
 		'<p><a href="' . UMAMI_CONNECT_DISCORD_INVITE . '" target="_blank">Discord</a></p>' .
 		'<p><a href="https://umami.is/docs" target="_blank">Umami Documentation</a></p>'
 	);
+
+	switch ( $tab ) {
+		case 'setup':
+			$screen->add_help_tab(
+				array(
+					'id'      => 'umami_help_setup',
+					'title'   => 'Setup',
+					'content' => '<p><strong>Quick Setup Guide</strong></p>' .
+								'<ol>' .
+								'<li>Create an account at <a href="https://umami.is" target="_blank">umami.is</a> (Cloud) or set up your own Umami instance (Self-hosted).</li>' .
+								'<li>Add your website in your Umami dashboard and copy the Website ID.</li>' .
+								'<li>Paste the Website ID below and select your mode (Cloud or Self-hosted).</li>' .
+								'<li>Save the settings - tracking will start automatically.</li>' .
+								'</ol>',
+				)
+			);
+
+			$screen->add_help_tab(
+				array(
+					'id'      => 'umami_help_settings',
+					'title'   => 'Settings',
+					'content' => '<p><strong>Mode</strong><br>' .
+								'Choose between Cloud (umami.is hosted service) or Self-hosted (your own Umami instance).</p>' .
+								'<p><strong>Website ID</strong><br>' .
+								'Your unique Umami Website ID in UUID format (e.g., 12345678-1234-1234-1234-123456789abc). Find this in your Umami dashboard under Settings → Websites.</p>' .
+								'<p><strong>Host URL</strong><br>' .
+								'Only required for self-hosted instances. Enter your Umami installation URL.<br>' .
+								'<strong>Examples:</strong><br>' .
+								'- Base URL: <code>https://analytics.yourdomain.com</code> (will use <code>/script.js</code>)<br>' .
+								'- Custom path: <code>https://analytics.yourdomain.com/custom</code> or <code>https://analytics.yourdomain.com/custom.js</code> (will use exactly what you enter after the hostname, with or without <code>.js</code>)<br>' .
+								'If you enter only the base URL, <code>/script.js</code> will be appended automatically. If you provide any path after the hostname, it will be used exactly as entered—regardless of whether it ends with <code>.js</code> or not.</p>' .
+								'<p><strong>Script Loading</strong><br>' .
+								'<strong>defer</strong>: Execute after HTML is parsed (recommended).<br>' .
+								'<strong>async</strong>: Load as soon as possible (may execute before DOM is ready).</p>',
+				)
+			);
+			break;
+		case 'share-url':
+			$screen->add_help_tab(
+				array(
+					'id'      => 'umami_help_share_url_overview',
+					'title'   => 'Overview',
+					'content' => '<p><strong>Umami Share URL</strong></p>' .
+							'<p>The Share URL is the public link to your Umami dashboard. Enter the URL generated by Umami ("Share Dashboard").</p>' .
+							'<ul><li>Only shared dashboards can be embedded.</li><li>The URL must be publicly accessible and allowed for iFrame embedding.</li></ul>',
+				)
+			);
+			$screen->add_help_tab(
+				array(
+					'id'      => 'umami_help_share_url_settings',
+					'title'   => 'Settings',
+					'content' => '<p><strong>Share URL</strong><br>' .
+						'Enter the full Share URL from your Umami dashboard (e.g. <code>https://cloud.umami.is/share/abc123</code>).<br>' .
+						'Only this URL will be shown in the statistics menu. Leave empty to disable the feature.</p>' .
+						'<p><strong>Reset or Change</strong><br>' .
+						'To change the Share URL, you must first use the reset function. After resetting, you can enter a new URL in the settings.</p>' .
+						'<p><strong>Requirements</strong><br>' .
+						'- The URL must be a valid public Umami share link.<br>' .
+						'- The dashboard must be shared and embeddable (no iFrame restrictions).</p>',
+				)
+			);
+			break;
+	}
 }
 
 function umami_connect_add_help_self_protection() {
