@@ -12,8 +12,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Constants for meta keys.
-define( 'UMAMI_CF7_META_EVENT_NAME', '_umami_cf7_custom_event' );
-define( 'UMAMI_CF7_META_EVENT_DATA', '_umami_cf7_event_data' );
+if ( ! defined( 'UMAMI_CF7_META_EVENT_NAME' ) ) {
+	define( 'UMAMI_CF7_META_EVENT_NAME', '_umami_cf7_custom_event' );
+}
+if ( ! defined( 'UMAMI_CF7_META_EVENT_DATA' ) ) {
+	define( 'UMAMI_CF7_META_EVENT_DATA', '_umami_cf7_event_data' );
+}
 
 // Guard: run only if CF7 is present (admin side).
 if ( ! is_admin() || ( ! class_exists( 'WPCF7' ) && ! function_exists( 'wpcf7' ) ) ) {
