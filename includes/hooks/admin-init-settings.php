@@ -478,5 +478,42 @@ add_action(
 			null,
 			'umami_connect_advanced'
 		);
+
+		register_setting(
+			'umami_connect_share_url',
+			'umami_advanced_share_url',
+			array(
+				'type' => 'string',
+				'sanitize_callback' => 'esc_url_raw',
+				'default' => '',
+			)
+		);
+		register_setting(
+			'umami_connect_share_url',
+			'umami_statistics_allowed_roles',
+			array(
+				'type' => 'array',
+				'sanitize_callback' => function ( $roles ) {
+					return array_map( 'sanitize_text_field', (array) $roles );
+				},
+				'default' => array(),
+			)
+		);
+
+		register_setting(
+			'umami_connect_general',
+			'umami_statistics_allowed_roles',
+			array(
+				'type' => 'array',
+				'sanitize_callback' => function ( $roles ) {
+					if ( ! is_array( $roles ) ) {
+						$roles = array();
+					}
+					$valid = array_keys( get_editable_roles() );
+					return array_values( array_intersect( $roles, $valid ) );
+				},
+				'default' => array(),
+			)
+		);
 	}
 );

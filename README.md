@@ -31,6 +31,7 @@ Transform how you understand your website visitors with **umami Connect** — th
 
 ---
 
+
 ## Key Features
 
 - **Visual Event Tracking** — Add tracking to buttons and links directly in Gutenberg editor
@@ -39,6 +40,7 @@ Transform how you understand your website visitors with **umami Connect** — th
 - **Privacy Controls** — Self-protection mode, Do Not Track support, domain restrictions
 - **Event Management** — View and manage all your tracking from one dashboard
 - **Advanced Options** — beforeSend hooks, custom tagging, URL cleanup
+- **Dashboard Embed** — View your Umami Analytics dashboard directly in the WordPress admin (role-based access)
 
 ---
 

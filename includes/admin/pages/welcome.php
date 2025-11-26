@@ -34,6 +34,7 @@ function umami_connect_welcome_page() {
 				border-radius: 12px;
 				padding: 18px 20px;
 				box-shadow: 0 1px 4px rgba(34,113,177,0.04);
+				border: 1.5px solid #e3e6ea;
 			}
 			.umami-feature-icon {
 				display: flex;
@@ -110,6 +111,13 @@ function umami_connect_welcome_page() {
 				<div class="umami-feature-content">
 					<strong><?php echo esc_html__( 'Multiple Integrations', 'umami-connect' ); ?></strong>
 					<span><?php echo esc_html__( 'Works with popular plugins & blocks', 'umami-connect' ); ?></span>
+				</div>
+			</div>
+			<div class="umami-feature-card">
+				<span class="umami-feature-icon"><span class="dashicons dashicons-visibility"></span></span>
+				<div class="umami-feature-content">
+					<strong><?php echo esc_html__( 'Inline Dashboard', 'umami-connect' ); ?></strong>
+					<span><?php echo esc_html__( 'View umami Statistics directly in your WordPress admin', 'umami-connect' ); ?></span>
 				</div>
 			</div>
 		</div>
