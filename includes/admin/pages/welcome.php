@@ -117,7 +117,7 @@ function umami_connect_welcome_page() {
 				<span class="umami-feature-icon"><span class="dashicons dashicons-visibility"></span></span>
 				<div class="umami-feature-content">
 					<strong><?php echo esc_html__( 'Inline Dashboard', 'umami-connect' ); ?></strong>
-					<span><?php echo esc_html__( 'View Umami Statistics directly in your WordPress admin', 'umami-connect' ); ?></span>
+					<span><?php echo esc_html__( 'View umami Statistics directly in your WordPress admin', 'umami-connect' ); ?></span>
 				</div>
 			</div>
 		</div>
