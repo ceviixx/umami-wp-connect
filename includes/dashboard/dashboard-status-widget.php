@@ -58,7 +58,16 @@ add_action(
 				$host = get_option( 'umami_host', '' );
 				$login_url = '';
 				if ( $mode === 'self' && ! empty( $host ) ) {
-					$login_url = rtrim( $host, '/' ) . '/login';
+					$parsed = parse_url( $host );
+					if ( ! empty( $parsed['scheme'] ) && ! empty( $parsed['host'] ) ) {
+						$host_url = $parsed['scheme'] . '://' . $parsed['host'];
+						if ( isset( $parsed['port'] ) ) {
+							$host_url .= ':' . $parsed['port'];
+						}
+						$login_url = rtrim( $host_url, '/' ) . '/login';
+					} else {
+						$login_url = rtrim( $host, '/' ) . '/login';
+					}
 				} else {
 					$login_url = 'https://cloud.umami.is/login';
 				}
