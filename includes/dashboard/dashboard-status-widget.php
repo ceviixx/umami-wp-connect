@@ -23,8 +23,8 @@ add_action(
 					}
 				}
 				$event_names_count = count( $event_names );
-				echo '<div class="umami-health-widget" style="display:flex; gap:0; align-items:stretch; max-width:520px; margin:auto;">';
-				echo '<div style="flex:0.7; min-width:140px; max-width:180px; display:flex; flex-direction:column; align-items:center; justify-content:center;">';
+				echo '<div class="umami-health-widget" style="display:flex; gap:0; align-items:stretch; margin:auto;">';
+				echo '<div style="flex:0.7; min-width:140px; display:flex; flex-direction:column; align-items:center; justify-content:center;">';
 				if ( $has_update ) {
 					echo '<div style="margin-bottom:1px;">'
 					. '<svg width="20" height="20" viewBox="0 0 204.688 186.621" xmlns="http://www.w3.org/2000/svg"><g><rect height="186.621" opacity="0" width="204.688" x="0" y="0"/><path d="M26.6602 185.547L178.027 185.547C194.629 185.547 204.688 174.023 204.688 159.082C204.688 154.492 203.32 149.707 200.879 145.41L125.098 13.3789C120.02 4.49219 111.328 0 102.344 0C93.3594 0 84.5703 4.49219 79.5898 13.3789L3.80859 145.41C1.17188 149.805 0 154.492 0 159.082C0 174.023 10.0586 185.547 26.6602 185.547ZM26.7578 170.215C19.9219 170.215 15.8203 164.941 15.8203 158.984C15.8203 157.129 16.2109 154.785 17.2852 152.734L92.9688 20.8008C95.0195 17.1875 98.7305 15.625 102.344 15.625C105.957 15.625 109.57 17.1875 111.621 20.8008L187.305 152.832C188.379 154.883 188.867 157.129 188.867 158.984C188.867 164.941 184.57 170.215 177.832 170.215Z" fill="#ff9800" fill-opacity="0.85"/><path d="M102.344 119.727C107.031 119.727 109.766 116.992 109.863 111.914L111.23 60.4492C111.328 55.4688 107.422 51.7578 102.246 51.7578C96.9727 51.7578 93.2617 55.3711 93.3594 60.3516L94.6289 111.914C94.7266 116.895 97.4609 119.727 102.344 119.727ZM102.344 151.465C108.008 151.465 112.891 146.973 112.891 141.309C112.891 135.547 108.105 131.152 102.344 131.152C96.582 131.152 91.7969 135.645 91.7969 141.309C91.7969 146.875 96.6797 151.465 102.344 151.465Z" fill="#ff9800" fill-opacity="0.85"/></g></svg>'
@@ -46,7 +46,7 @@ add_action(
 
 				echo '<div style="width:1px; background:#e0e0e0; margin:0 16px; border-radius:1px;"></div>';
 
-				echo '<div style="flex:1.3; min-width:180px; max-width:320px; display:flex; flex-direction:column; justify-content:center;">';
+				echo '<div style="flex:1.3; min-width:180px; display:flex; flex-direction:column; justify-content:center;">';
 				echo '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
 				echo '<tr><td style="padding:6px 10px 6px 0; color:#666;">Event names</td><td style="padding:6px 0; font-weight:bold; text-align:right;">' . intval( $event_names_count ) . '</td></tr>';
 				echo '<tr><td style="padding:6px 10px 6px 0; color:#666;">Event key-value pairs</td><td style="padding:6px 0; font-weight:bold; text-align:right;">' . intval( $event_key_value_count ) . '</td></tr>';
@@ -72,11 +72,33 @@ add_action(
 					$login_url = 'https://cloud.umami.is/login';
 				}
 				echo '<hr style="border:0; border-top:1px solid #e0e0e0; margin:18px -12px 0 -12px; padding:0; width:calc(100% + 24px);" />';
-				echo '<div style="padding-top:8px; text-align:right;">'
-					. '<a href="' . esc_url( $login_url ) . '" target="_blank" rel="noopener noreferrer" style="color:#21759b; font-size:13px; text-decoration:none; font-weight:400; display:inline-flex; align-items:center; gap:3px;">Umami Login'
+				$share_url = get_option( 'umami_advanced_share_url' );
+				$allowed_roles = get_option( 'umami_statistics_allowed_roles', array() );
+				if ( ! is_array( $allowed_roles ) ) {
+					$allowed_roles = array();
+				}
+				$user = wp_get_current_user();
+				$user_roles = (array) $user->roles;
+				$has_access = in_array( 'administrator', $user_roles );
+				if ( ! $has_access ) {
+					foreach ( $allowed_roles as $role ) {
+						if ( in_array( $role, $user_roles ) ) {
+							$has_access = true;
+							break;
+						}
+					}
+				}
+				echo '<div style="padding-top:8px; text-align:left; display:flex; align-items:center; gap:0;">';
+				echo '<a href="' . esc_url( $login_url ) . '" target="_blank" rel="noopener noreferrer" style="color:#21759b; font-size:13px; text-decoration:none; font-weight:400; display:inline-flex; align-items:center; gap:3px;">Umami Login'
 					. '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#21759b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:1px;"><path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'
-					. '</a>'
-					. '</div>';
+					. '</a>';
+				if ( ! empty( $share_url ) && $has_access ) {
+					echo '<span style="display:inline-block; width:1px; height:18px; background:#e0e0e0; margin:0 12px; vertical-align:middle;"></span>';
+					echo '<a href="' . esc_url( $share_url ) . '" target="_blank" rel="noopener noreferrer" style="color:#21759b; font-size:13px; text-decoration:none; font-weight:400; display:inline-flex; align-items:center; gap:3px;">See stats'
+						. '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#21759b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:1px;"><path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'
+						. '</a>';
+				}
+				echo '</div>';
 				echo '<style>'
 					. '.umami-health-widget .umami-status-label.orange{color:#d63638;} .umami-health-widget .umami-status-label.green{color:#46b450;} .umami-progress-wrapper.orange svg circle:last-child{stroke:#d63638;} .umami-progress-wrapper.green svg circle:last-child{stroke:#46b450;}'
 					. '</style>';

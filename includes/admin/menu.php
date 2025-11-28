@@ -2,39 +2,6 @@
 add_action(
 	'admin_menu',
 	function () {
-		$share_url = get_option( 'umami_advanced_share_url' );
-		$allowed_roles = get_option( 'umami_statistics_allowed_roles', array() );
-		if ( ! is_array( $allowed_roles ) ) {
-			$allowed_roles = array();
-		}
-		$user = wp_get_current_user();
-		$user_roles = (array) $user->roles;
-		$has_access = in_array( 'administrator', $user_roles );
-		if ( ! $has_access ) {
-			foreach ( $allowed_roles as $role ) {
-				if ( in_array( $role, $user_roles ) ) {
-					$has_access = true;
-					break;
-				}
-			}
-		}
-		if ( ! empty( $share_url ) && $has_access ) {
-			add_menu_page(
-				'umami Statistics',
-				'umami Statistics',
-				'read',
-				'umami-statistics',
-				'umami_statistics_page',
-				'dashicons-chart-bar',
-				58
-			);
-		}
-	}
-);
-
-add_action(
-	'admin_menu',
-	function () {
 
 		$general_page = add_menu_page(
 			'umami Connect',
