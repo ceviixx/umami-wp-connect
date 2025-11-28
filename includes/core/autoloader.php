@@ -45,7 +45,6 @@ class Umami_Connect_Autoloader {
 			// Core files (load first).
 			'core'        => array(
 				'constants.php',
-				'version_check.php',
 			),
 
 			// Admin files.
@@ -59,7 +58,6 @@ class Umami_Connect_Autoloader {
 				'general.php',
 				'self_protection.php',
 				'automation.php',
-				'update.php',
 				'events_overview.php',
 				'advanced.php',
 				'statistics.php',

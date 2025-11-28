@@ -1,20 +1,20 @@
 <?php
 function umami_statistics_page() {
-	$iframe_url = apply_filters( 'umami_analytics_iframe_url', get_option( 'umami_advanced_share_url' ) );
-	$headers = @get_headers( $iframe_url, 1 );
-	$blocked = false;
-	$block_reason = '';
-	$is_umami_cloud = strpos( $iframe_url, 'cloud.umami.is' ) !== false;
-	$current_host = ( isset( $_SERVER['HTTP_HOST'] ) ) ? strtolower( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : 'localhost';
-	$current_proto = ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] === 'on' ) ? 'https://' : 'http://';
-	$current_origin = $current_proto . $current_host;
+	$iframe_url              = apply_filters( 'umami_analytics_iframe_url', get_option( 'umami_advanced_share_url' ) );
+	$headers                 = @get_headers( $iframe_url, 1 );
+	$blocked                 = false;
+	$block_reason            = '';
+	$is_umami_cloud          = strpos( $iframe_url, 'cloud.umami.is' ) !== false;
+	$current_host            = ( isset( $_SERVER['HTTP_HOST'] ) ) ? strtolower( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : 'localhost';
+	$current_proto           = ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] === 'on' ) ? 'https://' : 'http://';
+	$current_origin          = $current_proto . $current_host;
 	$frame_ancestors_allowed = false;
 	if ( $headers && is_array( $headers ) ) {
 		foreach ( $headers as $key => $value ) {
 			$key_lower = strtolower( $key );
 			if ( $key_lower === 'x-frame-options' ) {
 				if ( ! $is_umami_cloud ) {
-					$blocked = true;
+					$blocked      = true;
 					$block_reason = 'X-Frame-Options: ' . ( is_array( $value ) ? implode( ', ', $value ) : $value );
 				}
 			}
@@ -33,7 +33,7 @@ function umami_statistics_page() {
 						}
 					}
 					if ( ! $frame_ancestors_allowed ) {
-						$blocked = true;
+						$blocked      = true;
 						$block_reason = 'Content-Security-Policy: ' . $value . ' (Host/Origin nicht erlaubt: ' . esc_html( $current_origin ) . ')';
 					}
 				}

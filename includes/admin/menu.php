@@ -2,12 +2,12 @@
 add_action(
 	'admin_menu',
 	function () {
-		$share_url = get_option( 'umami_advanced_share_url' );
+		$share_url     = get_option( 'umami_advanced_share_url' );
 		$allowed_roles = get_option( 'umami_statistics_allowed_roles', array() );
 		if ( ! is_array( $allowed_roles ) ) {
 			$allowed_roles = array();
 		}
-		$user = wp_get_current_user();
+		$user       = wp_get_current_user();
 		$user_roles = (array) $user->roles;
 		$has_access = in_array( 'administrator', $user_roles );
 		if ( ! $has_access ) {
@@ -105,21 +105,6 @@ add_action(
 			'umami_connect_advanced_page'
 		);
 		add_action( "load-{$advanced_page}", 'umami_connect_add_help_advanced' );
-
-		$update_menu_title = 'Update';
-		if ( umami_connect_has_update() ) {
-			$update_menu_title = 'Update <span class="update-plugins count-1"><span class="update-count">1</span></span>';
-		}
-
-		$update_page = add_submenu_page(
-			'umami_connect_welcome',
-			'Update',
-			$update_menu_title,
-			'manage_options',
-			'umami_connect_update',
-			'umami_connect_update_page'
-		);
-		add_action( "load-{$update_page}", 'umami_connect_add_help_update' );
 	}
 );
 

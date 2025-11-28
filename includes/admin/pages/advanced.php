@@ -89,9 +89,9 @@ function umami_connect_advanced_page() {
 							<th scope="row"><label>beforeSend</label></th>
 							<td>
 								<?php
-												$mode          = get_option( 'umami_tracker_before_send_mode', 'disabled' );
-								$function_name = get_option( 'umami_tracker_before_send', '' );
-								$inline_code   = get_option( 'umami_tracker_before_send_inline', '' );
+												$mode = get_option( 'umami_tracker_before_send_mode', 'disabled' );
+								$function_name        = get_option( 'umami_tracker_before_send', '' );
+								$inline_code          = get_option( 'umami_tracker_before_send_inline', '' );
 								?>
 								<fieldset>
 									<p style="margin: 0 0 8px;">Choose how to provide <code>beforeSend</code>:</p>

@@ -366,7 +366,7 @@ function umami_connect_render_events_overview_page() {
 			if ( in_array( $column_key, $hidden_columns, true ) ) {
 				continue;
 			}
-			$visible_count++;
+			++$visible_count;
 		}
 
 		if ( empty( $paged_rows ) ) {
@@ -401,7 +401,7 @@ function umami_connect_render_events_overview_page() {
 					$is_integration = is_string( $event_type ) && strpos( $event_type, 'integration_' ) === 0;
 					if ( $is_tracked && $event_type !== 'none' && ( $block_index || $is_integration ) ) {
 						// For integrations, use form_id if available, otherwise post_id
-						$delete_id = $is_integration && isset( $row['form_id'] ) ? $row['form_id'] : ( $row['post_id'] ?? 0 );
+						$delete_id         = $is_integration && isset( $row['form_id'] ) ? $row['form_id'] : ( $row['post_id'] ?? 0 );
 						$actions['delete'] = '<a href="#" class="delete-event submitdelete" data-post-id="' . esc_attr( (string) $delete_id ) . '" data-block-index="' . esc_attr( (string) $block_index ) . '" data-event-type="' . esc_attr( (string) $event_type ) . '" style="color:#b32d2e;">' . esc_html__( 'Delete', 'umami-connect' ) . '</a>';
 					}
 					if ( ! empty( $actions ) ) {
