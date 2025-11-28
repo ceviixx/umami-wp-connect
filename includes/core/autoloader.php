@@ -87,7 +87,6 @@ class Umami_Connect_Autoloader {
 				'autoloader-debug.php',
 			),
 		);
-		
 		// Defer loading of integrations via registry until plugins_loaded.
 		add_action( 'plugins_loaded', array( __CLASS__, 'load_integrations_from_registry' ) );
 	}
