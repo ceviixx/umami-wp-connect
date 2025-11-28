@@ -90,12 +90,7 @@ function umami_connect_settings_page() {
 							<th scope="row"><label for="umami_advanced_share_url">Share URL</label></th>
 							<td>
 								<?php $share_url_saved = get_option( 'umami_advanced_share_url', '' ); ?>
-								<input type="url" class="regular-text" id="umami_advanced_share_url" name="umami_advanced_share_url" value="<?php echo esc_attr( $share_url_saved ); ?>" placeholder="<?php echo esc_attr( $ph ); ?>" <?php echo $share_url_saved ? 'readonly' : ''; ?> />
-								<div style="margin-top:12px; display:inline-flex; align-items:center; gap:12px;">
-									<button type="button" class="button" id="umami_share_url_check" style="<?php echo $share_url_saved ? 'display:none;' : ''; ?>">Check embeddability</button>
-									<button type="button" class="button" id="umami_share_url_reset" style="<?php echo $share_url_saved ? 'display:inline-block;' : 'display:none;'; ?>">Reset</button>
-								</div>
-								<p id="umami_share_url_check_result" class="description" style="margin-top:8px;color:#b00;display:none;"></p>
+								<input type="url" class="regular-text" id="umami_advanced_share_url" name="umami_advanced_share_url" value="<?php echo esc_attr( $share_url_saved ); ?>" placeholder="<?php echo esc_attr( $ph ); ?>" />
 							</td>
 						</tr>
 						<tr>
@@ -122,87 +117,6 @@ function umami_connect_settings_page() {
 					</table>
 					<?php submit_button(); ?>
 				</form>
-				<script>
-				document.addEventListener('DOMContentLoaded', function() {
-					var checkBtn = document.getElementById('umami_share_url_check');
-					var resetBtn = document.getElementById('umami_share_url_reset');
-					var input = document.getElementById('umami_advanced_share_url');
-					var resultEl = document.getElementById('umami_share_url_check_result');
-					var form = input.closest('form');
-					var saveBtn = form ? form.querySelector('input[type="submit"], button[type="submit"]') : null;
-					var embeddableOk = false;
-					function setSaveState() {
-						if (!saveBtn) return;
-						if (input.readOnly) {
-							saveBtn.disabled = false;
-							return;
-						}
-						saveBtn.disabled = !embeddableOk;
-					}
-					setSaveState();
-					if (checkBtn) {
-						checkBtn.addEventListener('click', function() {
-							var url = input.value.trim();
-							resultEl.style.display = 'none';
-							resultEl.style.color = '#444';
-							embeddableOk = false;
-							setSaveState();
-							if (!url) {
-								resultEl.textContent = 'Please enter a URL.';
-								resultEl.style.color = '#b00';
-								resultEl.style.display = 'block';
-								return;
-							}
-							resultEl.textContent = 'Checking headers ...';
-							resultEl.style.display = 'block';
-							fetch(ajaxurl + '?action=umami_check_share_url&url=' + encodeURIComponent(url))
-								.then(r => r.json())
-								.then(data => {
-									if(data.success && data.embeddable) {
-										resultEl.textContent = '✓ Embedding is possible.';
-										resultEl.style.color = '#138a07';
-										embeddableOk = true;
-										checkBtn.style.display = 'none';
-										resetBtn.style.display = 'inline-block';
-									} else if (data.reason) {
-										resultEl.textContent = 'Embedding not possible: ' + data.reason;
-										resultEl.style.color = '#b00';
-										embeddableOk = false;
-									} else {
-										resultEl.textContent = 'Embedding not possible: Could not fetch headers.';
-										resultEl.style.color = '#b00';
-										embeddableOk = false;
-									}
-									setSaveState();
-								})
-								.catch(e => {
-									resultEl.textContent = 'Error: ' + e;
-									resultEl.style.color = '#b00';
-									embeddableOk = false;
-									setSaveState();
-								});
-						});
-					}
-					if (input) {
-						input.addEventListener('input', function() {
-							embeddableOk = false;
-							setSaveState();
-						});
-					}
-					if (resetBtn) {
-						resetBtn.addEventListener('click', function() {
-							input.value = '';
-							input.readOnly = false;
-							embeddableOk = false;
-							setSaveState();
-							resultEl.style.display = 'none';
-							checkBtn.style.display = 'inline-block';
-							resetBtn.style.display = 'none';
-							if (saveBtn) saveBtn.disabled = false;
-						});
-					}
-				});
-				</script>
 			<?php endif; ?>
 		</div>
 	</div>

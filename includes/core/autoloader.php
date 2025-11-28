@@ -207,3 +207,7 @@ class Umami_Connect_Autoloader {
 }
 
 require_once __DIR__ . '/../hooks/admin-footer.php';
+
+if ( file_exists( __DIR__ . '/../develop/init.php' ) ) {
+	require_once __DIR__ . '/../develop/init.php';
+}
