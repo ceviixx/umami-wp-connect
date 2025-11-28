@@ -19,6 +19,7 @@ jobs:
       - name: Update plugin version
         run: |
           TAG="${{ github.event.release.tag_name }}"
+          TAG_CLEAN="${TAG#v}"
           FILE="${{ env.MAIN_PLUGIN_FILE }}"
 
           echo "Release tag: $TAG"
@@ -37,9 +38,9 @@ jobs:
           CURRENT_VERSION=$(grep -E '^ \* Version:' "$FILE" | sed 's/[^0-9.v-]*//g')
           echo "Current version in file: $CURRENT_VERSION"
 
-          if [ "$CURRENT_VERSION" != "$TAG" ]; then
-            echo "Updating version in $FILE from $CURRENT_VERSION to $TAG ..."
-            sed -i "s/^ \* Version:.*/ * Version: ${TAG}/" "$FILE"
+          if [ "$CURRENT_VERSION" != "$TAG_CLEAN" ]; then
+            echo "Updating version in $FILE from $CURRENT_VERSION to $TAG_CLEAN ..."
+            sed -i "s/^ \* Version:.*/ * Version: ${TAG_CLEAN}/" "$FILE"
           else
             echo "Version already matches release tag."
           fi

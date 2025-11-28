@@ -1,8 +1,8 @@
 <?php
 function umami_connect_settings_page() {
-	$tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'setup';
+	$tab  = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'setup';
 	$tabs = array(
-		'setup' => 'Setup',
+		'setup'     => 'Setup',
 		'share-url' => 'umami Statistics',
 	);
 	?>
@@ -83,7 +83,7 @@ function umami_connect_settings_page() {
 					<?php
 					settings_fields( 'umami_connect_share_url' );
 					$mode = get_option( 'umami_mode', 'cloud' );
-					$ph = ( $mode === 'self' ) ? 'https://your-umami-instance.com/share/xxxx' : 'https://cloud.umami.is/share/xxxx';
+					$ph   = ( $mode === 'self' ) ? 'https://your-umami-instance.com/share/xxxx' : 'https://cloud.umami.is/share/xxxx';
 					?>
 					<table class="form-table" role="presentation">
 						<tr>
@@ -97,7 +97,7 @@ function umami_connect_settings_page() {
 							<th scope="row">Allowed Roles</th>
 							<td>
 								<?php
-								$roles = get_editable_roles();
+								$roles         = get_editable_roles();
 								$allowed_roles = get_option( 'umami_statistics_allowed_roles', array() );
 								if ( ! is_array( $allowed_roles ) ) {
 									$allowed_roles = array();
@@ -136,12 +136,12 @@ add_action(
 		if ( empty( $url ) ) {
 			wp_send_json_error( array( 'reason' => 'No URL provided' ) );
 		}
-		$headers = @get_headers( $url, 1 );
-		$embeddable = true;
-		$reason = '';
+		$headers        = @get_headers( $url, 1 );
+		$embeddable     = true;
+		$reason         = '';
 		$is_umami_cloud = strpos( $url, 'cloud.umami.is' ) !== false;
-		$current_host = ( isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : 'localhost' );
-		$current_proto = ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] === 'on' ) ? 'https://' : 'http://';
+		$current_host   = ( isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : 'localhost' );
+		$current_proto  = ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] === 'on' ) ? 'https://' : 'http://';
 		$current_origin = $current_proto . $current_host;
 		if ( $headers && is_array( $headers ) ) {
 			foreach ( $headers as $key => $value ) {
@@ -149,7 +149,7 @@ add_action(
 				if ( $key_lower === 'x-frame-options' ) {
 					if ( ! $is_umami_cloud ) {
 						$embeddable = false;
-						$reason = 'X-Frame-Options: ' . ( is_array( $value ) ? implode( ', ', $value ) : $value );
+						$reason     = 'X-Frame-Options: ' . ( is_array( $value ) ? implode( ', ', $value ) : $value );
 					}
 				}
 				if ( $key_lower === 'content-security-policy' ) {
@@ -159,7 +159,7 @@ add_action(
 					if ( stripos( $value, 'frame-ancestors' ) !== false && ! $is_umami_cloud ) {
 						if ( preg_match( '/frame-ancestors\s+([^;]+)/i', $value, $matches ) ) {
 							$ancestors = preg_split( '/\s+/', trim( $matches[1] ) );
-							$found = false;
+							$found     = false;
 							foreach ( $ancestors as $ancestor ) {
 								if ( $ancestor === "'self'" || $ancestor === $current_origin || strpos( $url, $ancestor ) === 0 ) {
 									$found = true;
@@ -168,35 +168,35 @@ add_action(
 							}
 							if ( $found ) {
 								$embeddable = true;
-								$reason = '';
+								$reason     = '';
 							} else {
 								$embeddable = false;
-								$reason = 'Content-Security-Policy: ' . $value;
+								$reason     = 'Content-Security-Policy: ' . $value;
 							}
 						} else {
 							$embeddable = false;
-							$reason = 'Content-Security-Policy: ' . $value;
+							$reason     = 'Content-Security-Policy: ' . $value;
 						}
 					}
 				}
 			}
 		} else {
 			$embeddable = false;
-			$reason = 'Could not fetch headers.';
+			$reason     = 'Could not fetch headers.';
 		}
 		if ( $embeddable ) {
 			wp_send_json(
 				array(
-					'success' => true,
+					'success'    => true,
 					'embeddable' => true,
 				)
 			);
 		} else {
 			wp_send_json(
 				array(
-					'success' => true,
+					'success'    => true,
 					'embeddable' => false,
-					'reason' => $reason,
+					'reason'     => $reason,
 				)
 			);
 		}

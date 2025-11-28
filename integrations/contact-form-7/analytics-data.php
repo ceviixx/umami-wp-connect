@@ -67,7 +67,7 @@ add_filter(
 				}
 			}
 			$is_tracked = ( $event_name !== '' );
-			$label              = get_the_title( $form_id );
+			$label      = get_the_title( $form_id );
 
 			$events[] = array(
 				'event'             => $is_tracked ? (string) $event_name : '(Candidate)',

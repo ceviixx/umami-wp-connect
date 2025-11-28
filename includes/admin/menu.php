@@ -72,21 +72,6 @@ add_action(
 			'umami_connect_advanced_page'
 		);
 		add_action( "load-{$advanced_page}", 'umami_connect_add_help_advanced' );
-
-		$update_menu_title = 'Update';
-		if ( umami_connect_has_update() ) {
-			$update_menu_title = 'Update <span class="update-plugins count-1"><span class="update-count">1</span></span>';
-		}
-
-		$update_page = add_submenu_page(
-			'umami_connect_welcome',
-			'Update',
-			$update_menu_title,
-			'manage_options',
-			'umami_connect_update',
-			'umami_connect_update_page'
-		);
-		add_action( "load-{$update_page}", 'umami_connect_add_help_update' );
 	}
 );
 

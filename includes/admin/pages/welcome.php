@@ -161,10 +161,10 @@ function umami_connect_welcome_page() {
 				</div>
 				<div style="font-size:13px; color:#646970; line-height:1.6;">
 					<?php
-						$issues_url   = 'https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '/issues/new?template=feature_request.yml&labels=enhancement';
-						$pulls_url    = 'https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '/pulls';
-						$contrib_url  = 'https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '/blob/main/CONTRIBUTING.md';
-						$text_html = sprintf(
+						$issues_url  = 'https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '/issues/new?template=feature_request.yml&labels=enhancement';
+						$pulls_url   = 'https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '/pulls';
+						$contrib_url = 'https://github.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '/blob/main/CONTRIBUTING.md';
+						$text_html   = sprintf(
 							// translators: 1: feature request URL, 2: pull request list URL, 3: contributing guide URL
 							__( 'Suggest an integration via a <a href="%1$s" target="_blank" rel="noopener noreferrer">feature request</a>, or add it directly with a <a href="%2$s" target="_blank" rel="noopener noreferrer">pull request</a>. See the <a href="%3$s" target="_blank" rel="noopener noreferrer">contribution guide</a>.', 'umami-connect' ),
 							esc_url( $issues_url ),

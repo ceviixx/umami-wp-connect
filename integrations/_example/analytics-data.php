@@ -37,10 +37,10 @@ add_filter(
 		$integration_color = '#606770';
 
 		foreach ( $items as $item_id ) {
-			$label       = 'Item ' . (int) $item_id; // Human-friendly label
-			$event_name  = ''; // Load from meta/settings if configured
-			$pairs       = array(); // Convert key/value into [ ['key'=>..,'value'=>..], ... ] if needed
-			$is_tracked  = ( $event_name !== '' );
+			$label      = 'Item ' . (int) $item_id; // Human-friendly label
+			$event_name = ''; // Load from meta/settings if configured
+			$pairs      = array(); // Convert key/value into [ ['key'=>..,'value'=>..], ... ] if needed
+			$is_tracked = ( $event_name !== '' );
 
 			$events[] = array(
 				'event'             => $is_tracked ? (string) $event_name : '(Candidate)',
