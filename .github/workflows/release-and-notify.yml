@@ -48,9 +48,9 @@ jobs:
           echo "Preview of updated file:"
           head -n 10 "$FILE"
 
-      - name: Remove develop include from autoloader
+      - name: Remove dev tools block from autoloader
         run: |
-          sed -i '/if ( file_exists( __DIR__ \/.*\/develop\/init.php/,+2d' includes/core/autoloader.php
+          sed -i '/Dev tools (remove for production release)/,/^[[:space:]]*),/d' includes/core/autoloader.php
 
       - name: Create plugin ZIP (with plugin folder)
         run: |

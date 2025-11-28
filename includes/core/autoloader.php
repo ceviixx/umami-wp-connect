@@ -80,13 +80,14 @@ class Umami_Connect_Autoloader {
 			'dashboard'   => array(
 				'dashboard-status-widget.php',
 			),
+
+			// Dev tools (remove for production release)
+			'dev'         => array(
+				'init.php',
+				'autoloader-debug.php',
+			),
 		);
-
-		// Load debug helper if in debug mode.
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			self::$file_map['core'][] = 'autoloader-debug.php';
-		}
-
+		
 		// Defer loading of integrations via registry until plugins_loaded.
 		add_action( 'plugins_loaded', array( __CLASS__, 'load_integrations_from_registry' ) );
 	}
@@ -207,7 +208,3 @@ class Umami_Connect_Autoloader {
 }
 
 require_once __DIR__ . '/../hooks/admin-footer.php';
-
-if ( file_exists( __DIR__ . '/../develop/init.php' ) ) {
-	require_once __DIR__ . '/../develop/init.php';
-}
