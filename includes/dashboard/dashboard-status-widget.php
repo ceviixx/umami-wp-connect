@@ -21,8 +21,8 @@ add_action(
 					}
 				}
 				$event_names_count = count( $event_names );
-				echo '<div class="umami-health-widget" style="display:flex; gap:0; align-items:stretch; max-width:520px; margin:auto;">';
-				echo '<div style="flex:1.3; min-width:180px; max-width:320px; display:flex; flex-direction:column; justify-content:center;">';
+				echo '<div class="umami-health-widget" style="display:flex; gap:0; align-items:stretch; margin:auto;">';
+				echo '<div style="flex:1.3; min-width:180px; display:flex; flex-direction:column; justify-content:center;">';
 				echo '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
 				echo '<tr><td style="padding:6px 10px 6px 0; color:#666;">Event names</td><td style="padding:6px 0; font-weight:bold; text-align:right;">' . intval( $event_names_count ) . '</td></tr>';
 				echo '<tr><td style="padding:6px 10px 6px 0; color:#666;">Event key-value pairs</td><td style="padding:6px 0; font-weight:bold; text-align:right;">' . intval( $event_key_value_count ) . '</td></tr>';
