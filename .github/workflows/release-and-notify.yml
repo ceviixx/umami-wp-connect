@@ -48,11 +48,15 @@ jobs:
           echo "Preview of updated file:"
           head -n 10 "$FILE"
 
+      - name: Remove dev tools block from autoloader
+        run: |
+          sed -i '/Dev tools (remove for production release)/,/^[[:space:]]*),/d' includes/core/autoloader.php
+
       - name: Create plugin ZIP (with plugin folder)
         run: |
           mkdir -p output/umami-wp-connect
           cp -r assets output/umami-wp-connect/
-          cp -r includes output/umami-wp-connect/
+          find includes -mindepth 1 -maxdepth 1 ! -name 'develop' -exec cp -r {} output/umami-wp-connect/includes/ \;
           cp -r integrations output/umami-wp-connect/
           cp "${{ env.MAIN_PLUGIN_FILE }}" output/umami-wp-connect/
           cd output
