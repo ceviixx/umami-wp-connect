@@ -24,8 +24,8 @@ Transform how you understand your website visitors with **umami Connect** — th
   <tr>
     <td align="center"><img src="screens/core/gutenberg/gutenberg-button.png" alt="Button Tracking" width="180"></td>
     <td align="center"><img src="screens/core/gutenberg/gutenberg-link.png" alt="Link Tracking" width="180"></td>
-    <td align="center"><img src="screens/core/settings/settings-general.png" alt="Easy Setup" width="180"></td>
-    <td align="center"><img src="screens/core/settings/settings-event-overview.png" alt="Event Management" width="180"></td>
+    <td align="center"><img src="screens/core/settings/settings-general-setup.png" alt="Easy Setup" width="180"></td>
+    <td align="center"><img src="screens/core/settings/settings-events-overview.png" alt="Event Management" width="180"></td>
   </tr>
 </table>
 
@@ -40,7 +40,7 @@ Transform how you understand your website visitors with **umami Connect** — th
 - **Privacy Controls** — Self-protection mode, Do Not Track support, domain restrictions
 - **Event Management** — View and manage all your tracking from one dashboard
 - **Advanced Options** — beforeSend hooks, custom tagging, URL cleanup
-- **Dashboard Embed** — View your Umami Analytics dashboard directly in the WordPress admin (role-based access)
+- **Dashboard Widget Link** - 'View stats' link in the dashboard widget when Share URL is set.
 
 ---
 
