@@ -65,6 +65,7 @@ class Umami_Connect_Autoloader {
 
 			// Hooks (filters and actions).
 			'hooks'       => array(
+				'admin-notices.php',
 				'filter-plugin-action-links.php',
 				'filter-render-block.php',
 				'filter-the-content.php',
