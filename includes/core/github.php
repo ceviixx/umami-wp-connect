@@ -57,49 +57,33 @@ class Umami_Connect_Github {
 			$changelog_file = ABSPATH . 'wp-content/plugins/umami-wp-connect/CHANGELOG.md';
 			if ( file_exists( $changelog_file ) ) {
 				$changelog_raw  = file_get_contents( $changelog_file );
-				$changelog_html = preg_replace( '/^\*\*v?([0-9]+\.[0-9]+\.[0-9]+)\*\*/m', '<strong>v$1</strong>', $changelog_raw );
-				$changelog_html = preg_replace( '/^##\s*v?([0-9]+\.[0-9]+\.[0-9]+)/m', '<strong>v$1</strong>', $changelog_html );
-				$changelog_html = preg_replace_callback(
-					'/(^|\n)(- .+?)(?=(\n[^-]|$))/s',
-					function ( $matches ) {
-						$items = preg_split( '/\n/', trim( $matches[2] ) );
-						$lis   = '';
-						foreach ( $items as $item ) {
-							if ( preg_match( '/^- (.+)/', $item, $m ) ) {
-								$lis .= '<li>' . htmlspecialchars( $m[1] ) . '</li>';
-							}
-						}
-						return "<ul>$lis</ul>";
-					},
-					$changelog_html
-				);
-				$changelog      = $changelog_html;
 			} else {
-				$changelog = 'See <a href="https://github.com/' . esc_attr( UMAMI_CONNECT_GITHUB_USER ) . '/' . esc_attr( UMAMI_CONNECT_GITHUB_REPO ) . '/releases">GitHub Releases</a>.';
+				$changelog_raw = '';
 			}
 		} else {
-			$changelog_body = isset( $release['body'] ) ? $release['body'] : '';
-			if ( $changelog_body ) {
-				$changelog_html = preg_replace( '/^\*\*v?([0-9]+\.[0-9]+\.[0-9]+)\*\*/m', '<strong>v$1</strong>', $changelog_body );
-				$changelog_html = preg_replace( '/^##\s*v?([0-9]+\.[0-9]+\.[0-9]+)/m', '<strong>v$1</strong>', $changelog_html );
-				$changelog_html = preg_replace_callback(
-					'/(^|\n)(- .+?)(?=(\n[^-]|$))/s',
-					function ( $matches ) {
-						$items = preg_split( '/\n/', trim( $matches[2] ) );
-						$lis   = '';
-						foreach ( $items as $item ) {
-							if ( preg_match( '/^- (.+)/', $item, $m ) ) {
-								$lis .= '<li>' . htmlspecialchars( $m[1] ) . '</li>';
-							}
+			$changelog_url = 'https://raw.githubusercontent.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '/main/CHANGELOG.md';
+			$changelog_raw = @file_get_contents( $changelog_url );
+		}
+		if ( $changelog_raw ) {
+			$changelog_html = preg_replace( '/^\*\*v?([0-9]+\.[0-9]+\.[0-9]+)\*\*/m', '<strong>v$1</strong>', $changelog_raw );
+			$changelog_html = preg_replace( '/^##\s*v?([0-9]+\.[0-9]+\.[0-9]+)/m', '<strong>v$1</strong>', $changelog_html );
+			$changelog_html = preg_replace_callback(
+				'/(^|\n)(- .+?)(?=(\n[^-]|$))/s',
+				function ( $matches ) {
+					$items = preg_split( '/\n/', trim( $matches[2] ) );
+					$lis   = '';
+					foreach ( $items as $item ) {
+						if ( preg_match( '/^- (.+)/', $item, $m ) ) {
+							$lis .= '<li>' . htmlspecialchars( $m[1] ) . '</li>';
 						}
-						return "<ul>$lis</ul>";
-					},
-					$changelog_html
-				);
-				$changelog      = $changelog_html;
-			} else {
-				$changelog = 'See <a href="https://github.com/' . esc_attr( UMAMI_CONNECT_GITHUB_USER ) . '/' . esc_attr( UMAMI_CONNECT_GITHUB_REPO ) . '/releases">GitHub Releases</a>.';
-			}
+					}
+					return "<ul>$lis</ul>";
+				},
+				$changelog_html
+			);
+			$changelog = $changelog_html;
+		} else {
+			$changelog = 'See <a href="https://github.com/' . esc_attr( UMAMI_CONNECT_GITHUB_USER ) . '/' . esc_attr( UMAMI_CONNECT_GITHUB_REPO ) . '/releases">GitHub Releases</a>.';
 		}
 
 		$readme_url = 'https://raw.githubusercontent.com/' . UMAMI_CONNECT_GITHUB_USER . '/' . UMAMI_CONNECT_GITHUB_REPO . '/main/README.md';
