@@ -19,12 +19,12 @@ This will execute `wp_maybe_auto_update()` and print `Auto-update executed.` in 
 ### GIF image for landing page
 ```bash
 convert -dither None -colors 256 \
-  \( screens/gutenberg/gutenberg-link-and-button.png -set delay 500 \) \
-  \( screens/settings/settings-general.png -set delay 200 \) \
-  \( screens/settings/settings-automation.png -set delay 200 \) \
-  \( screens/settings/settings-event-overview.png -set delay 200 \) \
+  \( screens/core/gutenberg/gutenberg-link-and-button.png -set delay 500 \) \
+  \( screens/core/settings/settings-general-setup.png -set delay 200 \) \
+  \( screens/core/settings/settings-automation.png -set delay 200 \) \
+  \( screens/core/settings/settings-events-overview.png -set delay 200 \) \
   -loop 0 \
-  screens/umami-connect-demo.gif
+  screens/core/umami-connect-demo.gif
 ```
 
 ---
