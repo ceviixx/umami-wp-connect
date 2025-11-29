@@ -6,7 +6,6 @@ add_action(
 			'umami_connect_update_widget',
 			'umami Connect',
 			function () {
-
 				$events                = apply_filters( 'umami_connect_get_all_events', array() );
 				$event_names_count     = 0;
 				$event_key_value_count = 0;
@@ -21,13 +20,40 @@ add_action(
 					}
 				}
 				$event_names_count = count( $event_names );
+
+				if ( function_exists( 'umami_connect_get_integrations' ) ) {
+					$integrations = umami_connect_get_integrations();
+					$active_integrations = 0;
+					foreach ( $integrations as $key => $config ) {
+						$should_load = true;
+						if ( isset( $config['check'] ) ) {
+							if ( is_callable( $config['check'] ) ) {
+								$should_load = (bool) call_user_func( $config['check'] );
+							} elseif ( is_string( $config['check'] ) && function_exists( $config['check'] ) ) {
+								$should_load = (bool) call_user_func( $config['check'] );
+							}
+						}
+						if ( $should_load ) {
+							$active_integrations++;
+						}
+					}
+				} else {
+					$active_integrations = 0;
+				}
 				echo '<div class="umami-health-widget" style="display:flex; gap:0; align-items:stretch; margin:auto;">';
-				echo '<div style="flex:1.3; min-width:180px; display:flex; flex-direction:column; justify-content:center;">';
-				echo '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
-				echo '<tr><td style="padding:6px 10px 6px 0; color:#666;">Event names</td><td style="padding:6px 0; font-weight:bold; text-align:right;">' . intval( $event_names_count ) . '</td></tr>';
-				echo '<tr><td style="padding:6px 10px 6px 0; color:#666;">Event key-value pairs</td><td style="padding:6px 0; font-weight:bold; text-align:right;">' . intval( $event_key_value_count ) . '</td></tr>';
+				echo '<table style="width:100%; border-collapse:collapse; font-size:14px; text-align:left; table-layout:fixed;">';
+				echo '<colgroup><col style="width:33.33%;"><col style="width:33.33%;"><col style="width:33.33%;"></colgroup>';
+				echo '<tr>';
+				echo '<th style="padding:6px 12px 6px 0; color:#666; font-weight:500; text-align:left;">Event names</th>';
+				echo '<th style="padding:6px 12px; color:#666; font-weight:500; text-align:left; border-left:1px solid #e0e0e0;">Event key-value pairs</th>';
+				echo '<th style="padding:6px 0 6px 12px; color:#666; font-weight:500; text-align:left; border-left:1px solid #e0e0e0;">Active integrations</th>';
+				echo '</tr>';
+				echo '<tr>';
+				echo '<td style="padding:0 12px 0 0; font-size:40px; font-weight:bold; color:#3a3a3aff; text-align:left;">' . intval( $event_names_count ) . '</td>';
+				echo '<td style="padding:0 12px; font-size:40px; font-weight:bold; color:#3a3a3aff; text-align:left; border-left:1px solid #e0e0e0;">' . intval( $event_key_value_count ) . '</td>';
+				echo '<td style="padding:0 0 0 12px; font-size:40px; font-weight:bold; color:#3a3a3aff; text-align:left; border-left:1px solid #e0e0e0;">' . intval( $active_integrations ) . '</td>';
+				echo '</tr>';
 				echo '</table>';
-				echo '</div>';
 				echo '</div>';
 
 				$mode      = get_option( 'umami_mode', 'cloud' );
