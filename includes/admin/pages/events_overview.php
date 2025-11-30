@@ -24,30 +24,30 @@ function umami_connect_render_events_overview_page() {
 			// Gutenberg block events - require valid numeric post_id
 			$numeric_post_id = absint( $post_id );
 			if ( ! $numeric_post_id || $numeric_post_id <= 0 ) {
-				echo '<div class="notice notice-error is-dismissible"><p><strong>Error: Invalid ID.</strong></p></div>';
+				echo '<div class="notice notice-error is-dismissible"><p><strong>' . esc_html__( 'Error: Invalid ID.', 'umami-connect' ) . '</strong></p></div>';
 			} elseif ( empty( $block_index ) || ! is_string( $block_index ) ) {
-				echo '<div class="notice notice-error is-dismissible"><p><strong>Error: Invalid block index.</strong></p></div>';
+				echo '<div class="notice notice-error is-dismissible"><p><strong>' . esc_html__( 'Error: Invalid block index.', 'umami-connect' ) . '</strong></p></div>';
 			} elseif ( ! in_array( $event_type, array( 'button', 'link' ), true ) ) {
-				echo '<div class="notice notice-error is-dismissible"><p><strong>Error: Invalid event type.</strong></p></div>';
+				echo '<div class="notice notice-error is-dismissible"><p><strong>' . esc_html__( 'Error: Invalid event type.', 'umami-connect' ) . '</strong></p></div>';
 			} else {
 				$result = umami_connect_delete_event_from_block( $numeric_post_id, $block_index, $event_type );
 			}
 		}
 
 		if ( $result ) {
-			echo '<div class="notice notice-success is-dismissible"><p><strong>Event deleted successfully.</strong></p></div>';
+			echo '<div class="notice notice-success is-dismissible"><p><strong>' . esc_html__( 'Event deleted successfully.', 'umami-connect' ) . '</strong></p></div>';
 		} elseif ( strpos( $event_type, 'integration_' ) === 0 ) {
-			echo '<div class="notice notice-error is-dismissible"><p><strong>Error:</strong> Could not delete integration event.</p></div>';
+			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Error: Could not delete integration event.', 'umami-connect' ) . '</p></div>';
 		} elseif ( ! empty( $post_id ) && absint( $post_id ) > 0 ) {
 			// Only show generic error if we had a valid post_id but deletion failed
-			echo '<div class="notice notice-error is-dismissible"><p><strong>Error:</strong> Could not delete event.</p></div>';
+			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Error: Could not delete event.', 'umami-connect' ) . '</p></div>';
 		}
 	}
 
 	echo '<div class="wrap">';
-	echo '<h1><b>umami Connect</b></h1>
-		<h3>Event overview</h3>';
-	echo '<p>Overview of all configured tracking events from Gutenberg blocks and integrations. Click "Edit" to manage individual events.</p>';
+	echo '<h1><b>umami Connect</b></h1>';
+	echo '<h3>' . esc_html__( 'Event overview', 'umami-connect' ) . '</h3>';
+	echo '<p>' . esc_html__( 'Overview of all configured tracking events from Gutenberg blocks and integrations. Click "Edit" to manage individual events.', 'umami-connect' ) . '</p>';
 
 	$screen = get_current_screen();
 	// Per-page aus Screen Options lesen (eigener Key)
@@ -105,16 +105,15 @@ function umami_connect_render_events_overview_page() {
 	$base_url = remove_query_arg( array( 'filter', 'paged' ) );
 
 	// All filter - always visible
-	echo '<li class="all"><a href="' . esc_url( $base_url ) . '" class="' . ( $current_filter === 'all' ? 'current' : '' ) . '">All <span class="count">(' . (int) $all_count . ')</span></a> | </li>';
+	echo '<li class="all"><a href="' . esc_url( $base_url ) . '" class="' . ( $current_filter === 'all' ? 'current' : '' ) . '">' . esc_html__( 'All', 'umami-connect' ) . ' <span class="count">(' . (int) $all_count . ')</span></a> | </li>';
 
 	// Events filter - always visible
 	$events_url = add_query_arg( 'filter', 'events', $base_url );
-	echo '<li class="events"><a href="' . esc_url( $events_url ) . '" class="' . ( $current_filter === 'events' ? 'current' : '' ) . '">Events <span class="count">(' . (int) $events_count . ')</span></a> | </li>';
+	echo '<li class="events"><a href="' . esc_url( $events_url ) . '" class="' . ( $current_filter === 'events' ? 'current' : '' ) . '">' . esc_html__( 'Events', 'umami-connect' ) . ' <span class="count">(' . (int) $events_count . ')</span></a> | </li>';
 
 	// Candidates filter - always visible
 	$candidates_url = add_query_arg( 'filter', 'candidates', $base_url );
-	echo '<li class="candidates"><a href="' . esc_url( $candidates_url ) . '" class="' . ( $current_filter === 'candidates' ? 'current' : '' ) . '">Candidates <span class="count">(' . (int) $candidates_count . ')</span></a></li>';
-
+	echo '<li class="candidates"><a href="' . esc_url( $candidates_url ) . '" class="' . ( $current_filter === 'candidates' ? 'current' : '' ) . '">' . esc_html__( 'Candidates', 'umami-connect' ) . ' <span class="count">(' . (int) $candidates_count . ')</span></a></li>';
 	echo '</ul>';
 	echo '<form method="get" style="margin: 0;">';
 	echo '<input type="hidden" name="page" value="umami_connect_events_overview">';

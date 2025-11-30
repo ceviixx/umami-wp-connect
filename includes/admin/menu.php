@@ -15,8 +15,8 @@ add_action(
 
 		$welcome_page = add_submenu_page(
 			'umami_connect_welcome',
-			'Welcome',
-			'Welcome',
+			esc_html__( 'Welcome', 'umami-connect' ),
+			esc_html__( 'Welcome', 'umami-connect' ),
 			'manage_options',
 			'umami_connect_welcome',
 			'umami_connect_welcome_page'
@@ -24,8 +24,8 @@ add_action(
 
 		$general_submenu_page = add_submenu_page(
 			'umami_connect_welcome',
-			'General',
-			'General',
+			esc_html__( 'General', 'umami-connect' ),
+			esc_html__( 'General', 'umami-connect' ),
 			'manage_options',
 			'umami_connect',
 			'umami_connect_settings_page'
@@ -34,8 +34,8 @@ add_action(
 
 		$self_protection_page = add_submenu_page(
 			'umami_connect_welcome',
-			'Self protection',
-			'Self protection',
+			esc_html__( 'Self protection', 'umami-connect' ),
+			esc_html__( 'Self protection', 'umami-connect' ),
 			'manage_options',
 			'umami_connect_self_protection',
 			'umami_connect_self_protection_page',
@@ -44,8 +44,8 @@ add_action(
 
 		$automation_page = add_submenu_page(
 			'umami_connect_welcome',
-			'Automation',
-			'Automation',
+			esc_html__( 'Automation', 'umami-connect' ),
+			esc_html__( 'Automation', 'umami-connect' ),
 			'manage_options',
 			'umami_connect_automation',
 			'umami_connect_automation_page'
@@ -54,8 +54,8 @@ add_action(
 
 		$events_overview_page = add_submenu_page(
 			'umami_connect_welcome',
-			'Events overview',
-			'Events overview',
+			esc_html__( 'Events overview', 'umami-connect' ),
+			esc_html__( 'Events overview', 'umami-connect' ),
 			'manage_options',
 			'umami_connect_events_overview',
 			'umami_connect_render_events_overview_page'
@@ -65,8 +65,8 @@ add_action(
 
 		$advanced_page = add_submenu_page(
 			'umami_connect_welcome',
-			'Advanced',
-			'Advanced',
+			esc_html__( 'Advanced', 'umami-connect' ),
+			esc_html__( 'Advanced', 'umami-connect' ),
 			'manage_options',
 			'umami_connect_advanced',
 			'umami_connect_advanced_page'

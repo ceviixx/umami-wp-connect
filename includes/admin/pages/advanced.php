@@ -2,19 +2,19 @@
 function umami_connect_advanced_page() {
 	$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'host-url'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$tabs = array(
-		'host-url'       => 'Host URL',
-		'auto-track'     => 'Auto track',
-		'domains'        => 'Domains',
-		'tag'            => 'Tag',
-		'exclude-search' => 'Exclude search',
-		'exclude-hash'   => 'Exclude hash',
-		'dnt'            => 'Do Not Track',
-		'before-send'    => 'Before send',
+		'host-url'       => esc_html__( 'Host URL', 'umami-connect' ),
+		'auto-track'     => esc_html__( 'Auto track', 'umami-connect' ),
+		'domains'        => esc_html__( 'Domains', 'umami-connect' ),
+		'tag'            => esc_html__( 'Tag', 'umami-connect' ),
+		'exclude-search' => esc_html__( 'Exclude search', 'umami-connect' ),
+		'exclude-hash'   => esc_html__( 'Exclude hash', 'umami-connect' ),
+		'dnt'            => esc_html__( 'Do Not Track', 'umami-connect' ),
+		'before-send'    => esc_html__( 'Before send', 'umami-connect' ),
 	);
 	?>
 	<div class="wrap">
 		<h1><b>umami Connect</b></h1>
-		<h3>Advanced</h3>
+		<h3><?php echo esc_html__( 'Advanced', 'umami-connect' ); ?></h3>
 		<h2 class="nav-tab-wrapper" style="margin-top:12px;">
 			<?php foreach ( $tabs as $key => $label ) : ?>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=umami_connect_advanced&tab=' . $key ) ); ?>" class="nav-tab <?php echo $tab === $key ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $label ); ?></a>
@@ -28,60 +28,118 @@ function umami_connect_advanced_page() {
 					<tbody>
 					<?php if ( $tab === 'host-url' ) : ?>
 						<tr>
-							<th scope="row"><label for="umami_tracker_host_url">Host URL override</label></th>
+							<th scope="row"><label for="umami_tracker_host_url"><?php echo esc_html__( 'Host URL override', 'umami-connect' ); ?></label></th>
 							<td>
 								<input type="url" class="regular-text" id="umami_tracker_host_url" name="umami_tracker_host_url" value="<?php echo esc_attr( get_option( 'umami_tracker_host_url', '' ) ); ?>" placeholder="https://analytics.example.com" />
-								<p class="description">Sets <code>data-host-url</code> on the tracker script. Leave empty to use the script host.</p>
+								<p class="description">
+										<?php
+										printf(
+											// translators: %1$s: <code>data-host-url</code>
+											esc_html__( 'Sets %1$s on the tracker script. Leave empty to use the script host.', 'umami-connect' ),
+											'<code>data-host-url</code>'
+										);
+										?>
+								</p>
 							</td>
 						</tr>
 					<?php elseif ( $tab === 'auto-track' ) : ?>
 						<tr>
-							<th scope="row"><label for="umami_disable_auto_track">Disable auto tracking</label></th>
+							<th scope="row"><label for="umami_disable_auto_track"><?php echo esc_html__( 'Disable auto tracking', 'umami-connect' ); ?></label></th>
 							<td>
 								<?php $v = get_option( 'umami_disable_auto_track', '0' ); ?>
-								<label><input type="checkbox" id="umami_disable_auto_track" name="umami_disable_auto_track" value="1" <?php checked( $v, '1' ); ?> /> Set <code>data-auto-track="false"</code> to disable Umami's built-in auto tracking.</label>
-								<p class="description">Note: The plugin's Automation settings are separate and can still emit events.</p>
+								<label><input type="checkbox" id="umami_disable_auto_track" name="umami_disable_auto_track" value="1" <?php checked( $v, '1' ); ?> />
+										<?php
+										printf(
+											// translators: %1$s: <code>data-auto-track="false"</code>
+											esc_html__( 'Set %1$s to disable Umami\'s built-in auto tracking.', 'umami-connect' ),
+											'<code>data-auto-track="false"</code>'
+										);
+										?>
+								</label>
+								<p class="description"><?php echo esc_html__( 'Note: The plugin\'s Automation settings are separate and can still emit events.', 'umami-connect' ); ?></p>
 							</td>
 						</tr>
 					<?php elseif ( $tab === 'domains' ) : ?>
 						<tr>
-							<th scope="row"><label for="umami_tracker_domains">Allowed domains</label></th>
+							<th scope="row"><label for="umami_tracker_domains"><?php echo esc_html__( 'Allowed domains', 'umami-connect' ); ?></label></th>
 							<td>
 								<input type="text" class="regular-text" id="umami_tracker_domains" name="umami_tracker_domains" value="<?php echo esc_attr( get_option( 'umami_tracker_domains', '' ) ); ?>" placeholder="example.com,example.org" />
-								<p class="description">Comma separated. Sets <code>data-domains</code> to restrict where the tracker runs.</p>
+								<p class="description">
+										<?php
+										printf(
+											// translators: %1$s: <code>data-domains</code>
+											esc_html__( 'Comma separated. Sets %1$s to restrict where the tracker runs.', 'umami-connect' ),
+											'<code>data-domains</code>'
+										);
+										?>
+								</p>
 							</td>
 						</tr>
 					<?php elseif ( $tab === 'tag' ) : ?>
 						<tr>
-							<th scope="row"><label for="umami_tracker_tag">Event tag</label></th>
+							<th scope="row"><label for="umami_tracker_tag"><?php echo esc_html__( 'Event tag', 'umami-connect' ); ?></label></th>
 							<td>
 								<input type="text" class="regular-text" id="umami_tracker_tag" name="umami_tracker_tag" value="<?php echo esc_attr( get_option( 'umami_tracker_tag', '' ) ); ?>" placeholder="umami-eu" />
-								<p class="description">Sets <code>data-tag</code> so you can filter events by tag in Umami.</p>
+								<p class="description">
+										<?php
+										printf(
+											// translators: %1$s: <code>data-tag</code>
+											esc_html__( 'Sets %1$s so you can filter events by tag in Umami.', 'umami-connect' ),
+											'<code>data-tag</code>'
+										);
+										?>
+								</p>
 							</td>
 						</tr>
 					<?php elseif ( $tab === 'exclude-search' ) : ?>
 						<tr>
-							<th scope="row"><label for="umami_tracker_exclude_search">Exclude search</label></th>
+							<th scope="row"><label for="umami_tracker_exclude_search"><?php echo esc_html__( 'Exclude search', 'umami-connect' ); ?></label></th>
 							<td>
 								<?php $v = get_option( 'umami_tracker_exclude_search', '0' ); ?>
-								<label><input type="checkbox" id="umami_tracker_exclude_search" name="umami_tracker_exclude_search" value="1" <?php checked( $v, '1' ); ?> /> Set <code>data-exclude-search="true"</code> to ignore URL query parameters.</label>
+								<label><input type="checkbox" id="umami_tracker_exclude_search" name="umami_tracker_exclude_search" value="1" <?php checked( $v, '1' ); ?> />
+										<?php
+										printf(
+											// translators: %1$s: <code>data-exclude-search="true"</code>
+											esc_html__( 'Set %1$s to ignore URL query parameters.', 'umami-connect' ),
+											'<code>data-exclude-search="true"</code>'
+										);
+										?>
+								</label>
+								   </label>
 
 							</td>
 						</tr>
 					<?php elseif ( $tab === 'exclude-hash' ) : ?>
 						<tr>
-							<th scope="row"><label for="umami_tracker_exclude_hash">Exclude hash</label></th>
+							<th scope="row"><label for="umami_tracker_exclude_hash"><?php echo esc_html__( 'Exclude hash', 'umami-connect' ); ?></label></th>
 							<td>
 								<?php $v = get_option( 'umami_tracker_exclude_hash', '0' ); ?>
-								<label><input type="checkbox" id="umami_tracker_exclude_hash" name="umami_tracker_exclude_hash" value="1" <?php checked( $v, '1' ); ?> /> Set <code>data-exclude-hash="true"</code> to ignore URL hash fragments.</label>
+								<label><input type="checkbox" id="umami_tracker_exclude_hash" name="umami_tracker_exclude_hash" value="1" <?php checked( $v, '1' ); ?> />
+										<?php
+										printf(
+											// translators: %1$s: <code>data-exclude-hash="true"</code>
+											esc_html__( 'Set %1$s to ignore URL hash fragments.', 'umami-connect' ),
+											'<code>data-exclude-hash="true"</code>'
+										);
+										?>
+								</label>
 							</td>
 						</tr>
 					<?php elseif ( $tab === 'dnt' ) : ?>
 						<tr>
-							<th scope="row"><label for="umami_tracker_do_not_track">Respect Do Not Track</label></th>
+							<th scope="row"><label for="umami_tracker_do_not_track"><?php echo esc_html__( 'Do Not Track', 'umami-connect' ); ?></label></th>
 							<td>
 								<?php $v = get_option( 'umami_tracker_do_not_track', '0' ); ?>
-								<label><input type="checkbox" id="umami_tracker_do_not_track" name="umami_tracker_do_not_track" value="1" <?php checked( $v, '1' ); ?> /> Set <code>data-do-not-track="true"</code> to respect the browser setting.</label>
+								<label><input type="checkbox" id="umami_tracker_do_not_track" name="umami_tracker_do_not_track" value="1" <?php checked( $v, '1' ); ?> />
+										<?php
+										printf(
+											// translators: %1$s: <code>data-do-not-track="true"</code>
+											esc_html__( 'Set %1$s to respect the browser setting.', 'umami-connect' ),
+											'<code>data-do-not-track="true"</code>'
+										);
+										?>
+								</label>
+								   </label>
 							</td>
 						</tr>
 					<?php elseif ( $tab === 'before-send' ) : ?>
@@ -89,55 +147,72 @@ function umami_connect_advanced_page() {
 							<th scope="row"><label>beforeSend</label></th>
 							<td>
 								<?php
-												$mode = get_option( 'umami_tracker_before_send_mode', 'disabled' );
+								$mode                 = get_option( 'umami_tracker_before_send_mode', 'disabled' );
 								$function_name        = get_option( 'umami_tracker_before_send', '' );
 								$inline_code          = get_option( 'umami_tracker_before_send_inline', '' );
 								?>
 								<fieldset>
-									<p style="margin: 0 0 8px;">Choose how to provide <code>beforeSend</code>:</p>
+									<p style="margin: 0 0 8px;"><?php echo esc_html__( 'Choose how to provide', 'umami-connect' ); ?> <code>beforeSend</code>:</p>
 									<div style="display:flex; gap:16px; align-items:center; margin-bottom:8px;">
 										<label style="display:inline-flex; align-items:center; gap:6px;">
 											<input type="radio" name="umami_tracker_before_send_mode" value="disabled" <?php checked( $mode, 'disabled' ); ?> />
-											<strong>Disabled</strong>
+											<strong><?php echo esc_html__( 'Disabled', 'umami-connect' ); ?></strong>
 										</label>
 										<label style="display:inline-flex; align-items:center; gap:6px;">
 											<input type="radio" name="umami_tracker_before_send_mode" value="function_name" <?php checked( $mode, 'function_name' ); ?> />
-											<strong>Function name</strong>
+											<strong><?php echo esc_html__( 'Function name', 'umami-connect' ); ?></strong>
 										</label>
 										<label style="display:inline-flex; align-items:center; gap:6px;">
 											<input type="radio" name="umami_tracker_before_send_mode" value="inline" <?php checked( $mode, 'inline' ); ?> />
-											<strong>Inline script</strong>
+											<strong><?php echo esc_html__( 'Inline script', 'umami-connect' ); ?></strong>
 										</label>
 									</div></fieldset>
 
 								<fieldset id="before_send_disabled_field" style="margin:8px 0 0;<?php echo $mode !== 'disabled' ? 'display:none;' : ''; ?>">
-									<p class="description">beforeSend hook is disabled. No function will be called before events are sent.</p>
+									<p class="description"><?php echo esc_html__( 'beforeSend hook is disabled. No function will be called before events are sent.', 'umami-connect' ); ?></p>
 								</fieldset>
 
 								<fieldset>
 
 									<div style="margin:8px 0 0;<?php echo $mode !== 'function_name' ? 'display:none;' : ''; ?>" id="before_send_function_name_field">
-										<label for="umami_tracker_before_send" style="display:block; font-weight:600;">Global function name</label>
+										<label for="umami_tracker_before_send" style="display:block; font-weight:600;"><?php echo esc_html__( 'Global function name', 'umami-connect' ); ?></label>
 										<input type="text" class="regular-text" id="umami_tracker_before_send" name="umami_tracker_before_send" value="<?php echo esc_attr( $function_name ); ?>" placeholder="beforeSendHandler" pattern="^[A-Za-z_$][A-Za-z0-9_$]*(\.[A-Za-z_$][A-Za-z0-9_$]*)*$" title="Valid JS function name, e.g. beforeSendHandler or MyApp.handlers.beforeSend" />
 										<p>
 											<button type="button" class="button" id="umami_fn_check">Check function</button>
 										</p>
 										<p id="umami_fn_check_result" class="description" style="display:none; margin-top:6px;"></p>
-										<p class="description">Reference an existing global function (available on the frontend), e.g. <code>beforeSendHandler</code>.</p>
+										<p class="description">
+												<?php
+												printf(
+													// translators: %1$s: <code>beforeSendHandler</code>
+													esc_html__( 'Reference an existing global function (available on the frontend), e.g. %1$s.', 'umami-connect' ),
+													'<code>beforeSendHandler</code>'
+												);
+												?>
+										</p>
 									</div>
 
 									<div style="margin:16px 0 0;<?php echo $mode !== 'inline' ? 'display:none;' : ''; ?>" id="before_send_inline_field">
-										<label for="umami_tracker_before_send_inline" style="display:block; font-weight:600;">Inline function</label>
+										<label for="umami_tracker_before_send_inline" style="display:block; font-weight:600;"><?php echo esc_html__( 'Inline function', 'umami-connect' ); ?></label>
 										<textarea class="large-text code" rows="10" id="umami_tracker_before_send_inline" name="umami_tracker_before_send_inline" placeholder="function(payload, url) {&#10;  // Inspect or modify payload&#10;  return payload;&#10;}"><?php echo esc_textarea( $inline_code ); ?></textarea>
 										<p>
-											<button type="button" class="button button-primary" id="umami_inline_test">Test function</button>
-											<button type="button" class="button" id="umami_inline_insert_example">Insert example</button>
-											<button type="button" class="button button-secondary" id="umami_inline_clear">Clear</button>
+											<button type="button" class="button button-primary" id="umami_inline_test"><?php echo esc_html__( 'Test function', 'umami-connect' ); ?></button>
+											<button type="button" class="button" id="umami_inline_insert_example"><?php echo esc_html__( 'Insert example', 'umami-connect' ); ?></button>
+											<button type="button" class="button button-secondary" id="umami_inline_clear"><?php echo esc_html__( 'Clear', 'umami-connect' ); ?></button>
 										</p>
 										<p id="umami_inline_test_result" class="description" style="display:none; margin-top:6px;"></p>
-										<p class="description">Provide a JavaScript function that starts with <code>function(</code>. Return the payload or a falsy value (e.g. <code>false</code>) to cancel sending.</p>
+											<p class="description">
+						<?php
+						printf(
+							// translators: %1$s: <code>function(</code>, %2$s: <code>false</code>
+							esc_html__( 'Provide a JavaScript function that starts with %1$s. Return the payload or a falsy value (e.g. %2$s) to cancel sending.', 'umami-connect' ),
+							'<code>function(</code>',
+							'<code>false</code>'
+						);
+						?>
+											</p>
 										<details style="margin-top:6px;">
-											<summary>Example</summary>
+											<summary><?php echo esc_html__( 'Example', 'umami-connect' ); ?></summary>
 											<pre style="background:#f6f7f7; padding:8px; overflow:auto;">function(payload, url) {
 	// Block events for preview URLs
 	if (url.includes('preview=true')) return false;
@@ -307,7 +382,7 @@ function umami_connect_advanced_page() {
 											if ( fnResultEl ) {
 												fnResultEl.style.display = 'block';
 												fnResultEl.style.color = '#cc1818';
-												fnResultEl.textContent = 'Please enter a function name first.';
+												fnResultEl.textContent = <?php echo json_encode( esc_html__( 'Please enter a function name first.', 'umami-connect' ) ); ?>;
 											}
 											return;
 										}
@@ -315,7 +390,7 @@ function umami_connect_advanced_page() {
 											if ( fnResultEl ) {
 												fnResultEl.style.display = 'block';
 												fnResultEl.style.color = '#cc1818';
-												fnResultEl.textContent = 'Invalid name. Use dot-separated JavaScript identifiers.';
+												fnResultEl.textContent = <?php echo json_encode( esc_html__( 'Invalid name. Use dot-separated JavaScript identifiers.', 'umami-connect' ) ); ?>;
 											}
 											return;
 										}
@@ -326,7 +401,7 @@ function umami_connect_advanced_page() {
 										if ( fnResultEl ) {
 											fnResultEl.style.display = 'block';
 											fnResultEl.style.color = '#444';
-											fnResultEl.textContent = 'Checking frontend availability…';
+											fnResultEl.textContent = <?php echo json_encode( esc_html__( 'Checking frontend availability…', 'umami-connect' ) ); ?>;
 										}
 
 										var iframe = document.createElement('iframe');
@@ -346,7 +421,7 @@ function umami_connect_advanced_page() {
 											if ( fnResultEl ) {
 												fnResultEl.style.display = 'block';
 												fnResultEl.style.color = '#cc1818';
-												fnResultEl.textContent = 'No response received from the frontend (timeout).';
+												fnResultEl.textContent = <?php echo json_encode( esc_html__( 'No response received from the frontend (timeout).', 'umami-connect' ) ); ?>;
 											}
 										}, 10000);
 
@@ -412,7 +487,7 @@ function umami_connect_advanced_page() {
 					<?php endif; ?>
 					</tbody>
 					</table>
-					<?php submit_button(); ?>
+					<?php submit_button( esc_html__( 'Save', 'umami-connect' ) ); ?>
 				</form>
 			</div>
 		</div>

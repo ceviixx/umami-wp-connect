@@ -2,13 +2,13 @@
 function umami_connect_settings_page() {
 	$tab  = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'setup';
 	$tabs = array(
-		'setup'     => 'Setup',
-		'share-url' => 'umami Statistics',
+		'setup'     => esc_html__( 'Setup', 'umami-connect' ),
+		'share-url' => esc_html__( 'umami Statistics', 'umami-connect' ),
 	);
 	?>
 	<div class="wrap">
 		<h1><b>umami Connect</b></h1>
-		<h3>General</h3>
+		<h3><?php echo esc_html__( 'General', 'umami-connect' ); ?></h3>
 		<h2 class="nav-tab-wrapper" style="margin-top:12px;">
 			<?php foreach ( $tabs as $key => $label ) : ?>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=umami_connect&tab=' . $key ) ); ?>" class="nav-tab <?php echo $tab === $key ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $label ); ?></a>
@@ -20,7 +20,7 @@ function umami_connect_settings_page() {
 					<?php
 					settings_fields( 'umami_connect_general' );
 					do_settings_sections( 'umami_connect' );
-					submit_button();
+					submit_button( esc_html__( 'Save', 'umami-connect' ) );
 					?>
 				</form>
 				<script>
@@ -115,7 +115,7 @@ function umami_connect_settings_page() {
 							</td>
 						</tr>
 					</table>
-					<?php submit_button(); ?>
+					<?php submit_button( esc_html__( 'Save', 'umami-connect' ) ); ?>
 				</form>
 			<?php endif; ?>
 		</div>

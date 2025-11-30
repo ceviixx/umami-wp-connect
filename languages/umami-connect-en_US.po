@@ -1,0 +1,365 @@
+msgid "Welcome"
+msgstr "{DEFINE}"
+
+msgid "General"
+msgstr "{DEFINE}"
+
+msgid "Self protection"
+msgstr "{DEFINE}"
+
+msgid "Automation"
+msgstr "{DEFINE}"
+
+msgid "Events overview"
+msgstr "{DEFINE}"
+
+msgid "Advanced"
+msgstr "{DEFINE}"
+
+
+msgid "Welcome to umami Connect"
+msgstr "{DEFINE}"
+
+msgid "<strong>umami Connect</strong> brings privacy-friendly <strong>Umami Analytics</strong> to WordPress. Effortless event tracking, easy setup, and seamless plugin integration—right where you need it."
+msgstr "{DEFINE}"
+
+msgid "Event Tracking"
+msgstr "{DEFINE}"
+
+msgid "Track custom events across your site"
+msgstr "{DEFINE}"
+
+msgid "Privacy-First"
+msgstr "{DEFINE}"
+
+msgid "GDPR compliant, no cookies required"
+msgstr "{DEFINE}"
+
+msgid "Easy Setup"
+msgstr "{DEFINE}"
+
+msgid "Configure in minutes, no coding needed"
+msgstr "{DEFINE}"
+
+msgid "Multiple Integrations"
+msgstr "{DEFINE}"
+
+msgid "Works with popular plugins & blocks"
+msgstr "{DEFINE}"
+
+msgid "Inline Dashboard"
+msgstr "{DEFINE}"
+
+msgid "View umami Statistics directly in your WordPress admin"
+msgstr "{DEFINE}"
+
+msgid "Active"
+msgstr "{DEFINE}"
+
+msgid "Inactive"
+msgstr "{DEFINE}"
+
+msgid "More Integrations Planned"
+msgstr "{DEFINE}"
+
+msgid "Suggest an integration via a <a href=\"%1$s\" target=\"_blank\" rel=\"noopener noreferrer\">feature request</a>, or add it directly with a <a href=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">pull request</a>. See the <a href=\"%3$s\" target=\"_blank\" rel=\"noopener noreferrer\">contribution guide</a>."
+msgstr "{DEFINE}"
+
+
+
+
+
+
+msgid "General"
+msgstr "{DEFINE}"
+
+msgid "Setup"
+msgstr "{DEFINE}"
+
+msgid "umami Statistics"
+msgstr "{DEFINE}"
+
+
+
+
+msgid "Save"
+msgstr "{DEFINE}"
+
+
+msgid "Mode"
+msgstr "{DEFINE}"
+
+msgid "Host URL"
+msgstr "{DEFINE}"
+
+msgid "Website ID"
+msgstr "{DEFINE}"
+
+msgid "Script Loading"
+msgstr "{DEFINE}"
+
+
+msgid "Exclude Logged-in Users"
+msgstr "{DEFINE}"
+
+msgid "Do not track my own visits."
+msgstr "{DEFINE}"
+
+msgid "Exclude logged-in WordPress users from tracking."
+msgstr "{DEFINE}"
+
+msgid "Auto-track Links"
+msgstr "{DEFINE}"
+
+msgid "Automatically track link clicks"
+msgstr "{DEFINE}"
+
+msgid "Auto-track Buttons"
+msgstr "{DEFINE}"
+
+msgid "Automatically track button clicks"
+msgstr "{DEFINE}"
+
+msgid "Auto-track Forms"
+msgstr "{DEFINE}"
+
+msgid "Automatically track form submissions"
+msgstr "{DEFINE}"
+
+
+
+
+
+
+msgid "Event overview"
+msgstr "{DEFINE}"
+
+msgid "Overview of all configured tracking events from Gutenberg blocks and integrations. Click "Edit" to manage individual events."
+msgstr "{DEFINE}"
+
+
+msgid "Error: Invalid ID."
+msgstr "{DEFINE}"
+
+msgid "Error: Invalid block index."
+msgstr "{DEFINE}"
+
+msgid "Error: Invalid event type."
+msgstr "{DEFINE}"
+
+
+msgid "Event deleted successfully."
+msgstr "{DEFINE}"
+
+msgid "Error: Could not delete integration event."
+msgstr "{DEFINE}"
+
+msgid "Error: Could not delete event."
+msgstr "{DEFINE}"
+
+
+msgid "All"
+msgstr "{DEFINE}"
+
+msgid "Events"
+msgstr "{DEFINE}"
+
+msgid "Candidates"
+msgstr "{DEFINE}"
+
+msgid "Search events"
+msgstr "{DEFINE}"
+
+msgid "Search events..."
+msgstr "{DEFINE}"
+
+msgid "Search"
+msgstr "{DEFINE}"
+
+msgid "No events found"
+msgstr "{DEFINE}"
+
+msgid "Start adding custom events by editing blocks in the Gutenberg editor and configuring Umami tracking in the block inspector."
+msgstr "{DEFINE}"
+
+
+msgid "Edit Page"
+msgstr "{DEFINE}"
+
+msgid "Edit Post"
+msgstr "{DEFINE}"
+
+msgid "Delete"
+msgstr "{DEFINE}"
+
+msgid "(no title)"
+msgstr "{DEFINE}"
+
+msgid "Current Page"
+msgstr "{DEFINE}"
+
+msgid "Next page"
+msgstr "{DEFINE}"
+
+msgid "Last page"
+msgstr "{DEFINE}"
+
+msgid "Confirm Event Deletion"
+msgstr "{DEFINE}"
+
+msgid "Are you sure you want to delete this event tracking configuration?"
+msgstr "{DEFINE}"
+
+msgid "This action cannot be undone."
+msgstr "{DEFINE}"
+
+msgid "Cancel"
+msgstr "{DEFINE}"
+
+msgid "Delete Event"
+msgstr "{DEFINE}"
+
+
+msgid "Auto track"
+msgstr "{DEFINE}"
+
+msgid "Domains"
+msgstr "{DEFINE}"
+
+msgid "Tag"
+msgstr "{DEFINE}"
+
+msgid "Exclude search"
+msgstr "{DEFINE}"
+
+msgid "Exclude hash"
+msgstr "{DEFINE}"
+
+msgid "Do Not Track"
+msgstr "{DEFINE}"
+
+msgid "Before send"
+msgstr "{DEFINE}"
+
+
+msgid "Choose how to provide"
+msgstr "{DEFINE}"
+
+
+msgid "Disabled"
+msgstr "{DEFINE}"
+
+msgid "Function name"
+msgstr "{DEFINE}"
+
+msgid "Inline script"
+msgstr "{DEFINE}"
+
+
+msgid "Respect Do Not Track"
+msgstr "{DEFINE}"
+
+msgid "Event tag"
+msgstr "{DEFINE}"
+
+msgid "Allowed domains"
+msgstr "{DEFINE}"
+
+msgid "Disable auto tracking"
+msgstr "{DEFINE}"
+
+msgid "Host URL override"
+msgstr "{DEFINE}"
+
+
+
+msgid "Event"
+msgstr "{DEFINE}"
+
+msgid "Integration"
+msgstr "{DEFINE}"
+
+msgid "Source"
+msgstr "{DEFINE}"
+
+msgid "Block Type"
+msgstr "{DEFINE}"
+
+msgid "Label/Text"
+msgstr "{DEFINE}"
+
+msgid "Data Pairs"
+msgstr "{DEFINE}"
+
+msgid "Enjoying umami Connect? Show your support with a %s on %s!"
+msgstr "{DEFINE}"
+
+msgid "Sets %s on the tracker script. Leave empty to use the script host."
+msgstr "{DEFINE}"
+
+msgid "Set %s to disable Umami's built-in auto tracking."
+msgstr "{DEFINE}"
+
+msgid "Note: The plugin's Automation settings are separate and can still emit events."
+msgstr "{DEFINE}"
+
+msgid "Comma separated. Sets %s to restrict where the tracker runs."
+msgstr "{DEFINE}"
+
+msgid "Sets %s so you can filter events by tag in Umami."
+msgstr "{DEFINE}"
+
+msgid "Set %s to ignore URL query parameters."
+msgstr "{DEFINE}"
+
+msgid "Set %s to ignore URL hash fragments."
+msgstr "{DEFINE}"
+
+msgid "Set %s to respect the browser setting."
+msgstr "{DEFINE}"
+
+msgid "beforeSend hook is disabled. No function will be called before events are sent."
+msgstr "{DEFINE}"
+
+msgid "Global function name"
+msgstr "{DEFINE}"
+
+msgid "Reference an existing global function (available on the frontend), e.g. %s."
+msgstr "{DEFINE}"
+
+msgid "Please enter a function name first."
+msgstr "{DEFINE}"
+
+msgid "Invalid name. Use dot-separated JavaScript identifiers."
+msgstr "{DEFINE}"
+
+msgid "Checking frontend availability…"
+msgstr "{DEFINE}"
+
+msgid "No response received from the frontend (timeout)."
+msgstr "{DEFINE}"
+
+msgid "Inline function"
+msgstr "{DEFINE}"
+
+msgid "Test function"
+msgstr "{DEFINE}"
+
+msgid "Insert example"
+msgstr "{DEFINE}"
+
+msgid "Clear"
+msgstr "{DEFINE}"
+
+msgid "Provide a JavaScript function that starts with %s. Return the payload or a falsy value (e.g. %s) to cancel sending."
+msgstr "{DEFINE}"
+
+msgid "Example"
+msgstr "{DEFINE}"
+
+
+msgid "Tracking Script URL:"
+msgstr "{DEFINE}"
+
+
+

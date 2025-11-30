@@ -177,7 +177,7 @@ function umami_connect_welcome_page() {
 								'a' => array(
 									'href'   => array(),
 									'target' => array(),
-									'rel'    => array(), // Fixed missing opening quote
+									'rel'    => array(),
 								),
 							)
 						);

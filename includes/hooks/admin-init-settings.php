@@ -313,7 +313,7 @@ add_action(
 
 		add_settings_field(
 			'umami_mode',
-			'Mode',
+			esc_html__( 'Mode', 'umami-connect' ),
 			function () {
 				$value = get_option( 'umami_mode', 'cloud' );
 				echo '<select id="umami_mode" name="umami_mode">';
@@ -327,7 +327,7 @@ add_action(
 
 		add_settings_field(
 			'umami_host',
-			'Host URL',
+			esc_html__( 'Host URL', 'umami-connect' ),
 			function () {
 				$value = get_option( 'umami_host', '' );
 				echo '<input type="url" id="umami_host" name="umami_host" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="https://analytics.yourdomain.com" />';
@@ -348,7 +348,7 @@ add_action(
 						val = val.replace(/\/+$/, "");
 						
 						var hasPath = val.match(/^https?:\/\/[^\/]+(\/)/);
-						subtitle.textContent = "Tracking Script URL: " + val + (hasPath ? "" : "/script.js");
+						subtitle.textContent = "' . esc_html__( 'Tracking Script URL:', 'umami-connect' ) . ' " + val + (hasPath ? "" : "/script.js");
 					}
 					
 					if (input && subtitle) {
@@ -365,7 +365,7 @@ add_action(
 
 		add_settings_field(
 			'umami_website_id',
-			'Website ID',
+			esc_html__( 'Website ID', 'umami-connect' ),
 			function () {
 				$value = get_option( 'umami_website_id', '' );
 				echo '<input type="text" id="umami_website_id" name="umami_website_id" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="12345678-1234-1234-1234-123456789abc" required />';
@@ -376,7 +376,7 @@ add_action(
 
 		add_settings_field(
 			'umami_script_loading',
-			'Script Loading',
+			esc_html__( 'Script Loading', 'umami-connect' ),
 			function () {
 				$value = get_option( 'umami_script_loading', 'async' );
 				echo '<select name="umami_script_loading">';
@@ -397,11 +397,11 @@ add_action(
 
 		add_settings_field(
 			'umami_exclude_logged_in',
-			'Exclude Logged-in Users',
+			esc_html__( 'Exclude Logged-in Users', 'umami-connect' ),
 			function () {
 				$value = get_option( 'umami_exclude_logged_in', '1' );
-				echo '<label><input type="checkbox" name="umami_exclude_logged_in" value="1"' . checked( $value, '1', false ) . ' /> Do not track my own visits</label>';
-				echo '<p class="description">Exclude logged-in WordPress users from tracking.</p>';
+				echo '<label><input type="checkbox" name="umami_exclude_logged_in" value="1"' . checked( $value, '1', false ) . ' /> ' . esc_html__( 'Do not track my own visits.', 'umami-connect' ) . '</label>';
+				echo '<p class="description">' . esc_html__( 'Exclude logged-in WordPress users from tracking.', 'umami-connect' ) . '</p>';
 			},
 			'umami_connect_self_protection',
 			'umami_connect_self_protection'
@@ -416,10 +416,10 @@ add_action(
 
 		add_settings_field(
 			'umami_autotrack_links',
-			'Auto-track Links',
+			esc_html__( 'Auto-track Links', 'umami-connect' ),
 			function () {
 				$value = get_option( 'umami_autotrack_links', '1' );
-				echo '<label><input type="checkbox" name="umami_autotrack_links" value="1"' . checked( $value, '1', false ) . ' /> Automatically track link clicks</label>';
+				echo '<label><input type="checkbox" name="umami_autotrack_links" value="1"' . checked( $value, '1', false ) . ' /> ' . esc_html__( 'Automatically track link clicks', 'umami-connect' ) . '</label>';
 			},
 			'umami_connect_automation',
 			'umami_connect_automation'
@@ -427,10 +427,10 @@ add_action(
 
 		add_settings_field(
 			'umami_autotrack_buttons',
-			'Auto-track Buttons',
+			esc_html__( 'Auto-track Buttons', 'umami-connect' ),
 			function () {
 				$value = get_option( 'umami_autotrack_buttons', '1' );
-				echo '<label><input type="checkbox" name="umami_autotrack_buttons" value="1"' . checked( $value, '1', false ) . ' /> Automatically track button clicks</label>';
+				echo '<label><input type="checkbox" name="umami_autotrack_buttons" value="1"' . checked( $value, '1', false ) . ' /> ' . esc_html__( 'Automatically track button clicks', 'umami-connect' ) . '</label>';
 			},
 			'umami_connect_automation',
 			'umami_connect_automation'
@@ -438,10 +438,10 @@ add_action(
 
 		add_settings_field(
 			'umami_autotrack_forms',
-			'Auto-track Forms',
+			esc_html__( 'Auto-track Forms', 'umami-connect' ),
 			function () {
 				$value = get_option( 'umami_autotrack_forms', '1' );
-				echo '<label><input type="checkbox" name="umami_autotrack_forms" value="1"' . checked( $value, '1', false ) . ' /> Automatically track form submissions</label>';
+				echo '<label><input type="checkbox" name="umami_autotrack_forms" value="1"' . checked( $value, '1', false ) . ' /> ' . esc_html__( 'Automatically track form submissions', 'umami-connect' ) . '</label>';
 			},
 			'umami_connect_automation',
 			'umami_connect_automation'
