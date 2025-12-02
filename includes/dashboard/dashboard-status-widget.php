@@ -44,9 +44,9 @@ add_action(
 				echo '<table style="width:100%; border-collapse:collapse; font-size:14px; text-align:left; table-layout:fixed;">';
 				echo '<colgroup><col style="width:33.33%;"><col style="width:33.33%;"><col style="width:33.33%;"></colgroup>';
 				echo '<tr>';
-				echo '<th style="padding:6px 12px 6px 0; color:#666; font-weight:500; text-align:left;">Event names</th>';
-				echo '<th style="padding:6px 12px; color:#666; font-weight:500; text-align:left; border-left:1px solid #e0e0e0;">Event key-value pairs</th>';
-				echo '<th style="padding:6px 0 6px 12px; color:#666; font-weight:500; text-align:left; border-left:1px solid #e0e0e0;">Active integrations</th>';
+				echo '<th style="padding:6px 12px 6px 0; color:#666; font-weight:500; text-align:left;">' . esc_html__( 'Event names', 'umami-connect' ) . '</th>';
+				echo '<th style="padding:6px 12px; color:#666; font-weight:500; text-align:left; border-left:1px solid #e0e0e0;">' . esc_html__( 'Event key-value pairs', 'umami-connect' ) . '</th>';
+				echo '<th style="padding:6px 0 6px 12px; color:#666; font-weight:500; text-align:left; border-left:1px solid #e0e0e0;">' . esc_html__( 'Active integrations', 'umami-connect' ) . '</th>';
 				echo '</tr>';
 				echo '<tr>';
 				echo '<td style="padding:0 12px 0 0; font-size:40px; font-weight:bold; color:#3a3a3aff; text-align:left;">' . intval( $event_names_count ) . '</td>';
@@ -91,12 +91,12 @@ add_action(
 					}
 				}
 				echo '<div style="padding-top:8px; text-align:left; display:flex; align-items:center; gap:0;">';
-				echo '<a href="' . esc_url( $login_url ) . '" target="_blank" rel="noopener noreferrer" style="color:#21759b; font-size:13px; text-decoration:none; font-weight:400; display:inline-flex; align-items:center; gap:3px;">Umami Login'
+				echo '<a href="' . esc_url( $login_url ) . '" target="_blank" rel="noopener noreferrer" style="color:#21759b; font-size:13px; text-decoration:none; font-weight:400; display:inline-flex; align-items:center; gap:3px;">Umami ' . esc_html__( 'Login', 'umami-connect' )
 					. '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#21759b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:1px;"><path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'
 					. '</a>';
 				if ( ! empty( $share_url ) && $has_access ) {
 					echo '<span style="display:inline-block; width:1px; height:18px; background:#e0e0e0; margin:0 12px; vertical-align:middle;"></span>';
-					echo '<a href="' . esc_url( $share_url ) . '" target="_blank" rel="noopener noreferrer" style="color:#21759b; font-size:13px; text-decoration:none; font-weight:400; display:inline-flex; align-items:center; gap:3px;">See stats'
+					echo '<a href="' . esc_url( $share_url ) . '" target="_blank" rel="noopener noreferrer" style="color:#21759b; font-size:13px; text-decoration:none; font-weight:400; display:inline-flex; align-items:center; gap:3px;">' . esc_html__( 'See stats', 'umami-connect' )
 						. '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#21759b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:1px;"><path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'
 						. '</a>';
 				}

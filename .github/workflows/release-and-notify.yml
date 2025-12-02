@@ -52,6 +52,15 @@ jobs:
         run: |
           sed -i '/Dev tools (remove for production release)/,/^[[:space:]]*),/d' includes/core/autoloader.php
 
+      - name: Install WP-CLI
+        run: |
+          curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          chmod +x wp-cli.phar
+          mv wp-cli.phar /usr/local/bin/wp
+
+      - name: Compile .po to .mo files (WordPress)
+        run: wp i18n make-mo languages
+
       - name: Create plugin ZIP (with plugin folder)
         run: |
           mkdir -p output/umami-wp-connect/includes
@@ -62,6 +71,8 @@ jobs:
           done
           cp -r integrations output/umami-wp-connect/
           cp "${{ env.MAIN_PLUGIN_FILE }}" output/umami-wp-connect/
+          mkdir -p output/umami-wp-connect/languages
+          cp languages/*.mo output/umami-wp-connect/languages/
           cd output
           zip -r "umami-wp-connect-${{ github.event.release.tag_name }}.zip" umami-wp-connect
 

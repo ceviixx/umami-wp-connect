@@ -152,7 +152,15 @@ function umami_connect_advanced_page() {
 								$inline_code          = get_option( 'umami_tracker_before_send_inline', '' );
 								?>
 								<fieldset>
-									<p style="margin: 0 0 8px;"><?php echo esc_html__( 'Choose how to provide', 'umami-connect' ); ?> <code>beforeSend</code>:</p>
+									<p style="margin: 0 0 8px;">
+									<?php
+									printf(
+										// translators: %1$s: <code>beforeSend</code>
+										esc_html__( 'Choose how to provide %1$s:', 'umami-connect' ),
+										'<code>beforeSend</code>'
+									);
+									?>
+									</p>
 									<div style="display:flex; gap:16px; align-items:center; margin-bottom:8px;">
 										<label style="display:inline-flex; align-items:center; gap:6px;">
 											<input type="radio" name="umami_tracker_before_send_mode" value="disabled" <?php checked( $mode, 'disabled' ); ?> />
@@ -178,7 +186,9 @@ function umami_connect_advanced_page() {
 										<label for="umami_tracker_before_send" style="display:block; font-weight:600;"><?php echo esc_html__( 'Global function name', 'umami-connect' ); ?></label>
 										<input type="text" class="regular-text" id="umami_tracker_before_send" name="umami_tracker_before_send" value="<?php echo esc_attr( $function_name ); ?>" placeholder="beforeSendHandler" pattern="^[A-Za-z_$][A-Za-z0-9_$]*(\.[A-Za-z_$][A-Za-z0-9_$]*)*$" title="Valid JS function name, e.g. beforeSendHandler or MyApp.handlers.beforeSend" />
 										<p>
-											<button type="button" class="button" id="umami_fn_check">Check function</button>
+											<button type="button" class="button" id="umami_fn_check">
+												<?php echo esc_html__( 'Check function', 'umami-connect' ); ?>
+											</button>
 										</p>
 										<p id="umami_fn_check_result" class="description" style="display:none; margin-top:6px;"></p>
 										<p class="description">
@@ -325,7 +335,7 @@ function umami_connect_advanced_page() {
 											if ( resultEl ) {
 												resultEl.style.display = 'block';
 												resultEl.style.color = '#cc1818';
-												resultEl.textContent = 'Please enter a function first.';
+												resultEl.textContent = <?php echo json_encode( esc_html__( 'Please enter code to test first.', 'umami-connect' ) ); ?>;
 											}
 											updateSubmitState( 'inline' );
 											return;
@@ -334,7 +344,7 @@ function umami_connect_advanced_page() {
 											if ( resultEl ) {
 												resultEl.style.display = 'block';
 												resultEl.style.color = '#cc1818';
-												resultEl.textContent = 'Code must start with "function(".';
+												resultEl.textContent = <?php echo json_encode( esc_html__( 'Code must start with "function(".', 'umami-connect' ) ); ?>;
 											}
 											updateSubmitState( 'inline' );
 											return;
@@ -344,7 +354,7 @@ function umami_connect_advanced_page() {
 											var fnFactory = new Function( 'return (' + code + ');' );
 											var fn = fnFactory();
 											if ( typeof fn !== 'function' ) {
-												throw new Error( 'Provided code did not evaluate to a function.' );
+												throw new Error( <?php echo json_encode( esc_html__( 'The provided code does not evaluate to a function.', 'umami-connect' ) ); ?> );
 											}
 											var payload = { __test__: true };
 											void fn( payload, 'https://example.com/test' );
@@ -353,14 +363,14 @@ function umami_connect_advanced_page() {
 											if ( resultEl ) {
 												resultEl.style.display = 'block';
 												resultEl.style.color = '#138a07';
-												resultEl.textContent = '✓ Test successful. You can save now.';
+												resultEl.textContent = '✓ ' <+ <?php echo json_encode( esc_html__( 'Test passed. You can now save the settings.', 'umami-connect' ) ); ?>;
 											}
 										} catch ( e ) {
 											inlineTestPassed = false;
 											if ( resultEl ) {
 												resultEl.style.display = 'block';
 												resultEl.style.color = '#cc1818';
-												resultEl.textContent = 'Test failed: ' + ( e && e.message ? e.message : e );
+												resultEl.textContent = <?php echo json_encode( esc_html__( 'Test failed:', 'umami-connect' ) ); ?> + ' ' + ( e && e.message ? e.message : e );
 											}
 										}
 
@@ -440,13 +450,13 @@ function umami_connect_advanced_page() {
 											var okColor = '#138a07';
 											var errorColor = '#cc1818';
 											if ( data.exists && data.isFunction ) {
-												msg = '✓ Found and available as a function on the public site.';
+												msg = '✓' + <?php echo json_encode( esc_html__( 'Function found and is valid.', 'umami-connect' ) ); ?>;
 												fnResultEl.style.color = okColor;
 											} else if ( data.exists && ! data.isFunction ) {
-												msg = 'Found, but it is not a function. Please provide a function name.';
+												msg = <?php echo json_encode( esc_html__( 'Found, but is not a function.', 'umami-connect' ) ); ?>;
 												fnResultEl.style.color = errorColor;
 											} else {
-												msg = 'Not found on the public site. Ensure your script/theme exposes it globally.';
+												msg = <?php echo json_encode( esc_html__( 'Function not found on the frontend.', 'umami-connect' ) ); ?>;
 												fnResultEl.style.color = errorColor;
 											}
 											if ( fnResultEl ) {
@@ -472,7 +482,7 @@ function umami_connect_advanced_page() {
 												if ( resultEl ) {
 													resultEl.style.display = 'block';
 													resultEl.style.color = '#cc1818';
-													resultEl.textContent = 'Please run and pass the test before saving.';
+													resultEl.textContent = <?php echo json_encode( esc_html__( 'Please test the inline function and ensure it passes before saving.', 'umami-connect' ) ); ?>;
 												}
 												inlineInput && inlineInput.focus();
 											}
