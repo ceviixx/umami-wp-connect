@@ -16,11 +16,10 @@ msgstr "{DEFINE}"
 msgid "Advanced"
 msgstr "{DEFINE}"
 
-
-msgid "Welcome to umami Connect"
+msgid "Welcome to %s"
 msgstr "{DEFINE}"
 
-msgid "<strong>umami Connect</strong> brings privacy-friendly <strong>Umami Analytics</strong> to WordPress. Effortless event tracking, easy setup, and seamless plugin integration—right where you need it."
+msgid "<strong>%1$s</strong> brings privacy-friendly <strong>%2$s</strong> to WordPress. Effortless event tracking, easy setup, and seamless plugin integration—right where you need it."
 msgstr "{DEFINE}"
 
 msgid "Event Tracking"
