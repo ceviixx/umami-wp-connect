@@ -64,7 +64,7 @@ function umami_connect_render_stats_widget() {
 	}
 	// Tabellenlayout wie Status-Widget
 	echo '<div class="umami-stats-table" style="width:100%;">';
-	echo '<table style="width:100%; border-collapse:collapse; font-size:15px; text-align:left; table-layout:fixed; background:#fff; border-radius:8px; box-shadow:none;">';
+	echo '<table style="width:100%; border-collapse:collapse; font-size:13px; text-align:left; table-layout:fixed; background:#fff; border-radius:8px; box-shadow:none;">';
 	echo '<colgroup>';
 	for ( $i = 0; $i < 5; $i++ ) {
 		echo '<col style="width:20%;">';
@@ -78,16 +78,17 @@ function umami_connect_render_stats_widget() {
 	echo '<th style="padding:5px 0; color:#666; font-weight:500; text-align:left;">' . esc_html__( 'Visit duration', 'umami-connect' ) . '</th>';
 	echo '</tr>';
 	echo '<tr>';
-	echo '<td style="font-size:2em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . intval( $stats['visitors'] ) . '</td>';
-	echo '<td style="font-size:2em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . intval( $stats['visits'] ) . '</td>';
-	echo '<td style="font-size:2em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . intval( $stats['pageviews'] ) . '</td>';
+	echo '<td style="font-size:1.7em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . intval( $stats['visitors'] ) . '</td>';
+	echo '<td style="font-size:1.7em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . intval( $stats['visits'] ) . '</td>';
+	echo '<td style="font-size:1.7em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . intval( $stats['pageviews'] ) . '</td>';
 	$bounce = ( isset( $stats['bounces'] ) && isset( $stats['visits'] ) && $stats['visits'] > 0 ) ? round( $stats['bounces'] / $stats['visits'] * 100 ) : 0;
-	echo '<td style="font-size:2em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . $bounce . '%</td>';
+	echo '<td style="font-size:1.7em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . $bounce . '%</td>';
 	$duration = ( isset( $stats['totaltime'] ) && isset( $stats['visits'] ) && $stats['visits'] > 0 ) ? round( $stats['totaltime'] / max( 1, $stats['visits'] ) ) : 0;
-	echo '<td style="font-size:2em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . umami_connect_format_short_time($duration) . '</td>';
+	echo '<td style="font-size:1.7em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . umami_connect_format_short_time( $duration ) . '</td>';
 	echo '</tr>';
-	// Vergleichs-Badges als Tabellenzeile unterhalb der Hauptwerte
-	$comp = $stats['comparison'];
+
+
+    $comp = $stats['comparison'];
 	echo '<tr>';
 	// Visitors
 	$visitors_val = intval($stats['visitors']);
@@ -123,20 +124,61 @@ function umami_connect_render_stats_widget() {
 	$bounce_icon = ($bounce_change > 0) ? 'arrow-up-alt' : 'arrow-down-alt'; // Mehr Bounce ist schlechter
 	$bounce_color = ($bounce_change > 0) ? '#d63638' : '#46b450';
 	echo '<td style="text-align:left; padding:2px 0;">';
-	umami_connect_stats_badge( $bounce_change, $bounce_color, $bounce_icon, 'percent', true );
+	umami_connect_stats_badge( $bounce_change, $bounce_color, $bounce_icon, true );
 	echo '</td>';
 	// Duration
 	$duration_val = (isset($stats['totaltime']) && isset($stats['visits']) && $stats['visits'] > 0) ? round($stats['totaltime'] / max(1, $stats['visits'])) : 0;
 	$duration_comp = (isset($comp['totaltime']) && isset($comp['visits']) && $comp['visits'] > 0) ? round($comp['totaltime'] / max(1, $comp['visits'])) : 0;
-	$duration_change = ($duration_comp > 0) ? round((($duration_val - $duration_comp) / $duration_comp) * 100) : 0;
+	$duration_change = ($duration_comp > 0) ? round((($duration_val - $duration_comp) / $duration_comp) * 100) : 0; // Prozentwert, nicht Zeit
 	$duration_icon = ($duration_change > 0) ? 'arrow-up-alt' : 'arrow-down-alt'; // Mehr Dauer ist schlechter
 	$duration_color = ($duration_change > 0) ? '#d63638' : '#46b450';
 	echo '<td style="text-align:left; padding:2px 0;">';
-	umami_connect_stats_badge( $duration_change, $duration_color, $duration_icon, 'duration', true );
+	umami_connect_stats_badge( $duration_change, $duration_color, $duration_icon, true );
 	echo '</td>';
 	echo '</tr>';
+
 	echo '</table>';
 	echo '</div>';
+
+	// Widget-Titel nachträglich als HTML setzen und Live-Badge dort aktualisieren
+	echo '<script>
+	document.addEventListener("DOMContentLoaded", function() {
+		var widget = document.getElementById("umami_stats_widget");
+		var header = null;
+		if (widget) {
+			// Versuche verschiedene Header-Varianten zu finden
+			header = widget.querySelector(".handlediv + h2")
+				|| widget.querySelector("h2.widget-title")
+				|| widget.querySelector("h2")
+				|| widget.querySelector(".widget-title")
+				|| null;
+			if (header) {
+				header.innerHTML = "Umami Stats <span id=\"umami-live-badge\" style=\"margin-left:8px;\"></span>";
+			}
+		}
+		function updateUmamiLiveBadge() {
+			var xhr = new XMLHttpRequest();
+			xhr.open("POST", ajaxurl, true);
+			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			xhr.onload = function() {
+				if (xhr.status === 200) {
+					var resp = JSON.parse(xhr.responseText);
+					var badge = document.getElementById("umami-live-badge");
+					if (badge) {
+						if (resp.count && resp.count > 0) {
+							badge.innerHTML = "<span style=\"background:rgba(70,180,80,0.15); color:#23282d; border-radius:999px; padding:4px 16px; font-size:0.7em; font-weight:500; margin-left:6px; display:inline-block; box-shadow:0 1px 2px rgba(70,180,80,0.08); letter-spacing:0.5px; vertical-align:middle;\">" + resp.count + " Visitors</span>";
+						} else {
+							badge.innerHTML = "";
+						}
+					}
+				}
+			};
+			xhr.send("action=umami_live_visitors");
+		}
+		updateUmamiLiveBadge();
+		setInterval(updateUmamiLiveBadge, 10000);
+	});
+	</script>';
 
 
 
@@ -200,9 +242,14 @@ function umami_connect_get_stats( $website_id, $token ) {
 		return new WP_Error( 'invalid_url', 'Invalid share URL' );
 	}
 	$timezone = 'Europe/Berlin';
-	$end = time() * 1000;
-	// $start = $end - ( 24 * 60 * 60 * 1000 ); // last 24 hours
-    $start = $end - ( 7 * 24 * 60 * 60 * 1000 ); // last 7 days
+    $dt = new DateTime('now', new DateTimeZone($timezone));
+    // Endzeit: nächste volle Stunde
+    if ($dt->format('i') != '00' || $dt->format('s') != '00') {
+        $dt->modify('+1 hour');
+    }
+    $dt->setTime($dt->format('H'), 0, 0);
+    $end = $dt->getTimestamp() * 1000;
+    $start = $end - (24 * 60 * 60 * 1000);
 	// Cloud: https://cloud.umami.is → https://cloud.umami.is/analytics/eu/api/websites/{id}/stats
 	if ( strpos( $parts['host'], 'cloud.umami.is' ) !== false ) {
 		$base = $parts['scheme'] . '://' . $parts['host'] . '/analytics/eu/';
@@ -239,40 +286,68 @@ function umami_connect_get_stats( $website_id, $token ) {
 	return $data;
 }
 
-
-function umami_connect_stats_badge( $change, $color, $arrow, $type = 'percent', $forceRed = false ) {
-    // Bounce rate und Visit duration: 0 = rot, kein Arrow
-    // Andere Werte: 0 = grün, kein Arrow
-    if ($change === 0 || $change === 0.0) {
-        $color = $forceRed ? '#d63638' : '#46b450';
-        $arrow = '';
+// Liefert die aktuelle Anzahl aktiver Besucher (selfhosted: /active, cloud: /active)
+function umami_connect_get_active_visitors() {
+    $share_url = get_option('umami_advanced_share_url', '');
+    $token_data = get_transient('umami_stats_token_' . md5($share_url));
+    if (!$token_data || !isset($token_data['token']) || !isset($token_data['websiteId'])) {
+        return 0;
     }
-    $outline = ($color === '#46b450') ? '1px solid #46b450' : '1px solid #d63638';
-    $icon_color = $color;
-    echo '<span style="display:inline-flex; align-items:center; justify-content:center; gap:1px; min-width:28px; height:22px; font-size:0.85em; color:#23282d; border:' . $outline . '; border-radius:8px; background:transparent; padding:10px 8px; font-weight:500; box-sizing:border-box;">';
-    if ($arrow) {
-        echo '<span class="dashicons dashicons-' . esc_attr( $arrow ) . '" style="font-size:1em; color:' . $icon_color . '; vertical-align:middle; position:relative; top:4px;"></span>';
-    }
-    if ($type === 'percent') {
-        echo '<span style="vertical-align:middle; font-family:inherit; font-weight:500; letter-spacing:0.5px;">' . abs( intval( $change ) ) . '%</span>';
-    } elseif ($type === 'duration') {
-        $abs_change = abs($change);
-        $formatted = umami_connect_format_short_time(round($abs_change));
-        echo '<span style="vertical-align:middle; font-family:inherit; font-weight:500; letter-spacing:0.5px;">' . ($change < 0 ? '-' : '') . $formatted . '</span>';
+    $parts = wp_parse_url($share_url);
+    if (strpos($parts['host'], 'cloud.umami.is') !== false) {
+        $base = $parts['scheme'] . '://' . $parts['host'] . '/analytics/eu/';
+        $api_url = sprintf('%sapi/websites/%s/active',
+            $base,
+            urlencode($token_data['websiteId'])
+        );
     } else {
-        echo '<span style="vertical-align:middle; font-family:inherit; font-weight:500; letter-spacing:0.5px;">' . abs(intval($change)) . '</span>';
+        $base = $parts['scheme'] . '://' . $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : '');
+        $api_url = sprintf('%s/api/websites/%s/active',
+            $base,
+            urlencode($token_data['websiteId'])
+        );
     }
-    echo '</span>';
+    $args = array(
+        'headers' => array('x-umami-share-token' => $token_data['token']),
+        'timeout' => 8,
+    );
+    $response = wp_remote_get($api_url, $args);
+    if (is_wp_error($response)) {
+        return 0;
+    }
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+    return isset($data['visitors']) ? intval($data['visitors']) : 0;
 }
 
-function umami_connect_format_short_time($val) {
-    $days = (int)($val / 86400);
-    $hours = (int)($val / 3600) - $days * 24;
-    $minutes = (int)($val / 60) - $days * 1440 - $hours * 60;
+// AJAX-Handler für Live-Besucher
+add_action('wp_ajax_umami_live_visitors', function() {
+    $count = umami_connect_get_active_visitors();
+    wp_send_json(array('count' => $count));
+});
+
+function umami_connect_stats_badge( $change, $color, $arrow, $forceRed = false ) {
+	if ($change === 0 || $change === 0.0) {
+		$color = $forceRed ? '#d63638' : '#46b450';
+		$arrow = '';
+	}
+	$bg_tint = ($color === '#46b450') ? 'rgba(70,180,80,0.10)' : 'rgba(214,54,56,0.10)';
+	echo '<span style="display:inline-flex; align-items:center; justify-content:center; gap:0px; min-width:20px; height:22px; font-size:0.75em; color:#23282d; border-radius:8px; background:' . $bg_tint . '; padding:10px 8px; font-weight:500; box-sizing:border-box;">';
+	if ($arrow) {
+		echo '<span class="dashicons dashicons-' . esc_attr( $arrow ) . '" style="font-size:1em; color:#000; vertical-align:middle; position:relative; top:5.5px;"></span>';
+	}
+	echo '<span style="vertical-align:middle;font-weight:500; letter-spacing:0.5px;">' . abs( intval( $change ) ) . '%</span>';
+	echo '</span>';
+}
+
+function umami_connect_format_short_time( $val ) {
+    $days = (int)( $val / 86400 );
+    $hours = (int)( $val / 3600 ) - $days * 24;
+    $minutes = (int)( $val / 60 ) - $days * 1440 - $hours * 60;
     $seconds = (int)$val - $days * 86400 - $hours * 3600 - $minutes * 60;
     $parts = array();
-    if ($hours > 0) $parts[] = $hours . 'h';
-    if ($minutes > 0) $parts[] = $minutes . 'm';
-    if ($seconds > 0 || empty($parts)) $parts[] = $seconds . 's';
-    return implode(' ', $parts);
+    if ( $hours > 0 ) $parts[] = $hours . 'h';
+    if ( $minutes > 0 ) $parts[] = $minutes . 'm';
+    if ( $seconds > 0 || empty( $parts ) ) $parts[] = $seconds . 's';
+    return implode( ' ', $parts );
 }
