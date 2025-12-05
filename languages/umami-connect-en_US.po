@@ -627,6 +627,7 @@ msgid ""
 "<p><em>Note: Manually configured tracking in the editor will always be respected and not overridden.</em></p>"
 msgstr "{DEFINE}"
 
+<<<<<<< HEAD
 msgid "Visitors"
 msgstr "{DEFINE}"
 
