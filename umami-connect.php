@@ -20,3 +20,14 @@ Umami_Connect_Autoloader::init( __FILE__ );
 // Import GitHub update logic
 require_once plugin_dir_path( __FILE__ ) . 'includes/core/github.php';
 Umami_Connect_Github::init();
+// Load plugin textdomain for translations
+add_action(
+	'init',
+	function () {
+		load_plugin_textdomain(
+			'umami-connect',
+			false,
+			plugin_basename( __DIR__ ) . '/languages'
+		);
+	}
+);

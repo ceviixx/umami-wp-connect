@@ -27,6 +27,11 @@ convert -dither None -colors 256 \
   screens/core/umami-connect-demo.gif
 ```
 
+### Generate .mo locale files.
+```bash
+wp i18n make-mo languages
+```
+
 ---
 
 ## Local Testing & Automation

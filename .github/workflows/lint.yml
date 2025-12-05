@@ -85,6 +85,8 @@ jobs:
               <exclude name="WordPress.Security.EscapeOutput"/>
               <!-- Allow native DOM object members like $nodeValue, $textContent -->
               <exclude name="WordPress.NamingConventions.ValidVariableName"/>
+              <exclude name="WordPress.WP.I18n"/>
+              <exclude name="WordPress.WP.I18n.NonSingularStringLiteralTextDomain"/>
             </rule>
             <exclude-pattern>vendor/*</exclude-pattern>
             <exclude-pattern>node_modules/*</exclude-pattern>

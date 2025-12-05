@@ -3,12 +3,12 @@ function umami_connect_automation_page() {
 	?>
 	<div class="wrap">
 		<h1><b>umami Connect</b></h1>
-		<h3>Automation</h3>
+		<h3><?php echo esc_html__( 'Automation', 'umami-connect' ); ?></h3>
 		<form action="options.php" method="post">
 	<?php
 	settings_fields( 'umami_connect_automation' );
 	do_settings_sections( 'umami_connect_automation' );
-	submit_button();
+	submit_button( esc_html__( 'Save', 'umami-connect' ) );
 	?>
 		</form>
 	</div>

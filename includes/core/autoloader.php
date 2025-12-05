@@ -60,7 +60,6 @@ class Umami_Connect_Autoloader {
 				'automation.php',
 				'events_overview.php',
 				'advanced.php',
-				'statistics.php',
 			),
 
 			// Hooks (filters and actions).
@@ -83,7 +82,7 @@ class Umami_Connect_Autoloader {
 			),
 
 			// Dev tools (remove for production release)
-			'dev'         => array(
+			'develop'         => array(
 				'init.php',
 				'autoloader-debug.php',
 			),

@@ -2,3 +2,4 @@
 *.zip
 output
 node_modules
+*.mo

@@ -2,16 +2,25 @@
 function umami_connect_welcome_page() {
 	?>
 	<div class="wrap">
-		<h1 style="display: none;"><?php echo esc_html__( 'Welcome to umami Connect', 'umami-connect' ); ?></h1>
+		<h1 style="display: none;">
+			<?php echo printf( esc_html__( 'Welcome to %s', 'umami-connect' ), 'umami Connect' ); ?>
+		</h1>
 		
 		<div id="umami-connect-notices"></div>
 
 		<div style="background: linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 100%); color: #ffffff; padding: 48px 48px; border-radius: 12px; margin: 20px 0 32px 0; box-shadow: 0 4px 16px rgba(0,0,0,0.2);">
 			<h2 style="color: #ffffff; margin: 0 0 20px 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">
-				<?php echo esc_html__( 'Welcome to umami Connect', 'umami-connect' ); ?>
+				<?php printf( esc_html__( 'Welcome to %s', 'umami-connect' ), 'umami Connect' ); ?>
 			</h2>
 			<p style="margin: 0; font-size: 16px; color: #e8e8e8; line-height: 1.6; max-width: 720px;">
-				<?php echo wp_kses_post( __( '<strong>umami Connect</strong> brings privacy-friendly <strong>Umami Analytics</strong> to WordPress. Effortless event tracking, easy setup, and seamless plugin integration—right where you need it.', 'umami-connect' ) ); ?>
+				<?php
+				printf(
+					// translators: 1: umami Connect, 2: Umami Analytics
+					__( '<strong>%1$s</strong> brings privacy-friendly <strong>%2$s</strong> to WordPress. Effortless event tracking, easy setup, and seamless plugin integration—right where you need it.', 'umami-connect' ),
+					'umami Connect',
+					'Umami Analytics'
+				);
+				?>
 			</p>
 		</div>
 
@@ -177,7 +186,7 @@ function umami_connect_welcome_page() {
 								'a' => array(
 									'href'   => array(),
 									'target' => array(),
-									'rel'    => array(), // Fixed missing opening quote
+									'rel'    => array(),
 								),
 							)
 						);
