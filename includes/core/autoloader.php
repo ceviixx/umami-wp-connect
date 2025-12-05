@@ -79,6 +79,7 @@ class Umami_Connect_Autoloader {
 			// Dashboard components.
 			'dashboard'   => array(
 				'dashboard-status-widget.php',
+				'dashboard-umami-stats-widget.php',
 			),
 
 			// Dev tools (remove for production release)
