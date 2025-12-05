@@ -64,3 +64,13 @@ act -j wp-smoke-test --container-architecture linux/amd64
 ```bash
 act -j structure-check --container-architecture linux/amd64
 ```
+
+
+### Auto-fix PHPCS errors (WordPress standards)
+To automatically fix all fixable PHPCS errors according to WordPress standards, run:
+
+```bash
+phpcbf --standard=WordPress includes/dashboard/dashboard-umami-stats-widget.php
+```
+
+> Requirement: PHPCS and the WordPress Coding Standards must be properly installed (see notes above or in the project).
