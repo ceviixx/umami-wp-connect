@@ -35,7 +35,6 @@ function umami_connect_render_stats_widget() {
 	$transient_key = 'umami_stats_token_' . md5( $share_url );
 	$token_data    = get_transient( $transient_key );
 
-	// Wenn kein Token oder Share-URL geändert, neu holen
 	if ( ! $token_data || ! isset( $token_data['token'] ) || ! isset( $token_data['websiteId'] ) ) {
 		$api_url  = umami_connect_get_token_api_url( $share_url );
 		$response = wp_remote_get( $api_url );
@@ -56,13 +55,11 @@ function umami_connect_render_stats_widget() {
 		set_transient( $transient_key, $token_data, DAY_IN_SECONDS );
 	}
 
-	// Stats holen
 	$stats = umami_connect_get_stats( $token_data['websiteId'], $token_data['token'] );
 	if ( is_wp_error( $stats ) ) {
 		echo '<p>' . esc_html__( 'Error fetching stats.', 'umami-connect' ) . '</p>';
 		return;
 	}
-	// Tabellenlayout wie Status-Widget
 	echo '<div class="umami-stats-table" style="width:100%;">';
 	echo '<table style="width:100%; border-collapse:collapse; font-size:13px; text-align:left; table-layout:fixed; background:#fff; border-radius:8px; box-shadow:none;">';
 	echo '<colgroup>';
@@ -71,20 +68,31 @@ function umami_connect_render_stats_widget() {
 	}
 	echo '</colgroup>';
 	echo '<tr>';
-	echo '<th style="padding:5px 0; color:#666; font-weight:500; text-align:left;">' . esc_html__( 'Visitors', 'umami-connect' ) . '</th>';
-	echo '<th style="padding:5px 0; color:#666; font-weight:500; text-align:left;">' . esc_html__( 'Visits', 'umami-connect' ) . '</th>';
-	echo '<th style="padding:5px 0; color:#666; font-weight:500; text-align:left;">' . esc_html__( 'Views', 'umami-connect' ) . '</th>';
-	echo '<th style="padding:5px 0; color:#666; font-weight:500; text-align:left;">' . esc_html__( 'Bounce rate', 'umami-connect' ) . '</th>';
-	echo '<th style="padding:5px 0; color:#666; font-weight:500; text-align:left;">' . esc_html__( 'Visit duration', 'umami-connect' ) . '</th>';
+	echo '<th style="padding:5px 0; color:#666; font-weight:500; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' . esc_html__( 'Visitors', 'umami-connect' ) . '</th>';
+	echo '<th style="padding:5px 0; color:#666; font-weight:500; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' . esc_html__( 'Visits', 'umami-connect' ) . '</th>';
+	echo '<th style="padding:5px 0; color:#666; font-weight:500; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' . esc_html__( 'Views', 'umami-connect' ) . '</th>';
+	echo '<th style="padding:5px 0; color:#666; font-weight:500; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' . esc_html__( 'Bounce rate', 'umami-connect' ) . '</th>';
+	echo '<th style="padding:5px 0; color:#666; font-weight:500; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' . esc_html__( 'Visit duration', 'umami-connect' ) . '</th>';
 	echo '</tr>';
 	echo '<tr>';
-	echo '<td style="font-size:1.7em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . intval( $stats['visitors'] ) . '</td>';
-	echo '<td style="font-size:1.7em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . intval( $stats['visits'] ) . '</td>';
-	echo '<td style="font-size:1.7em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . intval( $stats['pageviews'] ) . '</td>';
-	$bounce = ( isset( $stats['bounces'] ) && isset( $stats['visits'] ) && $stats['visits'] > 0 ) ? round( $stats['bounces'] / $stats['visits'] * 100 ) : 0;
-	echo '<td style="font-size:1.7em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . $bounce . '%</td>';
-	$duration = ( isset( $stats['totaltime'] ) && isset( $stats['visits'] ) && $stats['visits'] > 0 ) ? round( $stats['totaltime'] / max( 1, $stats['visits'] ) ) : 0;
-	echo '<td style="font-size:1.7em; font-weight:700; color:#23282d; padding:5px 0; text-align:left;">' . umami_connect_format_short_time( $duration ) . '</td>';
+	$visitors_length   = strlen( (string) intval( $stats['visitors'] ) );
+	$visitors_fontsize = $visitors_length > 5 ? '1.2em' : ( $visitors_length > 3 ? '1.4em' : '1.7em' );
+	echo '<td style="font-size:' . $visitors_fontsize . '; font-weight:700; color:#23282d; padding:5px 0; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' . intval( $stats['visitors'] ) . '</td>';
+	$visits_length   = strlen( (string) intval( $stats['visits'] ) );
+	$visits_fontsize = $visits_length > 5 ? '1.2em' : ( $visits_length > 3 ? '1.4em' : '1.7em' );
+	echo '<td style="font-size:' . $visits_fontsize . '; font-weight:700; color:#23282d; padding:5px 0; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' . intval( $stats['visits'] ) . '</td>';
+	$pageviews_length   = strlen( (string) intval( $stats['pageviews'] ) );
+	$pageviews_fontsize = $pageviews_length > 5 ? '1.2em' : ( $pageviews_length > 3 ? '1.4em' : '1.7em' );
+	echo '<td style="font-size:' . $pageviews_fontsize . '; font-weight:700; color:#23282d; padding:5px 0; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' . intval( $stats['pageviews'] ) . '</td>';
+	$bounce          = ( isset( $stats['bounces'] ) && isset( $stats['visits'] ) && $stats['visits'] > 0 ) ? round( $stats['bounces'] / $stats['visits'] * 100 ) : 0;
+	$bounce_length   = strlen( (string) $bounce );
+	$bounce_fontsize = $bounce_length > 4 ? '1.2em' : ( $bounce_length > 2 ? '1.4em' : '1.7em' );
+	echo '<td style="font-size:' . $bounce_fontsize . '; font-weight:700; color:#23282d; padding:5px 0; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' . $bounce . '%</td>';
+	$duration          = ( isset( $stats['totaltime'] ) && isset( $stats['visits'] ) && $stats['visits'] > 0 ) ? round( $stats['totaltime'] / max( 1, $stats['visits'] ) ) : 0;
+	$duration_str      = umami_connect_format_short_time( $duration );
+	$duration_length   = strlen( $duration_str );
+	$duration_fontsize = $duration_length > 7 ? '1.2em' : ( $duration_length > 4 ? '1.4em' : '1.7em' );
+	echo '<td style="font-size:' . $duration_fontsize . '; font-weight:700; color:#23282d; padding:5px 0; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' . $duration_str . '</td>';
 	echo '</tr>';
 	$comp = $stats['comparison'];
 	echo '<tr>';
@@ -162,7 +170,7 @@ function umami_connect_render_stats_widget() {
 					var badge = document.getElementById("umami-live-badge");
 					if (badge) {
 						if (resp.count && resp.count > 0) {
-							badge.innerHTML = "<span style=\"background:rgba(70,180,80,0.15); color:#23282d; border-radius:999px; padding:4px 16px; font-size:0.7em; font-weight:500; margin-left:6px; display:inline-block; box-shadow:0 1px 2px rgba(70,180,80,0.08); letter-spacing:0.5px; vertical-align:middle;\">" + resp.count + " Visitors</span>";
+							badge.innerHTML = "<span style=\"background:rgba(70,180,80,0.15); color:#23282d; border-radius:999px; padding:2px 10px; font-size:0.7em; font-weight:500; margin-left:6px; display:inline-block; box-shadow:0 1px 2px rgba(70,180,80,0.08); letter-spacing:0.5px; vertical-align:middle;\">" + resp.count + " ' . esc_html__( 'Visitor(s)', 'umami-connect' ) . '</span>";
 						} else {
 							badge.innerHTML = "";
 						}
@@ -172,7 +180,7 @@ function umami_connect_render_stats_widget() {
 			xhr.send("action=umami_live_visitors");
 		}
 		updateUmamiLiveBadge();
-		setInterval(updateUmamiLiveBadge, 10000);
+		setInterval(updateUmamiLiveBadge, 60000);
 	});
 	</script>';
 
@@ -219,12 +227,10 @@ function umami_connect_get_token_api_url( $share_url ) {
 		return '';
 	}
 	$share_id = basename( $parts['path'] );
-	// Cloud: https://cloud.umami.is/share/ID → https://cloud.umami.is/analytics/eu/api/share/ID
 	if ( strpos( $parts['host'], 'cloud.umami.is' ) !== false ) {
 		$base = $parts['scheme'] . '://' . $parts['host'] . '/analytics/eu/';
 		return trailingslashit( $base ) . 'api/share/' . $share_id;
 	}
-	// Self-hosted: http(s)://host/share/ID → http(s)://host/api/share/ID
 	$base = $parts['scheme'] . '://' . $parts['host'] . ( isset( $parts['port'] ) ? ':' . $parts['port'] : '' );
 	return trailingslashit( $base ) . 'api/share/' . $share_id;
 }
@@ -237,14 +243,12 @@ function umami_connect_get_stats( $website_id, $token ) {
 	}
 	$timezone = 'Europe/Berlin';
 	$dt       = new DateTime( 'now', new DateTimeZone( $timezone ) );
-	// Endzeit: nächste volle Stunde
 	if ( $dt->format( 'i' ) != '00' || $dt->format( 's' ) != '00' ) {
 		$dt->modify( '+1 hour' );
 	}
 	$dt->setTime( $dt->format( 'H' ), 0, 0 );
 	$end   = $dt->getTimestamp() * 1000;
 	$start = $end - ( 24 * 60 * 60 * 1000 );
-	// Cloud: https://cloud.umami.is → https://cloud.umami.is/analytics/eu/api/websites/{id}/stats
 	if ( strpos( $parts['host'], 'cloud.umami.is' ) !== false ) {
 		$base    = $parts['scheme'] . '://' . $parts['host'] . '/analytics/eu/';
 		$api_url = sprintf(
@@ -256,7 +260,6 @@ function umami_connect_get_stats( $website_id, $token ) {
 			urlencode( $timezone )
 		);
 	} else {
-		// Self-hosted: http(s)://host/api/websites/{id}/stats
 		$base    = $parts['scheme'] . '://' . $parts['host'] . ( isset( $parts['port'] ) ? ':' . $parts['port'] : '' );
 		$api_url = sprintf(
 			'%s/api/websites/%s/stats?startAt=%d&endAt=%d&unit=hour&timezone=%s',
@@ -282,7 +285,6 @@ function umami_connect_get_stats( $website_id, $token ) {
 	return $data;
 }
 
-// Liefert die aktuelle Anzahl aktiver Besucher (selfhosted: /active, cloud: /active)
 function umami_connect_get_active_visitors() {
 	$share_url  = get_option( 'umami_advanced_share_url', '' );
 	$token_data = get_transient( 'umami_stats_token_' . md5( $share_url ) );
@@ -318,7 +320,6 @@ function umami_connect_get_active_visitors() {
 	return isset( $data['visitors'] ) ? intval( $data['visitors'] ) : 0;
 }
 
-// AJAX-Handler für Live-Besucher
 add_action(
 	'wp_ajax_umami_live_visitors',
 	function () {

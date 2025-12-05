@@ -645,7 +645,7 @@ msgstr "{DEFINE}"
 msgid "Last 24 hours"
 msgstr "{DEFINE}"
 
-msgid ""
+msgid "Visitor(s)"
 msgstr "{DEFINE}"
 
 msgid ""
