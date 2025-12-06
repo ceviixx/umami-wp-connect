@@ -32,7 +32,7 @@ if ( ! is_admin() || ( ! class_exists( 'WPCF7' ) && ! function_exists( 'wpcf7' )
  */
 function umami_cf7_add_editor_panel( $panels ) {
 	$panels['umami-tracking-panel'] = array(
-		'title'    => __( 'Umami Tracking', 'umami-connect' ),
+		'title'    => wp_kses_post( 'Umami Tracking', 'umami-connect' ),
 		'callback' => 'umami_cf7_render_editor_panel',
 	);
 	return $panels;
@@ -69,9 +69,9 @@ function umami_cf7_render_editor_panel( $post ) { // phpcs:ignore WordPress.Nami
 			<div id="umami-cf7-kv-list">
 				<?php foreach ( $pairs as $k => $v ) : ?>
 					<div class="umami-kv-row" style="margin-bottom:6px; display:flex; gap:6px; align-items:center;">
-						<input type="text" name="umami_cf7_event_kv[key][]" class="regular-text" placeholder="<?php echo esc_attr( __( 'Key', 'umami-connect' ) ); ?>" value="<?php echo esc_attr( (string) $k ); ?>" />
-						<input type="text" name="umami_cf7_event_kv[value][]" class="regular-text" placeholder="<?php echo esc_attr( __( 'Value', 'umami-connect' ) ); ?>" value="<?php echo esc_attr( (string) $v ); ?>" />
-						<button type="button" class="button umami-kv-remove" aria-label="<?php echo esc_attr( __( 'Remove pair', 'umami-connect' ) ); ?>">&minus;</button>
+						<input type="text" name="umami_cf7_event_kv[key][]" class="regular-text" placeholder="<?php echo esc_attr( wp_kses_post( 'Key', 'umami-connect' ) ); ?>" value="<?php echo esc_attr( (string) $k ); ?>" />
+						<input type="text" name="umami_cf7_event_kv[value][]" class="regular-text" placeholder="<?php echo esc_attr( wp_kses_post( 'Value', 'umami-connect' ) ); ?>" value="<?php echo esc_attr( (string) $v ); ?>" />
+						<button type="button" class="button umami-kv-remove" aria-label="<?php echo esc_attr( wp_kses_post( 'Remove pair', 'umami-connect' ) ); ?>">&minus;</button>
 					</div>
 				<?php endforeach; ?>
 			</div>
@@ -105,20 +105,20 @@ function umami_cf7_admin_print_kv_script() {
 			keyInput.type = 'text';
 			keyInput.name = 'umami_cf7_event_kv[key][]';
 			keyInput.className = 'regular-text';
-			keyInput.placeholder = '<?php echo esc_js( __( 'Key', 'umami-connect' ) ); ?>';
+			keyInput.placeholder = '<?php echo esc_js( wp_kses_post( 'Key', 'umami-connect' ) ); ?>';
 			keyInput.value = k || '';
 
 			var valInput = document.createElement('input');
 			valInput.type = 'text';
 			valInput.name = 'umami_cf7_event_kv[value][]';
 			valInput.className = 'regular-text';
-			valInput.placeholder = '<?php echo esc_js( __( 'Value', 'umami-connect' ) ); ?>';
+			valInput.placeholder = '<?php echo esc_js( wp_kses_post( 'Value', 'umami-connect' ) ); ?>';
 			valInput.value = v || '';
 
 			var btn = document.createElement('button');
 			btn.type = 'button';
 			btn.className = 'button umami-kv-remove';
-			btn.setAttribute('aria-label', '<?php echo esc_js( __( 'Remove pair', 'umami-connect' ) ); ?>');
+			btn.setAttribute('aria-label', '<?php echo esc_js( wp_kses_post( 'Remove pair', 'umami-connect' ) ); ?>');
 			btn.textContent = '−';
 
 			row.appendChild(keyInput);

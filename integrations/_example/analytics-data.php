@@ -56,7 +56,7 @@ add_filter(
 				'integration_label' => $integration_label,
 				'integration_color' => $integration_color,
 				'edit_link'         => admin_url( 'admin.php?page=myintegration-settings&item=' . (int) $item_id ),
-				'edit_label'        => __( 'Edit', 'umami-connect' ),
+				'edit_label'        => wp_kses_post( 'Edit', 'umami-connect' ),
 			);
 		}
 

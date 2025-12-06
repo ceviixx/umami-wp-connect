@@ -28,7 +28,7 @@ jobs:
           php -r '
           error_reporting(E_ALL);
           define("ABSPATH", getcwd());
-          if (!function_exists("__")) { function __($t,$d=null){ return $t; } }
+          if (!function_exists("__")) { function wp_kses_post($t,$d=null){ return $t; } }
           $dir = "integrations";
           if (!is_dir($dir)) { echo "::error ::integrations/ not found\n"; exit(1); }
           $ents = scandir($dir) ?: [];

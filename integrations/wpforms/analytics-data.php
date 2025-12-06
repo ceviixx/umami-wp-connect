@@ -102,7 +102,7 @@ add_filter(
 				'edit_link'         => admin_url(
 					'admin.php?page=wpforms-builder&view=settings&form_id=' . (int) $form_id . '&section=umami_tracking'
 				),
-				'edit_label'        => __( 'Edit form', 'umami-connect' ),
+				'edit_label'        => wp_kses_post( 'Edit form', 'umami-connect' ),
 			);
 		}
 

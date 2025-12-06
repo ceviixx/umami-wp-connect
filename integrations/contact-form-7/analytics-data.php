@@ -85,7 +85,7 @@ add_filter(
 				'edit_link'         => admin_url(
 					'admin.php?page=wpcf7&action=edit&post=' . (int) $form_id . '&umami_tab=umami-tracking-panel'
 				),
-				'edit_label'        => __( 'Edit form', 'umami-connect' ),
+				'edit_label'        => wp_kses_post( 'Edit form', 'umami-connect' ),
 			);
 		}
 

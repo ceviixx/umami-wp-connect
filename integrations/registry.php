@@ -20,7 +20,7 @@ function umami_connect_get_integrations() {
 	return array(
 		'gutenberg'      => array(
 			'label'       => 'Gutenberg',
-			'description' => __( 'Create and track events in your editor blocks.', 'umami-connect' ),
+			'description' => wp_kses_post( 'Create and track events in your editor blocks.', 'umami-connect' ),
 			'color'       => '#2271b1',
 			'check'       => function () {
 				return function_exists( 'register_block_type' );
@@ -31,7 +31,7 @@ function umami_connect_get_integrations() {
 		),
 		'contact-form-7' => array(
 			'label'       => 'Contact Form 7',
-			'description' => __( 'Track form submissions with custom event names.', 'umami-connect' ),
+			'description' => wp_kses_post( 'Track form submissions with custom event names.', 'umami-connect' ),
 			'color'       => '#f38020',
 			'check'       => function () {
 				return ( class_exists( 'WPCF7' ) || function_exists( 'wpcf7' ) );
@@ -44,7 +44,7 @@ function umami_connect_get_integrations() {
 		),
 		'wpforms'        => array(
 			'label'       => 'WPForms',
-			'description' => __( 'Add Umami events to your WPForms.', 'umami-connect' ),
+			'description' => wp_kses_post( 'Add Umami events to your WPForms.', 'umami-connect' ),
 			'color'       => '#7a63f1',
 			'check'       => function () {
 				return function_exists( 'wpforms' );

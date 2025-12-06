@@ -392,9 +392,9 @@ function umami_connect_render_events_overview_page() {
 					// Row actions
 					$actions = array();
 					if ( ! empty( $row['edit_link'] ) ) {
-						$actions['edit'] = '<a href="' . esc_url( $row['edit_link'] ) . '" target="_blank">' . esc_html( $row['edit_label'] ?? __( 'Edit', 'umami-connect' ) ) . '</a>';
+						$actions['edit'] = '<a href="' . esc_url( $row['edit_link'] ) . '" target="_blank">' . esc_html( $row['edit_label'] ?? wp_kses_post( 'Edit', 'umami-connect' ) ) . '</a>';
 					} elseif ( ! empty( $row['post_id'] ) && $block_index ) {
-						$edit_label      = ( 'page' === $post_type ) ? __( 'Edit Page', 'umami-connect' ) : __( 'Edit Post', 'umami-connect' );
+						$edit_label      = ( 'page' === $post_type ) ? wp_kses_post( 'Edit Page', 'umami-connect' ) : wp_kses_post( 'Edit Post', 'umami-connect' );
 						$actions['edit'] = '<a href="' . esc_url( get_edit_post_link( (int) $row['post_id'] ) ) . '" target="_blank">' . esc_html( $edit_label ) . '</a>';
 					}
 					$is_integration = is_string( $event_type ) && strpos( $event_type, 'integration_' ) === 0;
@@ -550,7 +550,7 @@ function umami_connect_render_events_overview_page() {
 				closeOnEscape: true,
 				buttons: [
 					{
-						text: '<?php echo esc_js( __( 'Cancel', 'umami-connect' ) ); ?>',
+						text: '<?php echo esc_js( wp_kses_post( 'Cancel', 'umami-connect' ) ); ?>',
 						class: 'button',
 						style: 'background: #f6f7f7; border-color: #50575e; color: #50575e;',
 						click: function() {
@@ -558,7 +558,7 @@ function umami_connect_render_events_overview_page() {
 						}
 					},
 					{
-						text: '<?php echo esc_js( __( 'Delete Event', 'umami-connect' ) ); ?>',
+						text: '<?php echo esc_js( wp_kses_post( 'Delete Event', 'umami-connect' ) ); ?>',
 						class: 'button button-primary',
 						style: 'background: #d63638; border-color: #d63638;',
 						click: function() {

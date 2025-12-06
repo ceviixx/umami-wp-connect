@@ -1,3 +1,8 @@
+**1.5.0**
+- Added dashboard widget with the stats of last 24 hours.
+- New "Development" menu entry if you use the source code instead of the package zip.
+
+
 **1.4.0**
 - Removed Umami dashboard integration from plugin
 - Dashboard widget now includes a link to the Umami dashboard (opens in new tab)

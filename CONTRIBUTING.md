@@ -7,21 +7,11 @@ Thanks for your interest in improving the plugin! This guide focuses on **adding
 - Discussions: https://github.com/ceviixx/umami-wp-connect/discussions
 
 ---
-## 1. Fork & Clone (dev branch)
+## 1. Fork & Clone (main branch)
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/umami-wp-connect.git
+git clone https://github.com/ceviixx/umami-wp-connect.git
 cd umami-wp-connect
-git remote add upstream https://github.com/ceviixx/umami-wp-connect.git
-git fetch upstream
-git checkout -b feature/my-integration upstream/dev
-```
-
-Always branch off `dev` (not `main`). Keep your fork synced:
-
-```bash
-git fetch upstream
-git merge upstream/dev
 ```
 
 ---
@@ -32,7 +22,7 @@ Integrations are registered in `integrations/registry.php` via `umami_connect_ge
 ```php
 $key => array(
   'label'       => 'Human Name',
-  'description' => __( 'Short explainer shown in UI.', 'umami-connect' ),
+  'description' => wp_kses_post( 'Short explainer shown in UI.', 'umami-connect' ),
   'color'       => '#hexcolor',   // Used in admin lists
   'check'       => function () {  // Return true if plugin is active
     return function_exists( 'some_plugin_function' );
@@ -124,7 +114,7 @@ git commit -m "feat(integration): add MyForm integration"
 git push origin feature/my-integration
 ```
 
-Open a PR against `dev` with:
+Open a PR against `main` with:
 - Motivation & scope
 - List of added files
 - Any limitations or TODOs
@@ -160,7 +150,6 @@ Label it with `enhancement` (or let triage adjust).
 - All text translatable, escaped
 - Event arrays contain required keys
 - Works in Events Overview filter/search
-- PR targets `dev`
 
 
 

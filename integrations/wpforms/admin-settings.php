@@ -31,7 +31,7 @@ if ( ! is_admin() || ! function_exists( 'wpforms' ) ) {
  * @return array
  */
 function umami_wpforms_add_settings_section( $sections ) {
-	$sections['umami_tracking'] = __( 'Umami Tracking', 'umami-connect' );
+	$sections['umami_tracking'] = wp_kses_post( 'Umami Tracking', 'umami-connect' );
 	return $sections;
 }
 add_filter( 'wpforms_builder_settings_sections', 'umami_wpforms_add_settings_section', 20 );
@@ -82,9 +82,9 @@ function umami_wpforms_settings_content( $instance ) {
 				<?php if ( ! empty( $pairs ) ) : ?>
 					<?php foreach ( $pairs as $k => $v ) : ?>
 						<div class="umami-kv-row" style="margin-bottom: 8px; display: flex; gap: 8px; align-items: center;">
-							<input type="text" name="umami_wpforms_event_kv[key][]" placeholder="<?php echo esc_attr( __( 'Key', 'umami-connect' ) ); ?>" value="<?php echo esc_attr( (string) $k ); ?>" style="flex: 1; max-width: 240px;" />
-							<input type="text" name="umami_wpforms_event_kv[value][]" placeholder="<?php echo esc_attr( __( 'Value', 'umami-connect' ) ); ?>" value="<?php echo esc_attr( (string) $v ); ?>" style="flex: 1; max-width: 240px;" />
-							<button type="button" class="button umami-kv-remove" aria-label="<?php echo esc_attr( __( 'Remove pair', 'umami-connect' ) ); ?>" style="min-width: 32px;">&minus;</button>
+							<input type="text" name="umami_wpforms_event_kv[key][]" placeholder="<?php echo esc_attr( wp_kses_post( 'Key', 'umami-connect' ) ); ?>" value="<?php echo esc_attr( (string) $k ); ?>" style="flex: 1; max-width: 240px;" />
+							<input type="text" name="umami_wpforms_event_kv[value][]" placeholder="<?php echo esc_attr( wp_kses_post( 'Value', 'umami-connect' ) ); ?>" value="<?php echo esc_attr( (string) $v ); ?>" style="flex: 1; max-width: 240px;" />
+							<button type="button" class="button umami-kv-remove" aria-label="<?php echo esc_attr( wp_kses_post( 'Remove pair', 'umami-connect' ) ); ?>" style="min-width: 32px;">&minus;</button>
 						</div>
 					<?php endforeach; ?>
 				<?php endif; ?>
@@ -119,21 +119,21 @@ function umami_wpforms_admin_print_kv_script() {
 			var keyInput = document.createElement('input');
 			keyInput.type = 'text';
 			keyInput.name = 'umami_wpforms_event_kv[key][]';
-			keyInput.placeholder = '<?php echo esc_js( __( 'Key', 'umami-connect' ) ); ?>';
+			keyInput.placeholder = '<?php echo esc_js( wp_kses_post( 'Key', 'umami-connect' ) ); ?>';
 			keyInput.value = k || '';
 			keyInput.style.cssText = 'flex: 1; max-width: 240px;';
 
 			var valInput = document.createElement('input');
 			valInput.type = 'text';
 			valInput.name = 'umami_wpforms_event_kv[value][]';
-			valInput.placeholder = '<?php echo esc_js( __( 'Value', 'umami-connect' ) ); ?>';
+			valInput.placeholder = '<?php echo esc_js( wp_kses_post( 'Value', 'umami-connect' ) ); ?>';
 			valInput.value = v || '';
 			valInput.style.cssText = 'flex: 1; max-width: 240px;';
 
 			var btn = document.createElement('button');
 			btn.type = 'button';
 			btn.className = 'button umami-kv-remove';
-			btn.setAttribute('aria-label', '<?php echo esc_js( __( 'Remove pair', 'umami-connect' ) ); ?>');
+			btn.setAttribute('aria-label', '<?php echo esc_js( wp_kses_post( 'Remove pair', 'umami-connect' ) ); ?>');
 			btn.textContent = '−';
 			btn.style.cssText = 'min-width: 32px;';
 
