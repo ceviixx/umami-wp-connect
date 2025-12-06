@@ -36,7 +36,7 @@ class Umami_Connect_Github {
 	}
 
 	public static function github_plugin_api( $res, $action, $args ) {
-		if ( 'umami-wp-connect' !== $args->slug ) {
+		if ( ! isset( $args->slug ) || 'umami-wp-connect' !== $args->slug ) {
 			return $res;
 		}
 		$release = self::get_latest_github_release();
